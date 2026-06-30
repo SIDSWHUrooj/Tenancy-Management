@@ -1,0 +1,262 @@
+<div class="container-fluid p-0">
+
+  <!-- ── 1. Rent Card ─────────────────────────────────────────── -->
+  <div class="card charge-card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white border-bottom py-2 px-4">
+      <div class="d-flex align-items-center gap-2">
+        <span class="charge-icon charge-icon--rent">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-house-fill" viewBox="0 0 16 16">
+            <path d="M8.707 1.5a1 1 0 0 0-1.414 0L.646 8.146a.5.5 0 0 0 .708.708L8 2.207l6.646 6.647a.5.5 0 0 0 .708-.708L13 5.793V2.5a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v1.293L8.707 1.5Z"/>
+            <path d="m8 3.293 6 6V13.5a1.5 1.5 0 0 1-1.5 1.5h-9A1.5 1.5 0 0 1 2 13.5V9.293l6-6Z"/>
+          </svg>
+        </span>
+        <h6 class="mb-0 fw-bold text-dark">Rent</h6>
+        <span class="ms-auto text-muted small">Annual Rent: AED {{ form.annualRent | number:'1.0-0' }}</span>
+      </div>
+    </div>
+    <div class="card-body px-4 py-3">
+      <div class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+          <label class="form-label">Base Amount</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="number"
+              class="form-control text-end bg-white"
+              [(ngModel)]="form.rentAmount"
+              (ngModelChange)="calculateRent()">
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Tax Group</label>
+          <select
+            class="form-select bg-white"
+            [(ngModel)]="form.rentTaxGroup"
+            (change)="calculateRent()">
+            <option value="Standard VAT">Standard VAT</option>
+            <option value="Zero Rated">Zero Rated</option>
+            <option value="Out of Scope">Out of Scope</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">VAT %</label>
+          <input
+            type="number"
+            class="form-control text-end bg-white"
+            [(ngModel)]="form.rentTaxRate"
+            (ngModelChange)="calculateRent()">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Tax Amount</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="number"
+              class="form-control text-end bg-light"
+              [value]="form.rentTaxAmount"
+              readonly>
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-semibold text-primary">Total</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text charge-total-prefix">AED</span>
+            <input
+              type="number"
+              class="form-control text-end fw-bold charge-total-field"
+              [value]="form.rentTotal"
+              readonly>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 2. Security Deposit Card ─────────────────────────────── -->
+  <div class="card charge-card border-0 shadow-sm mb-3">
+    <div class="card-header bg-white border-bottom py-2 px-4">
+      <div class="d-flex align-items-center gap-2">
+        <span class="charge-icon charge-icon--deposit">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-shield-fill-check" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 0c-.69 0-1.843.265-2.928.56-1.11.3-2.229.655-2.887.87a1.54 1.54 0 0 0-1.044 1.262c-.596 4.477.787 7.795 2.465 9.99a11.777 11.777 0 0 0 2.517 2.453c.386.273.744.482 1.048.625.28.132.581.24.829.24s.548-.108.829-.24a7.159 7.159 0 0 0 1.048-.625 11.775 11.775 0 0 0 2.517-2.453c1.678-2.195 3.061-5.513 2.465-9.99a1.541 1.541 0 0 0-1.044-1.263 62.467 62.467 0 0 0-2.887-.87C9.843.266 8.69 0 8 0zm2.146 5.146a.5.5 0 0 1 .708.708l-3 3a.5.5 0 0 1-.708 0l-1.5-1.5a.5.5 0 1 1 .708-.708L7.5 7.793l2.646-2.647z"/>
+          </svg>
+        </span>
+        <h6 class="mb-0 fw-bold text-dark">Security Deposit</h6>
+      </div>
+    </div>
+    <div class="card-body px-4 py-3">
+      <div class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+          <label class="form-label">Base Amount</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="number"
+              class="form-control text-end bg-white"
+              [(ngModel)]="form.depositAmount"
+              (ngModelChange)="calculateDeposit()">
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Tax Group</label>
+          <select
+            class="form-select bg-white"
+            [(ngModel)]="form.depositTaxGroup"
+            (change)="calculateDeposit()">
+            <option value="Standard VAT">Standard VAT</option>
+            <option value="Zero Rated">Zero Rated</option>
+            <option value="Out of Scope">Out of Scope</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">VAT %</label>
+          <input
+            type="number"
+            class="form-control text-end bg-white"
+            [(ngModel)]="form.depositTaxRate"
+            (ngModelChange)="calculateDeposit()">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Tax Amount</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="number"
+              class="form-control text-end bg-light"
+              [value]="form.depositTaxAmount"
+              readonly>
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-semibold text-primary">Total</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text charge-total-prefix">AED</span>
+            <input
+              type="number"
+              class="form-control text-end fw-bold charge-total-field"
+              [value]="form.depositTotal"
+              readonly>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── 3. Administration Fee Card ───────────────────────────── -->
+  <div class="card charge-card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-2 px-4">
+      <div class="d-flex align-items-center gap-2">
+        <span class="charge-icon charge-icon--admin">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-receipt" viewBox="0 0 16 16">
+            <path d="M1.92.506a.5.5 0 0 1 .434.14L3 1.293l.646-.647a.5.5 0 0 1 .708 0L5 1.293l.646-.647a.5.5 0 0 1 .708 0L7 1.293l.646-.647a.5.5 0 0 1 .708 0L9 1.293l.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .708 0l.646.647.646-.647a.5.5 0 0 1 .801.13l.5 1A.5.5 0 0 1 15 2v12a.5.5 0 0 1-.053.224l-.5 1a.5.5 0 0 1-.8.13L13 14.707l-.646.647a.5.5 0 0 1-.708 0L11 14.707l-.646.647a.5.5 0 0 1-.708 0L9 14.707l-.646.647a.5.5 0 0 1-.708 0L7 14.707l-.646.647a.5.5 0 0 1-.708 0L5 14.707l-.646.647a.5.5 0 0 1-.708 0L3 14.707l-.646.647a.5.5 0 0 1-.801-.13l-.5-1A.5.5 0 0 1 1 14V2a.5.5 0 0 1 .053-.224l.5-1a.5.5 0 0 1 .367-.27zm.217 1.338L2 2.118v11.764l.137.274.51-.51a.5.5 0 0 1 .707 0l.646.647.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.646.646.646-.646a.5.5 0 0 1 .708 0l.509.509.137-.274V2.118l-.137-.274-.51.51a.5.5 0 0 1-.707 0L12 1.707l-.646.647a.5.5 0 0 1-.708 0L10 1.707l-.646.647a.5.5 0 0 1-.708 0L8 1.707l-.646.647a.5.5 0 0 1-.708 0L6 1.707l-.646.647a.5.5 0 0 1-.708 0L4 1.707l-.646.647a.5.5 0 0 1-.708 0l-.509-.51-.137.274zM3 4.5a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 1 1 0 1h-6a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h4a.5.5 0 1 1 0 1h-4a.5.5 0 0 1-.5-.5z"/>
+          </svg>
+        </span>
+        <h6 class="mb-0 fw-bold text-dark">Administration Fee</h6>
+      </div>
+    </div>
+    <div class="card-body px-4 py-3">
+      <div class="row g-3 align-items-end">
+
+        <div class="col-md-3">
+          <label class="form-label">Base Amount</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="number"
+              class="form-control text-end bg-white"
+              [(ngModel)]="form.adminFeeAmount"
+              (ngModelChange)="calculateAdminFee()">
+          </div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label">Tax Group</label>
+          <select
+            class="form-select bg-white"
+            [(ngModel)]="form.adminFeeTaxGroup"
+            (change)="calculateAdminFee()">
+            <option value="Standard VAT">Standard VAT</option>
+            <option value="Zero Rated">Zero Rated</option>
+            <option value="Out of Scope">Out of Scope</option>
+          </select>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">VAT %</label>
+          <input
+            type="number"
+            class="form-control text-end bg-white"
+            [(ngModel)]="form.adminFeeTaxRate"
+            (ngModelChange)="calculateAdminFee()">
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label">Tax Amount</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="number"
+              class="form-control text-end bg-light"
+              [value]="form.adminFeeTaxAmount"
+              readonly>
+          </div>
+        </div>
+
+        <div class="col-md-2">
+          <label class="form-label fw-semibold text-primary">Total</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text charge-total-prefix">AED</span>
+            <input
+              type="number"
+              class="form-control text-end fw-bold charge-total-field"
+              [value]="form.adminFeeTotal"
+              readonly>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Summary Row: 3 boxes + blue Invoice Total ────────────── -->
+  <div class="row g-3">
+
+    <!-- Invoice Total box -->
+    <div class="col-md-4">
+      <div class="summary-box summary-box--total">
+        <div class="summary-box__label">Invoice Total</div>
+        <div class="summary-box__value">AED {{ form.invoiceTotal | number:'1.2-2' }}</div>
+      </div>
+    </div>
+
+    <!-- Previous Receipts box -->
+    <div class="col-md-4">
+      <div class="summary-box summary-box--prev">
+        <div class="summary-box__label">Previous Receipts</div>
+        <div class="summary-box__value">AED {{ form.lastReceiptTotal | number:'1.2-2' }}</div>
+      </div>
+    </div>
+
+    <!-- Balance Amount box -->
+    <div class="col-md-4  ">
+      <div class="summary-box summary-box--balance">
+        <div class="summary-box__label">Balance Amount</div>
+        <div class="summary-box__value">AED {{ form.balanceAmount | number:'1.2-2' }}</div>
+      </div>
+    </div>
+
+  </div>
+
+</div>

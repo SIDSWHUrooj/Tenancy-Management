@@ -1,0 +1,50 @@
+// Theme Colors
+$primary-color: #0050b3;      // Target Blue requested by User
+$primary-hover: #003a8c;
+$border-color: #ced4da;
+
+// Status Badges
+.status-green {
+  background-color: rgba(40, 167, 69, 0.12) !important;
+  color: #1e7e34 !important;
+  border: 1px solid rgba(40, 167, 69, 0.35);
+}
+.status-yellow {
+  background-color: rgba(255, 193, 7, 0.15) !important;
+  color: #856404 !important;
+  border: 1px solid rgba(255, 193, 7, 0.35);
+}
+.status-red {
+  background-color: rgba(220, 53, 69, 0.12) !important;
+  color: #bd2130 !important;
+  border: 1px solid rgba(220, 53, 69, 0.35);
+}
+// Document Amount (Blue Field, White Text)
+
+.doc-amount-group {
+  border-radius: 0.25rem;
+  overflow: hidden;
+  .input-group-text, .form-control {
+    background-color: $primary-color !important;
+    color: #ffffff !important;
+    border-color: $primary-color !important;
+    font-weight: 600;
+  }
+  // Read-only text color override
+  .form-control[readonly] {
+    color: #ffffff !important;
+  }
+}
+.form-label {
+  font-size: 0.825rem;
+}
+.input-group-sm {
+  .form-control {
+    font-size: 0.85rem;
+    padding: 0.3rem 0.5rem;
+  }
+  .input-group-text {
+    font-size: 0.75rem;
+    padding: 0.3rem 0.5rem;
+  }
+}

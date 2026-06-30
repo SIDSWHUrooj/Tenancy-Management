@@ -1,0 +1,278 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm main-receipt-card">
+
+     <!-- ── Card Header ─────────────────────────────────────── -->
+<div class="card-header bg-white py-3">
+  <div class="d-flex justify-content-between align-items-center">
+
+    <!-- Title + Receipt No + Status Badge -->
+    <div>
+      <h4 class="mb-0 text-dark fw-bold">Tenancy Receipt Entry</h4>
+      <span class="receipt-subtitle d-inline-flex align-items-center gap-2 mt-1">
+        Receipt No: {{ form.receiptNumber }}
+        <span class="status-badge"
+              [class.status-draft]="form.status === 'Draft'"
+              [class.status-posted]="form.status === 'Posted'"
+              [class.status-cancelled]="form.status === 'Cancelled'">
+          {{ form.status }}
+        </span>
+      </span>
+    </div>
+
+    <!-- Action Buttons -->
+    <div class="d-flex gap-2 header-actions">
+
+      <button
+        class="btn btn-draft-action"
+        type="button"
+        [disabled]="!canSaveDraft()"
+        (click)="saveDraft()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M11 2H9v3h2z"/>
+          <path d="M1.5 1.5A1.5 1.5 0 0 1 3 0h8.5a1.5 1.5 0 0 1 1.06.44l2 2A1.5 1.5 0 0 1 15 3.5V14a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 14V1.5zM3 1a.5.5 0 0 0-.5.5V14a.5.5 0 0 0 .5.5h11a.5.5 0 0 0 .5-.5V3.5a.5.5 0 0 0-.146-.354l-2-2A.5.5 0 0 0 12 1H3z"/>
+        </svg>
+        Save Draft
+      </button>
+
+      <button
+        class="btn btn-save-action"
+        type="button"
+        [disabled]="!canPost()"
+        (click)="postReceipt()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
+        </svg>
+        Post
+      </button>
+
+      <button
+        class="btn btn-outline-print"
+        type="button"
+        [disabled]="!canPrint()"
+        (click)="printReceipt()">
+        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" viewBox="0 0 16 16">
+          <path d="M2.5 8a.5.5 0 1 0 0-1 .5.5 0 0 0 0 1z"/>
+          <path d="M5 1a2 2 0 0 0-2 2v2H2a2 2 0 0 0-2 2v3a2 2 0 0 0 2 2h1v1a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2v-1h1a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-1V3a2 2 0 0 0-2-2H5zM4 3a1 1 0 0 1 1-1h6a1 1 0 0 1 1 1v2H4V3zm1 5a1 1 0 0 0-1 1v3a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V9a1 1 0 0 0-1-1H5z"/>
+        </svg>
+        Print
+      </button>
+
+      <button
+        class="btn btn-cancel-action"
+        type="button"
+        [disabled]="!canCancel()"
+        (click)="cancelReceipt()">
+          
+        Cancel
+      </button>
+
+    </div>
+  </div>
+</div>
+      <!-- ── Card Body ───────────────────────────────────────── -->
+      <div class="card-body">
+
+        <!-- ROW 1: Receipt Number | Receipt Date | Status | Multiple Invoices -->
+        <div class="row g-3 mb-3">
+
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Receipt Number</label>
+            <input
+              type="text"
+              class="form-control bg-light"
+              [value]="form.receiptNumber"
+              readonly>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Receipt Date</label>
+            <input
+              type="date"
+              class="form-control bg-white"
+              [(ngModel)]="form.receiptDate">
+          </div>
+          <div class="col-md-3  ">
+            <label class="form-label fw-semibold">Invoice Number</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control bg-light"
+                [(ngModel)]="form.invoiceNumber"
+                placeholder="Select Invoice"
+                readonly>
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                title="Search Invoice"
+                (click)="openInvoiceLookup()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-danger"
+                title="Clear"
+                (click)="resetReceipt()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                  <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Status</label>
+            <input
+              type="text"
+              class="form-control bg-light"
+              [value]="form.status"
+              readonly>
+          </div>
+
+          
+
+        <!-- ROW 2: Invoice Number | Period From | Period To -->
+        <div class="row g-3 mb-2">
+
+          
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Period From</label>
+            <input
+              type="text"
+              class="form-control bg-light"
+              [value]="form.periodFrom"
+              readonly
+              placeholder="—">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Period To</label>
+            <input
+              type="text"
+              class="form-control bg-light"
+              [value]="form.periodTo"
+              readonly
+              placeholder="—">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Property ID</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control bg-white"
+                [(ngModel)]="form.propertyId"
+                placeholder="ID">
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                title="Search Property"
+                (click)="openPropertyLookup()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Unit No</label>
+            <input
+              type="text"
+              class="form-control bg-light"
+              [value]="form.unitNo"
+              readonly
+              placeholder="—">
+          </div>
+
+        </div>
+
+        <!-- ROW 3: Customer ID | Customer Name -->
+        <div class="row g-3 mb-3">
+
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Customer ID</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control bg-white"
+                [(ngModel)]="form.customer"
+                placeholder="ID">
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                title="Search Customer"
+                (click)="openCustomerLookup()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-9">
+            <label class="form-label fw-semibold">Customer Name</label>
+            <input
+              type="text"
+              class="form-control bg-light"
+              [value]="form.customerName"
+              readonly
+              placeholder="Populated on Customer ID selection">
+          </div>
+
+        </div>
+
+        <!-- ── Tabs ──────────────────────────────────────────── -->
+        <ul class="nav modern-tabs mb-4 border-bottom">
+          <li class="nav-item">
+            <button
+              class="nav-link-tab"
+              [class.active]="activeTab === 'rental'"
+              (click)="setTab('rental')">
+              Rental Details
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link-tab"
+              [class.active]="activeTab === 'receipt'"
+              (click)="setTab('receipt')">
+              Receipt Details
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link-tab"
+              [class.active]="activeTab === 'settlement'"
+              (click)="setTab('settlement')">
+              Settlement Details
+            </button>
+          </li>
+        </ul>
+
+        <!-- ── Tab Content ───────────────────────────────────── -->
+        <div class="tab-content">
+
+          @if (activeTab === 'rental') {
+            <app-rental-details-tab [form]="form" />
+          }
+
+          @if (activeTab === 'receipt') {
+            <app-receipt-details-tab [form]="form" />
+          }
+
+          @if (activeTab === 'settlement') {
+            <app-settlement-details-tab [form]="form" />
+          }
+
+        </div>
+
+      </div>
+      <!-- /card-body -->
+
+    </div>
+  </div>
+</div>

@@ -1,0 +1,203 @@
+<div class="container-fluid p-0">
+
+  <!-- ── Settlement Information Card ────────────────────────── -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+      <h6 class="mb-0 fw-bold text-dark">Settlement Information</h6>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+
+        <!-- Leave Date -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Leave Date</label>
+          <input
+            type="date"
+            class="form-control bg-white"
+            [(ngModel)]="form.leaveDate">
+        </div>
+
+        <!-- Early Termination Checkbox -->
+        <div class="col-md-3 d-flex align-items-end pb-1">
+          <div class="form-check mb-1">
+            <input
+              class="form-check-input"
+              type="checkbox"
+              id="earlyTermination"
+              [(ngModel)]="form.earlyTermination"
+              (ngModelChange)="onEarlyTerminationChange()">
+            <label class="form-check-label cursor-pointer fw-semibold" for="earlyTermination">
+              Early Termination
+            </label>
+          </div>
+        </div>
+
+      </div>
+
+      <!-- Early Termination Notice -->
+      @if (form.earlyTermination) {
+        <div class="alert alert-warning alert-early-term mt-3 mb-0 d-flex align-items-start gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+          </svg>
+          <span class="small">
+            Early termination is flagged. Any applicable penalty charges or refund adjustments
+            should be confirmed before finalising this receipt.
+          </span>
+        </div>
+      }
+    </div>
+  </div>
+
+  <!-- ── Payment Summary Card ────────────────────────────────── -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+      <h6 class="mb-0 fw-bold text-dark">Payment Summary</h6>
+    </div>
+    <div class="card-body">
+      <div class="row g-3">
+
+        <!-- Invoice Total -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Invoice Total</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="text"
+              class="form-control text-end bg-light fw-semibold"
+              [value]="form.invoiceTotal | number:'1.2-2'"
+              readonly>
+          </div>
+        </div>
+
+        <!-- Previous Receipts -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Previous Receipts</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="text"
+              class="form-control text-end bg-light text-success fw-semibold"
+              [value]="form.lastReceiptTotal | number:'1.2-2'"
+              readonly>
+          </div>
+        </div>
+
+        <!-- Current Receipt -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Current Receipt</label>
+          <div class="input-group">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="text"
+              class="form-control text-end bg-light text-primary fw-semibold"
+              [value]="form.receiptTotal | number:'1.2-2'"
+              readonly>
+          </div>
+        </div>
+
+        <!-- Outstanding Balance -->
+        <div class="col-md-3">
+          <label class="form-label fw-semibold">Outstanding Balance</label>
+          <div class="input-group">
+            <span class="input-group-text balance-prefix">AED</span>
+            <input
+              type="text"
+              class="form-control text-end fw-bold balance-field"
+              [value]="form.balanceAmount | number:'1.2-2'"
+              readonly>
+          </div>
+        </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Settlement Status Card ──────────────────────────────── -->
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-3">
+      <h6 class="mb-0 fw-bold text-dark">Settlement Status</h6>
+    </div>
+    <div class="card-body">
+
+      <div class="d-flex align-items-center gap-3">
+
+        <!-- Status Badge -->
+        <span
+          class="settlement-status-badge"
+          [ngClass]="getStatusBadgeClass(form.settlementStatus)">
+          @if (!form.settlementStatus) {
+            <span class="text-muted fst-italic">Not calculated yet</span>
+          } @else {
+            {{ form.settlementStatus }}
+          }
+        </span>
+
+        <!-- Contextual description -->
+        @if (form.settlementStatus === 'Fully Paid') {
+          <span class="text-muted small">
+            Invoice is fully settled. No outstanding balance remains.
+          </span>
+        }
+        @if (form.settlementStatus === 'Partially Paid') {
+          <span class="text-muted small">
+            AED {{ form.balanceAmount | number:'1.2-2' }} remains outstanding after this receipt.
+          </span>
+        }
+        @if (form.settlementStatus === 'Outstanding') {
+          <span class="text-muted small">
+            No payments recorded yet. Full invoice amount of AED {{ form.invoiceTotal | number:'1.2-2' }} is due.
+          </span>
+        }
+
+      </div>
+
+      <!-- Progress Bar -->
+      @if (form.invoiceTotal > 0) {
+        <div class="mt-4">
+          <div class="d-flex justify-content-between mb-1">
+            <span class="small text-muted">Payment Progress</span>
+            <span class="small fw-semibold">
+              {{ ((form.lastReceiptTotal + form.receiptTotal) / form.invoiceTotal * 100) | number:'1.0-0' }}%
+            </span>
+          </div>
+          <div class="progress settlement-progress">
+            <!-- Previous receipts (green) -->
+            <div
+              class="progress-bar bg-success"
+              role="progressbar"
+              [style.width.%]="(form.lastReceiptTotal / form.invoiceTotal) * 100"
+              [attr.aria-valuenow]="form.lastReceiptTotal"
+              aria-valuemin="0"
+              [attr.aria-valuemax]="form.invoiceTotal"
+              title="Previous Receipts: AED {{ form.lastReceiptTotal | number:'1.2-2' }}">
+            </div>
+            <!-- Current receipt (blue) -->
+            <div
+              class="progress-bar"
+              role="progressbar"
+              [style.width.%]="(form.receiptTotal / form.invoiceTotal) * 100"
+              [attr.aria-valuenow]="form.receiptTotal"
+              aria-valuemin="0"
+              [attr.aria-valuemax]="form.invoiceTotal"
+              title="This Receipt: AED {{ form.receiptTotal | number:'1.2-2' }}">
+            </div>
+          </div>
+          <div class="d-flex justify-content-between mt-1">
+            <span class="small text-muted">
+              <span class="legend-dot bg-success"></span> Previous: AED {{ form.lastReceiptTotal | number:'1.2-2' }}
+            </span>
+            <span class="small text-muted">
+              <span class="legend-dot progress-bar-bg"></span> This receipt: AED {{ form.receiptTotal | number:'1.2-2' }}
+            </span>
+            <span class="small text-muted">
+              Remaining: AED {{ form.balanceAmount | number:'1.2-2' }}
+            </span>
+          </div>
+        </div>
+      }
+
+    </div>
+  </div>
+
+</div>

@@ -1,0 +1,98 @@
+<div class="card border-0 shadow-sm">
+  <div class="card-body">
+    <div class="row g-4">
+
+      <!-- Tax Table -->
+      <div class="col-lg-8">
+        <h6 class="fw-semibold mb-3 d-flex align-items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-percent text-primary me-2" viewBox="0 0 16 16">
+            <path d="M13.485 1.485a.5.5 0 0 1 .123.676l-11.25 12.5a.5.5 0 1 1-.749-.662l11.25-12.5a.5.5 0 0 1 .676-.114ZM4.5 5.5a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Zm7 7a1.5 1.5 0 1 1 0-3 1.5 1.5 0 0 1 0 3Zm0 1a2.5 2.5 0 1 0 0-5 2.5 2.5 0 0 0 0 5Z"/>
+          </svg>
+          Available Taxes
+        </h6>
+
+        <div class="table-responsive border rounded">
+          <table class="table align-middle table-hover mb-0 custom-tax-table">
+            <thead>
+              <tr>
+                <th width="80" class="text-center">Select</th>
+                <th>Tax Name</th>
+                <th width="150">Rate</th>
+                <th width="180" class="text-end">Tax Amount</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let tax of taxes">
+                <td class="text-center">
+                  <input
+                    class="form-check-input cursor-pointer"
+                    type="checkbox"
+                    [(ngModel)]="tax.selected">
+                </td>
+                <td>
+                  <div class="fw-semibold text-dark">
+                    {{ tax.name }}
+                  </div>
+                </td>
+                <td>
+                  <span class="badge px-3 py-2 tax-rate-badge">
+                    {{ tax.percentage }}%
+                  </span>
+                </td>
+                <td class="text-end fw-semibold text-dark">
+                  AED {{ (documentAmount * tax.percentage / 100) | number:'1.2-2' }}
+                </td>
+              </tr>
+              <tr *ngIf="taxes.length === 0">
+                <td colspan="4" class="text-center py-4 text-muted">
+                  No taxes configured.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Summary Panel -->
+      <div class="col-lg-4">
+        <div class="border rounded-3 h-100 bg-light-panel">
+          <div class="p-3 border-bottom bg-white rounded-top-3">
+            <h6 class="mb-0 fw-semibold d-flex align-items-center text-dark">
+              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-bar-graph text-primary me-2" viewBox="0 0 16 16">
+                <path d="M10 13.5a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-6a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v6Zm-2.5.5a.5.5 0 0 0 .5-.5v-4a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v4a.5.5 0 0 0 .5.5h1Zm-3 0a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5v2a.5.5 0 0 0 .5.5h1Z"/>
+                <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2ZM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5v2Z"/>
+              </svg>
+              Tax Summary
+            </h6>
+          </div>
+          
+          <div class="p-3">
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom-dashed">
+              <span class="text-muted small">Document Amount</span>
+              <span class="fw-semibold text-dark">
+                AED {{ documentAmount | number:'1.2-2' }}
+              </span>
+            </div>
+
+            <div class="d-flex justify-content-between align-items-center py-2 border-bottom-dashed">
+              <span class="text-muted small">Selected Taxes</span>
+              <span class="badge bg-secondary-badge text-dark fw-semibold px-2 py-1">
+                {{ taxes.filter(t => t.selected).length }}
+              </span>
+            </div>
+
+            <div class="tax-total-box mt-4 p-3 rounded">
+              <div class="d-flex justify-content-between align-items-center">
+                <span class="fw-semibold text-white">Total Tax</span>
+                <span class="fw-bold fs-5 text-white">
+                  AED {{ totalTaxAmount | number:'1.2-2' }}
+                </span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>

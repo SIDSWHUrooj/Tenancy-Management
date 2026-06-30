@@ -1,0 +1,170 @@
+// ─────────────────────────────────────────────
+// Theme Tokens
+// ─────────────────────────────────────────────
+$primary-color: #0050b3;
+$primary-hover:  #003a8c;
+$border-color:   #ced4da;
+
+// ─────────────────────────────────────────────
+// Charge Cards
+// ─────────────────────────────────────────────
+.charge-card {
+  border: 1px solid rgba(0, 0, 0, 0.08) !important;
+  border-radius: 0.3rem;
+
+  .card-header {
+    background-color: #fafbfc !important;
+    border-bottom: 1px solid rgba(0, 0, 0, 0.07) !important;
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
+
+    h6 {
+      font-size: 0.9rem;
+    }
+  }
+}
+
+// ── Charge type icon pill ─────────────────────
+.charge-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 26px;
+  height: 26px;
+  border-radius: 6px;
+  flex-shrink: 0;
+}
+
+.charge-icon--rent {
+  background-color: rgba(0, 80, 179, 0.1);
+  color: $primary-color;
+}
+
+.charge-icon--deposit {
+  background-color: rgba(40, 167, 69, 0.1);
+  color: #1e7e34;
+}
+
+.charge-icon--admin {
+  background-color: rgba(255, 193, 7, 0.15);
+  color: #856404;
+}
+
+// ─────────────────────────────────────────────
+// Form Controls
+// ─────────────────────────────────────────────
+.form-label {
+  font-size: 0.8rem;
+  color: #6c757d;
+  margin-bottom: 0.35rem;
+}
+
+.form-control,
+.form-select {
+  border: 1px solid $border-color;
+  border-radius: 0.25rem;
+  font-size: 0.875rem;
+  padding: 0.3rem 0.55rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    border-color: lighten($primary-color, 15%);
+    box-shadow: 0 0 0 0.15rem rgba(0, 80, 179, 0.2);
+    outline: 0;
+  }
+
+  &.bg-light[readonly] {
+    background-color: #f1f3f5 !important;
+    color: #495057;
+    cursor: default;
+  }
+}
+
+.input-group-text {
+  font-size: 0.78rem;
+  padding: 0.3rem 0.5rem;
+  color: #6c757d;
+  background-color: #e9ecef;
+  border: 1px solid $border-color;
+}
+
+// ── Per-row "Total" field: blue bg + white text ─
+.charge-total-field {
+  background-color: rgba(0, 80, 179, 0.07) !important;
+  color: $primary-color !important;
+  border-color: rgba(0, 80, 179, 0.2) !important;
+}
+
+.charge-total-prefix {
+  background-color: rgba(0, 80, 179, 0.07) !important;
+  color: $primary-color !important;
+  border-color: rgba(0, 80, 179, 0.2) !important;
+  font-weight: 600;
+}
+
+// ─────────────────────────────────────────────
+// Summary Boxes
+// ─────────────────────────────────────────────
+.summary-box {
+  border-radius: 0.3rem;
+  padding: 1rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid transparent;
+
+  &__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__value {
+    font-size: 1.1rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+}
+
+// Invoice Total — solid primary blue
+.summary-box--total {
+  background-color: $primary-color;
+  border-color: $primary-color;
+
+  .summary-box__label {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .summary-box__value {
+    color: #ffffff;
+  }
+}
+
+// Previous Receipts — soft green tint
+.summary-box--prev {
+  background-color: rgba(40, 167, 69, 0.08);
+  border-color: rgba(40, 167, 69, 0.25);
+
+  .summary-box__label {
+    color: #1e7e34;
+  }
+
+  .summary-box__value {
+    color: #155724;
+  }
+}
+
+// Balance Amount — soft blue tint
+.summary-box--balance {
+  background-color: rgba(0, 80, 179, 0.06);
+  border-color: rgba(0, 80, 179, 0.2);
+
+  .summary-box__label {
+    color: $primary-color;
+  }
+
+  .summary-box__value {
+    color: $primary-hover;
+  }
+}

@@ -1,0 +1,57 @@
+<div class="row g-3 py-2">
+  <!-- Invoice Total -->
+  <div class="col-md-2">
+    <label class="form-label text-muted mb-1">Invoice Total</label>
+    <div class="input-group input-group-sm">
+      <span class="input-group-text bg-light">AED</span>
+      <input
+        type="text"
+        class="form-control text-end bg-light fw-semibold"
+        [value]="invoiceTotal | number:'1.2-2'"
+        readonly>
+    </div>
+  </div>
+  <!-- Previous Receipts -->
+  <div class="col-md-2.5 col-sm-6">
+    <label class="form-label text-muted mb-1">Previous Receipts</label>
+    <div class="input-group input-group-sm">
+      <span class="input-group-text bg-light">AED</span>
+      <input
+        type="text"
+        class="form-control text-end bg-light fw-semibold"
+        [value]="lastReceiptTotal | number:'1.2-2'"
+        readonly>
+    </div>
+  </div>
+  <!-- Current Receipt -->
+  <div class="col-md-2.5 col-sm-6">
+    <label class="form-label text-muted mb-1">Current Receipt</label>
+    <div class="input-group input-group-sm">
+      <span class="input-group-text bg-light">AED</span>
+      <input
+        type="text"
+        class="form-control text-end bg-light fw-semibold"
+        [value]="receiptTotal | number:'1.2-2'"
+        readonly>
+    </div>
+  </div>
+  <!-- Outstanding Balance -->
+  <div class="col-md-3">
+    <label class="form-label text-dark fw-semibold mb-1">Outstanding Balance</label>
+    <div class="input-group input-group-sm doc-amount-group shadow-sm">
+      <span class="input-group-text">AED</span>
+      <input
+        type="text"
+        class="form-control text-end fw-bold text-white"
+        [value]="balanceAmount | number:'1.2-2'"
+        readonly>
+    </div>
+  </div>
+  <!-- Settlement Status Badge -->
+  <div class="col-md-2 d-flex flex-column justify-content-end">
+    <label class="form-label text-muted mb-1">Settlement Status</label>
+    <span class="badge py-2 px-3 rounded-pill text-center w-100 fw-bold" [ngClass]="getStatusBadgeClass()">
+      {{ status }}
+    </span>
+  </div>
+</div>

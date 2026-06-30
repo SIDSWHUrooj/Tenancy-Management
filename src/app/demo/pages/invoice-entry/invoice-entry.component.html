@@ -1,0 +1,355 @@
+<div class="row">
+  <div class="col-12">
+    <div class="card border-0 shadow-sm main-invoice-card">
+
+      <!-- Header -->
+      <div class="card-header bg-white py-3">
+        <div class="d-flex justify-content-between align-items-center">
+          <div>
+            <h4 class="mb-1 text-dark fw-bold">Invoice Entry</h4>
+          </div>
+          <div class="d-flex gap-2">
+            <button 
+              class="btn btn-outline-invoice-type"
+              title="Change Invoice Type"
+              (click)="openTypeModal()">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-gear me-1 align-middle" viewBox="0 0 16 16">
+                <path d="M8 4.754a3.246 3.246 0 1 0 0 6.492 3.246 3.246 0 0 0 0-6.492zM5.754 8a2.246 2.246 0 1 1 4.492 0 2.246 2.246 0 0 1-4.492 0z"/>
+                <path d="M9.796 1.343c-.527-1.79-3.065-1.79-3.592 0l-.094.319a.873.873 0 0 1-1.255.52l-.292-.16c-1.64-.892-3.433.902-2.54 2.541l.159.292a.873.873 0 0 1-.52 1.255l-.319.094c-1.79.527-1.79 3.065 0 3.592l.319.094a.873.873 0 0 1 .52 1.255l-.16.292c-.892 1.64.901 3.434 2.541 2.54l.292.159a.873.873 0 0 1 1.255.52l.094.319c.527 1.79 3.065 1.79 3.592 0l.094-.319a.873.873 0 0 1 1.255-.52l.292.16c1.64.893 3.434-.902 2.54-2.541l-.159-.292a.873.873 0 0 1 .52-1.255l.319-.094c1.79-.527 1.79-3.065 0-3.592l-.319-.094a.873.873 0 0 1-.52-1.255l.16-.292c.893-1.64-.902-3.433-2.541-2.54l-.292-.159a.873.873 0 0 1-1.255-.52l-.094-.319zm-2.633.283c.246-.835 1.428-.835 1.674 0l.094.319a1.873 1.873 0 0 0 2.693 1.115l.291-.16c.764-.415 1.6.42 1.184 1.185l-.159.292a1.873 1.873 0 0 0 1.116 2.692l.318.094c.835.246.835 1.428 0 1.674l-.319.094a1.873 1.873 0 0 0-1.115 2.693l.16.291c.415.764-.42 1.6-1.185 1.184l-.291-.159a1.873 1.873 0 0 0-2.693 1.116l-.094.318c-.246.835-1.428.835-1.674 0l-.094-.319a1.873 1.873 0 0 0-2.692-1.115l-.292.16c-.764.415-1.6-.42-1.184-1.185l.159-.291A1.873 1.873 0 0 0 1.94 8.286l-.318-.094c-.835-.246-.835-1.428 0-1.674l.319-.094A1.873 1.873 0 0 0 3.06 3.824L2.9 3.532c-.415-.764.42-1.6 1.185-1.184l.292.159a1.873 1.873 0 0 0 2.692-1.115l.094-.319z"/>
+              </svg>
+              Invoice Type
+            </button>
+            <button 
+              class="btn btn-outline-print"
+              (click)="printInvoice()">
+              Print
+            </button>
+            <button 
+              class="btn btn-primary btn-save-action"
+              (click)="saveInvoice()">
+              Save
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <!-- Body -->
+      <div class="card-body">
+
+        <!-- Invoice Header Section -->
+        <div class="row g-3 mb-4">
+
+          <!-- Invoice Number + Search + Refresh -->
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Invoice Number</label>
+            <div class="input-group">
+              <input
+                type="text"
+                class="form-control bg-light"
+                [(ngModel)]="invoiceNo"
+                readonly>
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                title="Search Invoice"
+                (click)="openInvoiceLookup()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                </svg>
+              </button>
+              <button
+                type="button"
+                class="btn btn-outline-danger"
+                title="Refresh Invoice (Clear)"
+                (click)="resetInvoice()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
+                  <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+                  <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Invoice Date</label>
+            <input
+              type="date"
+              class="form-control bg-white"
+              [(ngModel)]="invoiceDate">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Invoice Type</label>
+            <select 
+              class="form-select bg-white" 
+              [(ngModel)]="invoiceType"
+              (change)="openTypeModal()">
+              <option value="New">New</option>
+              <option value="Renewal">Renewal</option>
+              <option value="Additional">Additional</option>
+              <option value="Ejari">Ejari</option>
+            </select>
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label">Purpose Of Lease</label>
+            <select 
+              class="form-select bg-white"
+              [(ngModel)]="purposeOfLease">
+              <option value="Commercial">Commercial</option>
+              <option value="Residential">Residential</option>
+              <option value="Office">Office</option>
+              <option value="Warehouse">Warehouse</option>
+            </select>
+          </div>
+
+        </div>
+
+        <!-- Customer Section -->
+        <div class="row g-3 mb-3">
+          <div class="col-md-3">
+            <label class="form-label">Customer ID</label>
+            <div class="input-group">
+              <input
+                class="form-control bg-white"
+                placeholder="ID"
+                [(ngModel)]="customerId">
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                title="Search Customer"
+                (click)="openCustomerLookup()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-9">
+            <label class="form-label">Customer Name</label>
+            <input
+              class="form-control bg-white"
+              placeholder="Select Customer ID or enter name"
+              [(ngModel)]="customerName">
+          </div>
+        </div>
+
+        <!-- Property Section -->
+        <div class="row g-3 mb-4">
+          <div class="col-md-3">
+            <label class="form-label">Property ID</label>
+            <div class="input-group">
+              <input
+                class="form-control bg-white"
+                placeholder="ID"
+                [(ngModel)]="propertyId">
+              <button
+                type="button"
+                class="btn btn-outline-primary"
+                title="Search Property"
+                (click)="openPropertyLookup()">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+
+          <div class="col-md-9">
+            <label class="form-label">Property Name</label>
+            <input
+              class="form-control bg-white"
+              placeholder="Select Property ID or enter property name"
+              [(ngModel)]="propertyName">
+          </div>
+        </div>
+<!-- CONTRACT INFORMATION -->
+    <h5 class="mb-0 d-flex align-items-center">
+      <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-file-earmark-text text-primary me-2" viewBox="0 0 16 16">
+        <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5z"/>
+        <path d="M14 4.5V14a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h5.5L14 4.5zm-3 0A1.5 1.5 0 0 1 9.5 3V1H4a1 1 0 0 0-1 1v12a1 1 0 0 0 1 1h8a1 1 0 0 0 1-1V4.5h-2z"/>
+      </svg>
+      Contract Information
+    </h5>
+  </div>
+  <div class="card-body pt-0">
+    <div class="row g-3">
+
+      <div class="col-md-6">
+        <label class="form-label">Contract Number</label>
+        <input
+          type="text"
+          class="form-control bg-white"
+          placeholder="Enter Contract Number"
+          [(ngModel)]="totals.contractNumber">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Contract Date</label>
+        <input
+          type="date"
+          class="form-control bg-white"
+          [(ngModel)]="totals.contractDate">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Document Number</label>
+        <input
+          type="text"
+          class="form-control bg-white"
+          placeholder="Enter Document Number"
+          [(ngModel)]="totals.documentNumber">
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label">Ejari Number</label>
+        <input
+          type="text"
+          class="form-control bg-white"
+          placeholder="Enter Ejari Number"
+          [(ngModel)]="totals.ejariNumber">
+      </div>
+
+    </div>
+  
+
+        <!-- Tabs -->
+        <ul class="nav modern-tabs mb-4 border-bottom pt-4">
+          <li class="nav-item">
+            <button
+              class="nav-link-tab"
+              [class.active]="activeTab === 'building'"
+              (click)="setTab('building')">
+              Building
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link-tab"
+              [class.active]="activeTab === 'tax'"
+              (click)="setTab('tax')">
+              Tax
+            </button>
+          </li>
+          <li class="nav-item">
+            <button
+              class="nav-link-tab"
+              [class.active]="activeTab === 'totals'"
+              (click)="setTab('totals')">
+              Totals
+            </button>
+          </li>
+        </ul>
+
+        <!-- Tab Content -->
+        <div class="tab-content">
+          @if(activeTab === 'building') {
+            <app-building-tab />
+          }
+          @if(activeTab === 'tax') {
+            <app-tax-tab />
+          }
+          @if(activeTab === 'totals') {
+            <app-totals-tab />
+          }
+        </div>
+
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- POP-UP TYPE SELECTION MODAL -->
+<div class="modal-overlay" *ngIf="showTypeModal">
+  <div class="modal-container shadow-lg border rounded-3 bg-white">
+    <div class="modal-header border-bottom py-3 px-4 d-flex justify-content-between align-items-center bg-light">
+      <h5 class="mb-0 fw-bold text-dark d-flex align-items-center">
+        <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-file-earmark-diff text-primary me-2" viewBox="0 0 16 16">
+          <path d="M8 5a.5.5 0 0 1 .5.5V7H10a.5.5 0 0 1 0 1H8.5v1.5a.5.5 0 0 1-1 0V8H6a.5.5 0 0 1 0-1h1.5V5.5A.5.5 0 0 1 8 5zm-2.5 6.5A.5.5 0 0 1 6 11h4a.5.5 0 0 1 0 1H6a.5.5 0 0 1-.5-.5z"/>
+          <path d="M14 14V4.5L9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2zM9.5 3A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5V3z"/>
+        </svg>
+        Invoice Type Selection
+      </h5>
+      <button type="button" class="btn-close-modal" (click)="showTypeModal = false">
+        &times;
+      </button>
+    </div>
+    
+    <div class="modal-body p-4">
+      <p class="text-muted small mb-4">Please select the Invoice Type to configure the entry details and setup parameters:</p>
+      
+      <!-- Radio selection for types -->
+      <div class="row g-3 mb-4">
+        <div class="col-md-6" *ngFor="let type of ['New', 'Renewal', 'Additional', 'Ejari']">
+          <div class="type-radio-card p-3 border rounded cursor-pointer d-flex align-items-center"
+               [class.active]="modalInvoiceType === type"
+               (click)="modalInvoiceType = type">
+            <input 
+              type="radio" 
+              name="invoiceTypeRadio" 
+              [id]="'radio_' + type" 
+              [value]="type"
+              [(ngModel)]="modalInvoiceType"
+              class="form-check-input me-3 pointer-events-none">
+            <label [for]="'radio_' + type" class="fw-semibold text-dark mb-0 cursor-pointer pointer-events-none">
+              {{ type }} Invoice
+            </label>
+          </div>
+        </div>
+      </div>
+
+      <!-- DYNAMIC INPUT FIELDS BASED ON SELECTION -->
+      <div class="dynamic-modal-inputs p-3 border rounded bg-light" *ngIf="modalInvoiceType !== 'New'">
+        
+        <!-- Renewal Options -->
+        <div *ngIf="modalInvoiceType === 'Renewal'">
+          <label class="form-label fw-semibold">Contract Number</label>
+          <input 
+            type="text" 
+            class="form-control bg-white" 
+            placeholder="e.g., CNT-2026-0098"
+            [(ngModel)]="modalContractNo">
+          <span class="text-muted small mt-1 d-block">Provide the active lease contract code for renewal details lookup.</span>
+        </div>
+
+        <!-- Additional Options -->
+        <div *ngIf="modalInvoiceType === 'Additional'">
+          <label class="form-label fw-semibold">Previous Invoice Number</label>
+          <input 
+            type="text" 
+            class="form-control bg-white" 
+            placeholder="e.g., INV-000001"
+            [(ngModel)]="modalPrevInvoiceNo">
+          <span class="text-muted small mt-1 d-block">Specify the reference invoice ID for the extra items.</span>
+        </div>
+
+        <!-- Ejari Options -->
+        <div *ngIf="modalInvoiceType === 'Ejari'">
+          <label class="form-label fw-semibold">Ejari Contract Number</label>
+          <input 
+            type="text" 
+            class="form-control bg-white" 
+            placeholder="e.g., EJR-988223"
+            [(ngModel)]="modalEjariNo">
+          <span class="text-muted small mt-1 d-block">Input the Ejari system registration number.</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-footer border-top p-3 px-4 bg-light d-flex justify-content-end gap-2 rounded-bottom-3">
+      <button 
+        type="button" 
+        class="btn btn-secondary py-2" 
+        (click)="showTypeModal = false">
+        Cancel
+      </button>
+      <button 
+        type="button" 
+        class="btn btn-primary py-2" 
+        (click)="confirmInvoiceType()">
+        Proceed Setup
+      </button>
+    </div>
+  </div>
+</div>

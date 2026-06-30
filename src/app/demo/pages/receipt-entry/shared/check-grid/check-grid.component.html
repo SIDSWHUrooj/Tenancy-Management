@@ -1,0 +1,78 @@
+<div class="card border-0 shadow-sm mb-3">
+  <div class="card-header bg-white border-bottom d-flex justify-content-between align-items-center py-2">
+    <h6 class="mb-0 fw-semibold text-dark">Checks Information</h6>
+    <button
+      type="button"
+      class="btn btn-primary btn-sm btn-add-line"
+      (click)="addRow()">
+      <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-plus-lg me-1 align-middle" viewBox="0 0 16 16" style="margin-top: -2px;">
+        <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+      </svg>
+      Add Check
+    </button>
+  </div>
+  <div class="table-responsive">
+    <table class="table table-hover align-middle mb-0 custom-invoice-table">
+      <thead class="invoice-header">
+        <tr>
+          <th width="60" class="text-center">Sr</th>
+          <th width="180">Check No</th>
+          <th width="180">Check Date</th>
+          <th class="text-end" width="180"  class="text-center">Check Amount</th>
+          <th width="70" class="text-center">Action</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr *ngFor="let item of checks; let i = index">
+          <td class="text-center text-muted fw-semibold">
+            {{ item.lineNo }}
+          </td>
+          <td>
+            <input
+              type="text"
+              class="form-control bg-white"
+              placeholder="e.g. CHK-100234"
+              [(ngModel)]="item.checkNo"
+              (ngModelChange)="onGridUpdated()">
+          </td>
+          <td>
+            <input
+              type="date"
+              class="form-control bg-white"
+              [(ngModel)]="item.checkDate"
+              (ngModelChange)="onGridUpdated()">
+          </td>
+          <td>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-light border-end-0">AED</span>
+              <input
+                type="number"
+                class="form-control text-end bg-white border-start-0 fw-semibold"
+                [(ngModel)]="item.amount"
+                (ngModelChange)="onAmountChanged()">
+            </div>
+          </td>
+         
+            
+          <td class="text-center">
+            <button
+              type="button"
+              class="btn btn-outline-danger btn-sm border-0 btn-delete-row"
+              (click)="removeRow(i)"
+              title="Delete Check">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash" viewBox="0 0 16 16">
+                <path d="M5.5 5.5A.5.5 0 0 1 6 6v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm2.5 0a.5.5 0 0 1 .5.5v6a.5.5 0 0 1-1 0V6a.5.5 0 0 1 .5-.5Zm3 .5a.5.5 0 0 0-1 0v6a.5.5 0 0 0 1 0V6Z"/>
+                <path d="M14.5 3a1 1 0 0 1-1 1H13v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V4h-.5a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1H6a1 1 0 0 1 1-1h2a1 1 0 0 1 1 1h3.5a1 1 0 0 1 1 1v1ZM4.118 4 4 4.059V13a1 1 0 0 0 1 1h6a1 1 0 0 0 1-1V4.059L11.882 4H4.118ZM2.5 3h11V2h-11v1Z"/>
+              </svg>
+            </button>
+          </td>
+        </tr>
+        <tr *ngIf="checks.length === 0">
+          <td colspan="6" class="text-center py-4 text-muted small">
+            No check details generated. Adjust the "Number of Checks" or click "Add Check" above.
+          </td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+</div>

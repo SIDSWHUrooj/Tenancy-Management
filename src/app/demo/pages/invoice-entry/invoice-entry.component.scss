@@ -1,0 +1,304 @@
+$primary-color: #0050b3;      // Target Blue requested by User
+$primary-hover: #003a8c;
+$danger-color: #dc3545;       // Standard Red (Delete)
+$danger-hover: #bd2130;
+$border-color: #ced4da;       // Standard Bootstrap Light Gray
+
+// ----------------------------------------------------
+// Card & Page Layout Base
+// ----------------------------------------------------
+.main-invoice-card {
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  border-radius: 0.35rem;
+  background-color: #ffffff;
+  box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.05) !important;
+
+  .card-header {
+    border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+    
+    h4 {
+      font-size: 1.25rem;
+      letter-spacing: 0.01em;
+    }
+  }
+}
+
+// ----------------------------------------------------
+// Standard Form Controls
+// ----------------------------------------------------
+.form-control, .form-select {
+  border: 1px solid $border-color;
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+  padding: 0.375rem 0.75rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    border-color: lighten($primary-color, 15%);
+    box-shadow: 0 0 0 0.2rem rgba(0, 80, 179, 0.25);
+    outline: 0;
+  }
+}
+
+.form-label {
+  font-size: 0.875rem;
+  color: #495057;
+  margin-bottom: 0.5rem;
+}
+
+// Input Group Search Buttons
+.input-group {
+  .btn-outline-primary {
+    color: $primary-color;
+    border-color: $border-color;
+    
+    &:hover {
+      background-color: $primary-color;
+      border-color: $primary-color;
+      color: #ffffff;
+    }
+  }
+
+  .btn-outline-danger {
+    color: $danger-color;
+    border-color: $border-color;
+    
+    &:hover {
+      background-color: $danger-color;
+      border-color: $danger-color;
+      color: #ffffff;
+    }
+  }
+}
+
+// ----------------------------------------------------
+// Modern Navigation Tabs
+// ----------------------------------------------------
+.modern-tabs {
+  gap: 1.5rem;
+  margin-bottom: 1.5rem;
+  
+  .nav-item {
+    margin-bottom: -1px; // Align border with navigation line
+  }
+
+  .nav-link-tab {
+    background: transparent;
+    border: none;
+    border-bottom: 3px solid transparent;
+    color: #6c757d;
+    font-weight: 600;
+    font-size: 0.95rem;
+    padding: 0.6rem 0.5rem;
+    transition: all 0.2s ease-in-out;
+    cursor: pointer;
+
+    &:hover {
+      color: $primary-color;
+      border-bottom-color: lighten($primary-color, 25%);
+    }
+
+    &.active {
+      color: $primary-color;
+      border-bottom-color: $primary-color;
+    }
+  }
+}
+
+// ----------------------------------------------------
+// Header & Action Buttons
+// ----------------------------------------------------
+
+// Save: Solid Blue background
+.btn-save-action {
+  background-color: $primary-color !important;
+  border-color: $primary-color !important;
+  color: #ffffff !important;
+  font-weight: 500;
+  padding: 0.4rem 1.25rem;
+  
+  &:hover {
+    background-color: $primary-hover !important;
+    border-color: $primary-hover !important;
+  }
+}
+
+// Print: Blue Outline, solid on hover
+.btn-outline-print {
+  background-color: transparent !important;
+  border: 1px solid $primary-hover !important;
+  color: $primary-hover !important;
+  font-weight: 500;
+  padding: 0.4rem 1.25rem;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    background-color: $primary-color !important;
+    color: #ffffff !important;
+    border-color: $primary-color !important;
+  }
+}
+.btn-outline-invoice-type {
+  background-color: transparent !important;
+  border: 1px solid $primary-hover !important;
+  color: $primary-hover !important;
+  font-weight: 500;
+  padding: 0.4rem 1.25rem;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    background-color: $primary-color !important;
+    color: #ffffff !important;
+    border-color: $primary-color !important;
+  }
+}
+
+// General button helpers
+.btn-primary {
+  background-color: $primary-color !important;
+  border-color: $primary-color !important;
+  color: #ffffff !important;
+  
+  &:hover {
+    background-color: $primary-hover !important;
+    border-color: $primary-hover !important;
+  }
+}
+
+.btn-secondary {
+  background-color: #6c757d !important;
+  border-color: #6c757d !important;
+  color: #ffffff !important;
+  
+  &:hover {
+    background-color: #5a6268 !important;
+    border-color: #545b62 !important;
+  }
+}
+
+.btn-danger {
+  background-color: $danger-color !important;
+  border-color: $danger-color !important;
+  color: #ffffff !important;
+  
+  &:hover {
+    background-color: $danger-hover !important;
+    border-color: $danger-hover !important;
+  }
+}
+
+// ----------------------------------------------------
+// Interactive Dialog / Modal Popup Styles
+// ----------------------------------------------------
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeInOverlay 0.2s ease-out;
+
+  .modal-container {
+    width: 90%;
+    max-width: 580px;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.4rem;
+    overflow: hidden;
+    animation: slideInModal 0.25s cubic-bezier(0.1, 0.8, 0.3, 1);
+
+    .modal-header {
+      background-color: #f8fafc;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+
+      .btn-close-modal {
+        background: transparent;
+        border: none;
+        font-size: 1.5rem;
+        color: #adb5bd;
+        cursor: pointer;
+        padding: 0 0.5rem;
+        transition: color 0.15s ease;
+
+        &:hover {
+          color: #495057;
+        }
+      }
+    }
+
+    .modal-body {
+      padding: 1.5rem;
+    }
+
+    .modal-footer {
+      background-color: #f8fafc;
+      border-top: 1px solid rgba(0, 0, 0, 0.08);
+      gap: 0.5rem;
+    }
+  }
+}
+
+// Card Radio Type selector grid
+.type-radio-card {
+  border: 1px solid $border-color;
+  border-radius: 0.25rem;
+  background-color: #ffffff;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    border-color: lighten($primary-color, 15%);
+    background-color: #fcfdfe;
+  }
+  
+  &.active {
+    border-color: $primary-color !important;
+    background-color: rgba(0, 80, 179, 0.04) !important;
+    
+    label {
+      color: $primary-color !important;
+    }
+    
+    .form-check-input {
+      border-color: $primary-color;
+      background-color: $primary-color;
+    }
+  }
+
+  .form-check-input {
+    width: 1.1rem;
+    height: 1.1rem;
+    cursor: pointer;
+  }
+
+  label {
+    cursor: pointer;
+    font-size: 0.95rem;
+  }
+}
+
+.dynamic-modal-inputs {
+  border: 1px solid rgba(0, 80, 179, 0.12) !important;
+  background-color: rgba(0, 80, 179, 0.02) !important;
+}
+
+// Fade/slide Animations
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}

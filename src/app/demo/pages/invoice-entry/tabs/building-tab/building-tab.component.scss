@@ -1,0 +1,289 @@
+  // Theme Colors
+  $primary-color: #0050b3;      // Target Blue requested by User
+  $primary-hover: #003a8c;
+  $danger-color: #dc3545;       // Standard Red (Delete)
+  $danger-hover: #bd2130;
+  $border-color: #ced4da;       // Standard Bootstrap Light Gray
+
+  // Soft transparent colors for status buttons/selects
+  //$status-green-bg: rgba(40, 167, 69, 0.12);
+  //$status-green-text: #1e7e34;
+  //$status-green-border: rgba(40, 167, 69, 0.35);
+
+  //$status-yellow-bg: rgba(255, 193, 7, 0.15);
+  //$status-yellow-text: #856404;
+  //$status-yellow-border: rgba(255, 193, 7, 0.35);
+
+  //$status-red-bg: rgba(220, 53, 69, 0.12);
+  //$status-red-text: #bd2130;
+  //$status-red-border: rgba(220, 53, 69, 0.35);
+
+  // Soft dynamic badges next to labels
+
+
+  .container-fluid {
+    font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+    color: #212529;
+
+    .text-primary {
+      color: $primary-color !important;
+    }
+
+    // ----------------------------------------------------
+    // Card Layouts
+    // ----------------------------------------------------
+    .card {
+      border: 1px solid rgba(0, 0, 0, 0.125);
+      border-radius: 0.25rem;
+      background-color: #ffffff;
+      box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075) !important;
+
+      .card-header {
+        background-color: #ffffff;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.125);
+        
+        h5 {
+          font-weight: 600;
+          font-size: 1.1rem;
+          color: #333333;
+        }
+      }
+    }
+
+    // ----------------------------------------------------
+    // Form Controls
+    // ----------------------------------------------------
+    .form-control, .form-select {
+      border: 1px solid $border-color;
+      border-radius: 0.25rem;
+      background-color: #ffffff;
+      color: #495057;
+      font-size: 0.9rem;
+      padding: 0.375rem 0.75rem;
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+      &:focus {
+        border-color: lighten($primary-color, 15%);
+        box-shadow: 0 0 0 0.2rem rgba(0, 80, 179, 0.25);
+        outline: 0;
+      }
+    }
+
+    .form-label {
+      font-size: 0.875rem;
+      color: #495057;
+      margin-bottom: 0.5rem;
+    }
+
+    // Search input group button
+    .input-group {
+      .btn-outline-primary {
+        color: $primary-color;
+        border-color: $border-color;
+        
+        &:hover {
+          background-color: $primary-color;
+          border-color: $primary-color;
+          color: #ffffff;
+        }
+      }
+    }
+
+    // Checkbox cursor pointer
+    .form-check-input, .form-check-label {
+      cursor: pointer;
+    }
+
+    // ----------------------------------------------------
+    // Status Selector Dynamic Styles (Transparent)
+    // ----------------------------------------------------
+  select.status-select {
+    font-weight: 500;
+    cursor: pointer;
+
+    option {
+      background: #fff;
+      color: #212529;
+    }
+  }
+
+      // Dropdown list options MUST appear in white color when opened
+      option {
+        background-color: #ffffff !important;
+        color: #212529 !important;
+      }
+    }
+
+    // ----------------------------------------------------
+    // Invoice Table
+    // ----------------------------------------------------
+    .custom-invoice-table {
+      width: 100%;
+      margin-bottom: 0;
+      
+      thead {
+        tr {
+          background-color: $primary-color !important;
+          
+          th {
+            color: #ffffff !important;
+            font-weight: 500;
+            font-size: 0.875rem;
+            padding: 0.75rem;
+            border-bottom: none;
+          }
+        }
+      }
+
+      tbody {
+        tr {
+          td {
+            padding: 0.5rem 0.75rem;
+            border-bottom: 1px solid rgba(0, 0, 0, 0.08);
+            
+            .form-control {
+              padding: 0.3rem 0.5rem;
+              font-size: 0.85rem;
+            }
+            
+            .input-group-text {
+              font-size: 0.75rem;
+              padding: 0.3rem 0.5rem;
+              color: #6c757d;
+              background-color: #e9ecef;
+              border: 1px solid $border-color;
+            }
+          }
+        }
+      }
+    }
+
+    // Add Row Line Button (Blue Background)
+    .btn-add-line {
+      background-color: $primary-color !important;
+      border-color: $primary-color !important;
+      color: #ffffff !important;
+      font-weight: 500;
+      
+      &:hover {
+        background-color: $primary-hover !important;
+        border-color: $primary-hover !important;
+      }
+    }
+
+    // Delete line item circular hover button
+    .btn-outline-danger {
+      color: #adb5bd;
+      
+      &:hover {
+        color: $danger-color;
+        background-color: #f8d7da;
+      }
+    }
+
+    // ----------------------------------------------------
+    // Document Amount (Blue Field, White Text)
+    // ----------------------------------------------------
+    .doc-amount-group {
+      border-radius: 0.25rem;
+      overflow: hidden;
+
+      .input-group-text, .form-control {
+        background-color: $primary-color !important;
+        color: #ffffff !important;
+        border-color: $primary-color !important;
+        font-weight: 600;
+      }
+
+      // Read-only text color override
+      .form-control[readonly] {
+        color: #ffffff !important;
+      }
+    }
+
+    // ----------------------------------------------------
+    // File Upload Section
+    // ----------------------------------------------------
+    .upload-area {
+      background-color: #ffffff;
+      border: 2px dashed $border-color !important;
+      border-radius: 0.25rem;
+      transition: all 0.2s ease-in-out;
+      
+      h5 {
+        font-weight: 500;
+        color: #495057;
+      }
+
+      .btn-browse {
+        background-color: $primary-color !important;
+        border-color: $primary-color !important;
+        color: #ffffff !important;
+        font-size: 0.85rem;
+        padding: 0.4rem 1.2rem;
+        
+        &:hover {
+          background-color: $primary-hover !important;
+          border-color: $primary-hover !important;
+        }
+      }
+
+      &.dragging {
+        border-color: $primary-color !important;
+        background-color: rgba(0, 80, 179, 0.03);
+      }
+    }
+
+    // ----------------------------------------------------
+    // Form Action Footer Buttons
+    // ----------------------------------------------------
+    
+    // Save button: Blue background, white text
+    .btn-save-action {
+      background-color: $primary-color !important;
+      border-color: $primary-color !important;
+      color: #ffffff !important;
+      font-weight: 500;
+      padding: 0.45rem 1.5rem;
+      
+      &:hover {
+        background-color: $primary-hover !important;
+        border-color: $primary-hover !important;
+      }
+    }
+
+    // Delete button: Red background, white text
+    .btn-delete-action {
+      background-color: $danger-color !important;
+      border-color: $danger-color !important;
+      color: #ffffff !important;
+      font-weight: 500;
+      padding: 0.45rem 1.5rem;
+      
+      &:hover {
+        background-color: $danger-hover !important;
+        border-color: $danger-hover !important;
+      }
+    }
+  .invoice-header th {
+    background-color: #003a8c !important;
+    color: white !important;
+    border-color: #003a8c !important;
+    font-weight: 600;
+  }
+    // Print button: Blue outline, turns blue on hover
+    .btn-outline-print {
+      background-color: transparent !important;
+      border: 1px solid $primary-color !important;
+      color: $primary-color !important;
+      font-weight: 500;
+      padding: 0.45rem 1.5rem;
+      transition: all 0.15s ease-in-out;
+      
+      &:hover {
+        background-color: $primary-color !important;
+        color: #ffffff !important;
+        border-color: $primary-color !important;
+      }
+    }
+

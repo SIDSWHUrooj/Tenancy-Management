@@ -1,0 +1,93 @@
+// Theme Colors
+$primary-color: #0050b3;
+$primary-hover: #003a8c;
+$danger-color: #dc3545;
+$danger-hover: #bd2130;
+$border-color: #ced4da;
+.custom-invoice-table {
+  width: 100%;
+  margin-bottom: 0;
+  
+  thead {
+    tr {
+      background-color: $primary-color !important;
+      
+      th {
+        color: #ffffff !important;
+        font-weight: 500;
+        font-size: 0.85rem;
+        padding: 0.5rem 0.75rem;
+        border-bottom: none;
+      }
+    }
+  }
+  tbody {
+    tr {
+      td {
+        padding: 0.4rem 0.75rem;
+        border-bottom: 1px solid rgba(0, 0, 0, 0.06);
+        font-size: 0.875rem;
+        
+        .form-control {
+          padding: 0.25rem 0.5rem;
+          font-size: 0.85rem;
+          border: 1px solid $border-color;
+          border-radius: 0.2rem;
+          height: auto;
+          
+          &:focus {
+            border-color: lighten($primary-color, 15%);
+            box-shadow: 0 0 0 0.15rem rgba(0, 80, 179, 0.15);
+            outline: 0;
+          }
+        }
+        
+        .input-group-text {
+          font-size: 0.75rem;
+          padding: 0.25rem 0.5rem;
+          color: #6c757d;
+          background-color: #e9ecef;
+          border: 1px solid $border-color;
+        }
+      }
+    }
+  }
+}
+.invoice-header th {
+  background-color: #003a8c !important;
+  color: white !important;
+  border-color: #003a8c !important;
+  font-weight: 600;
+}
+// Add row button
+.btn-add-line {
+  background-color: $primary-color !important;
+  border-color: $primary-color !important;
+  color: #ffffff !important;
+  font-weight: 500;
+  font-size: 0.8rem;
+  padding: 0.25rem 0.75rem;
+  
+  &:hover {
+    background-color: $primary-hover !important;
+    border-color: $primary-hover !important;
+  }
+}
+// Trash icon hover styling
+.btn-outline-danger {
+  color: #adb5bd;
+  border-radius: 50%;
+  width: 28px;
+  height: 28px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0;
+  transition: all 0.15s ease-in-out;
+  
+  &:hover {
+    color: $danger-color;
+    background-color: #f8d7da;
+    border-color: transparent;
+  }
+}
