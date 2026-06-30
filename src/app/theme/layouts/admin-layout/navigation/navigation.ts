@@ -19,24 +19,7 @@ export interface NavigationItem {
 }
 
 export const NavigationItems: NavigationItem[] = [
-  {
-    id: 'dashboard',
-    title: 'Dashboard',
-    type: 'group',
-    icon: 'icon-navigation',
-    children: [
-      {
-        id: 'default',
-        title: 'Default',
-        type: 'item',
-        classes: 'nav-item',
-        url: '/dashboard/default',
-        icon: 'dashboard',
-        breadcrumbs: false
-      }
-    ]
-  },
-
+  
   {
   id: 'transactions',
   title: 'Transactions',
@@ -45,7 +28,7 @@ export const NavigationItems: NavigationItem[] = [
   children: [
     {
       id: 'invoice-entry',
-      title: 'Invoice Entry',
+      title: 'Invoice Management',
       type: 'item',
       url: '/invoice-entry'
     }
@@ -62,9 +45,16 @@ export const NavigationItems: NavigationItem[] = [
       title: 'Receipt Entry',
       type: 'item',
       url: '/receipt-entry'
+    },
+    {
+      id: 'recurring-entries',
+      title: 'Recurring Entries',
+      type: 'item',
+      url: '/recurring-entries'
     }
   ]
 },
+
   {
     id: 'authentication',
     title: 'Authentication',

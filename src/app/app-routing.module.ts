@@ -62,9 +62,17 @@ const routes: Routes = [
   loadComponent: () =>
     import('./demo/pages/receipt-entry/receipt-entry.component')
       .then(m => m.ReceiptEntryComponent)
+},
+{
+  path: 'recurring-entries',
+  loadComponent: () =>
+    import('./demo/pages/recurring-entries/recurring-entries.component').then(
+      (m) => m.RecurringEntriesComponent
+    )
 }
     ]
   },
+  
   {
     path: '',
     component: GuestLayoutComponent,

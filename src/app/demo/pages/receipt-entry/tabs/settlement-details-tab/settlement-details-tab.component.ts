@@ -23,7 +23,11 @@ export class SettlementDetailsTabComponent implements OnChanges {
 
   // ── Called when Early Termination toggle changes ──────────────
   onEarlyTerminationChange(): void {
-    // Additional early-termination logic can go here
+    if (!this.form.earlyTermination) {
+      // Range is no longer active — clear the From Date so a stale
+      // value isn't silently carried into a later calculation/save.
+      this.form.fromDate = null;
+    }
     this.recalculate();
   }
 
@@ -36,15 +40,5 @@ export class SettlementDetailsTabComponent implements OnChanges {
     );
     this.form.balanceAmount = result.balanceAmount;
     this.form.settlementStatus = result.status;
-  }
-
-  // ── Badge styling helper ──────────────────────────────────────
-  getStatusBadgeClass(status: string): string {
-    switch (status) {
-      case 'Fully Paid':    return 'badge-status-paid';
-      case 'Partially Paid': return 'badge-status-partial';
-      case 'Outstanding':   return 'badge-status-outstanding';
-      default:              return 'badge-status-default';
-    }
   }
 }
