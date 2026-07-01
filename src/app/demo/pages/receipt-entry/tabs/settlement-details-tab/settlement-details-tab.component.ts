@@ -22,14 +22,30 @@ export class SettlementDetailsTabComponent implements OnChanges {
   }
 
   // ── Called when Early Termination toggle changes ──────────────
-  onEarlyTerminationChange(): void {
-    if (!this.form.earlyTermination) {
-      // Range is no longer active — clear the From Date so a stale
-      // value isn't silently carried into a later calculation/save.
-      this.form.fromDate = null;
-    }
-    this.recalculate();
+ onEarlyTerminationChange(): void {
+
+  if (!this.form.earlyTermination) {
+    // Reset when disabled
+    this.form.toDate = this.form.periodToDate;
   }
+
+  this.recalculate();
+}
+onToDateChange(): void {
+
+  if (!this.form.toDate || !this.form.periodToDate) {
+    return;
+  }
+
+  const selected = new Date(this.form.toDate);
+  const periodEnd = new Date(this.form.periodToDate);
+
+  if (selected > periodEnd) {
+    this.form.toDate = this.form.periodToDate;
+  }
+
+  this.recalculate();
+}
 
   // ── Derive settlement status from current financials ──────────
   recalculate(): void {

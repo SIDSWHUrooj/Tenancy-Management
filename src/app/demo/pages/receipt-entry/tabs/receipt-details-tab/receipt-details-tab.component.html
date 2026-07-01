@@ -1,99 +1,94 @@
 <div class="card border-0 shadow-sm mb-4">
   <div class="card-body">
-    <!-- Receipt Configurations Row -->
+
+    <!-- Receipt Configuration Row -->
     <div class="row g-3 mb-4">
-      
-      <!-- Receipt Date -->
-      <div class="col-md-3">
+
+      <div class="col-md-4">
         <label class="form-label fw-semibold">Receipt Date</label>
-        <input
-          type="date"
-          class="form-control bg-white"
-          [(ngModel)]="form.receiptDate"
-          (change)="onChecksCountChange()">
+        <input type="date" class="form-control bg-white" [(ngModel)]="form.receiptDate">
       </div>
-      <!-- Clearing Bank -->
-      <div class="col-md-3">
+
+      <div class="col-md-4">
         <label class="form-label fw-semibold">Clearing Bank</label>
-        <select
-          class="form-select bg-white"
-          [(ngModel)]="form.detailsBank">
+        <select class="form-select bg-white" [(ngModel)]="form.detailsBank">
           <option value="">-- Select Bank --</option>
-          <option *ngFor="let bank of banksList" [value]="bank">
-            {{ bank }}
-          </option>
+          <option *ngFor="let bank of banksList" [value]="bank">{{ bank }}</option>
         </select>
       </div>
-      <!-- Number of Checks -->
-      <div class="col-md-3">
-        <label class="form-label fw-semibold">Number of Checks</label>
-        <input
-          type="number"
-          class="form-control bg-white text-center"
-          min="0"
-          max="24"
-          [(ngModel)]="form.numberOfChecks"
-          (ngModelChange)="onChecksCountChange()">
+
+      <div class="col-md-4">
+        <label class="form-label fw-semibold">Number of Cheques</label>
+        <select class="form-select bg-white" [(ngModel)]="form.numberOfChecks">
+          <option [ngValue]="0">-- Select --</option>
+          <option *ngFor="let n of chequeCountOptions" [ngValue]="n">{{ n }}</option>
+        </select>
+        <div class="form-text">Cheque dates are generated automatically from the rental period.</div>
       </div>
-      <!-- Current Receipt Total -->
-      <div class="col-md-3">
-        <label class="form-label fw-semibold text-primary">Receipt Total</label>
-        <div class="input-group">
-          <span class="input-group-text bg-light">AED</span>
-          <input
-            type="number"
-            class="form-control text-end bg-white fw-bold text-primary"
-            placeholder="0.00"
-            [(ngModel)]="form.receiptTotal"
-            (ngModelChange)="onReceiptTotalInput()">
-        </div>
-      </div>
+
+    
     </div>
-    <!-- Check Grid Component -->
+
+  
+    <!-- Unified Payment Schedule -->
     <div class="row">
       <div class="col-12">
         <app-check-grid
           [checks]="form.checks"
+          [bank]="form.detailsBank"
+          [adminFeeTotal]="form.adminFeeTotal"
+          [adminFeeReference]="form.adminFeeReference"
+          [depositTotal]="form.depositTotal"
+          [depositReference]="form.depositReference"
+          [penaltyTotal]="form.penaltyTotal"
+          [penaltyCause]="form.penaltyCause"
+          [penaltyReference]="form.penaltyReference"
+          [periodFrom]="form.periodFrom"
+          [periodTo]="form.periodTo"
+          [invoiceTotal]="form.invoiceTotal"
           (checksChange)="onChecksUpdated($event)"
-          (totalAmountChange)="onReceiptTotalChanged($event)">
+          (totalAmountChange)="onChequeTotalChanged($event)"
+          (grandTotalChange)="onGrandTotalChanged($event)">
         </app-check-grid>
       </div>
     </div>
-    <!-- NEW: Attachment Upload -->
-<div class="row mt-4">
-  <div class="col-12">
-    <label class="form-label fw-semibold">Attachments</label>
 
-    <div class="border rounded p-3 bg-light">
-      <input
-        type="file"
-        class="form-control bg-white mb-3"
-        multiple
-        accept=".pdf,.png,.jpg,.jpeg"
-        (change)="onFilesSelected($event)">
+    <!-- Attachments (multiple files, add/remove) -->
+    <div class="row mt-4">
+      <div class="col-12">
+        <label class="form-label fw-semibold">Attachments</label>
 
-      @if (form.attachments?.length) {
-        <ul class="list-group">
-          @for (att of form.attachments; track att.id) {
-            <li class="list-group-item d-flex justify-content-between align-items-center bg-white">
-              <div>
-                <span class="fw-semibold">{{ att.name }}</span>
-                <span class="text-muted ms-2">({{ formatFileSize(att.size) }})</span>
-              </div>
-              <button
-                type="button"
-                class="btn btn-sm btn-outline-danger"
-                (click)="removeAttachment(att.id)">
-                Remove
-              </button>
-            </li>
+        <div class="border rounded p-3 bg-light">
+          <input
+            type="file"
+            class="form-control bg-white mb-3"
+            multiple
+            accept=".pdf,.png,.jpg,.jpeg"
+            (change)="onFilesSelected($event)">
+
+          @if (form.attachments?.length) {
+            <ul class="list-group">
+              @for (att of form.attachments; track att.id) {
+                <li class="list-group-item d-flex justify-content-between align-items-center bg-white">
+                  <div>
+                    <span class="fw-semibold">{{ att.name }}</span>
+                    <span class="text-muted ms-2">({{ formatFileSize(att.size) }})</span>
+                  </div>
+                  <button
+                    type="button"
+                    class="btn btn-sm btn-outline-danger"
+                    (click)="removeAttachment(att.id)">
+                    Remove
+                  </button>
+                </li>
+              }
+            </ul>
+          } @else {
+            <p class="text-muted small mb-0">No files attached yet. PDF, PNG, JPG — max 5MB each.</p>
           }
-        </ul>
-      } @else {
-        <p class="text-muted small mb-0">No files attached yet. PDF, PNG, JPG — max 5MB each.</p>
-      }
+        </div>
+      </div>
     </div>
-  </div>
-</div>
+
   </div>
 </div>

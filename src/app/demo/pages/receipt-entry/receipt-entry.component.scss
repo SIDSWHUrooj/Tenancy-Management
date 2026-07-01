@@ -1,15 +1,9 @@
-// ─────────────────────────────────────────────
-// Theme Tokens
-// ─────────────────────────────────────────────
 $primary-color: #0050b3;
-$primary-hover:  #003a8c;
-$danger-color:   #dc3545;
-$danger-hover:   #bd2130;
-$border-color:   #ced4da;
+$primary-hover: #003a8c;
+$danger-color: #dc3545;
+$danger-hover: #bd2130;
+$border-color: #ced4da;
 
-// ─────────────────────────────────────────────
-// Card & Page Layout
-// ─────────────────────────────────────────────
 .main-receipt-card {
   border: 1px solid rgba(0, 0, 0, 0.1);
   border-radius: 0.35rem;
@@ -31,9 +25,6 @@ $border-color:   #ced4da;
   color: #6c757d;
 }
 
-// ─────────────────────────────────────────────
-// Form Controls
-// ─────────────────────────────────────────────
 .form-control,
 .form-select {
   border: 1px solid $border-color;
@@ -61,9 +52,6 @@ $border-color:   #ced4da;
   margin-bottom: 0.5rem;
 }
 
-// ─────────────────────────────────────────────
-// Input Group Buttons
-// ─────────────────────────────────────────────
 .input-group {
   .btn-outline-primary {
     color: $primary-color;
@@ -88,22 +76,6 @@ $border-color:   #ced4da;
   }
 }
 
-// ─────────────────────────────────────────────
-// Checkbox
-// ─────────────────────────────────────────────
-.form-check-input,
-.form-check-label {
-  cursor: pointer;
-}
-
-.form-check-input:checked {
-  background-color: $primary-color;
-  border-color: $primary-color;
-}
-
-// ─────────────────────────────────────────────
-// Modern Navigation Tabs
-// ─────────────────────────────────────────────
 .modern-tabs {
   gap: 1.5rem;
   margin-bottom: 1.5rem;
@@ -135,15 +107,11 @@ $border-color:   #ced4da;
   }
 }
 
-// ─────────────────────────────────────────────
-// Header Action Buttons
-// ─────────────────────────────────────────────
-.btn-save-action {
+.btn-save-action,
+.btn-primary {
   background-color: $primary-color !important;
   border-color: $primary-color !important;
   color: #ffffff !important;
-  font-weight: 500;
-  padding: 0.4rem 1.25rem;
 
   &:hover {
     background-color: $primary-hover !important;
@@ -151,7 +119,8 @@ $border-color:   #ced4da;
   }
 }
 
-.btn-outline-print {
+.btn-outline-print,
+.btn-outline-invoice-type {
   background-color: transparent !important;
   border: 1px solid $primary-hover !important;
   color: $primary-hover !important;
@@ -166,20 +135,6 @@ $border-color:   #ced4da;
   }
 }
 
-// ─────────────────────────────────────────────
-// Propagated button classes (used in child tabs)
-// ─────────────────────────────────────────────
-.btn-primary {
-  background-color: $primary-color !important;
-  border-color: $primary-color !important;
-  color: #ffffff !important;
-
-  &:hover {
-    background-color: $primary-hover !important;
-    border-color: $primary-hover !important;
-  }
-}
-
 .btn-secondary {
   background-color: #6c757d !important;
   border-color: #6c757d !important;
@@ -191,19 +146,6 @@ $border-color:   #ced4da;
   }
 }
 
-.btn-danger {
-  background-color: $danger-color !important;
-  border-color: $danger-color !important;
-  color: #ffffff !important;
-
-  &:hover {
-    background-color: $danger-hover !important;
-    border-color: $danger-hover !important;
-  }
-}
-// ─────────────────────────────────────────────
-// 🔥 NEW: Status Badge (Draft / Posted / Cancelled)
-// ─────────────────────────────────────────────
 .status-badge {
   display: inline-flex;
   align-items: center;
@@ -213,11 +155,10 @@ $border-color:   #ced4da;
   letter-spacing: 0.03em;
   text-transform: uppercase;
   padding: 0.3rem 0.7rem;
-  border-radius: 50rem; // pill shape
+  border-radius: 50rem;
   line-height: 1;
   vertical-align: middle;
 
-  // small status dot
   &::before {
     content: '';
     width: 6px;
@@ -243,9 +184,6 @@ $border-color:   #ced4da;
   }
 }
 
-// ─────────────────────────────────────────────
-// 🔥 NEW: Header Action Buttons — professional polish
-// ─────────────────────────────────────────────
 .header-actions {
   .btn {
     font-size: 0.85rem;
@@ -268,32 +206,14 @@ $border-color:   #ced4da;
       transform: translateY(-1px);
       box-shadow: 0 0.15rem 0.35rem rgba(0, 0, 0, 0.12);
     }
-
-    &:not(:disabled):active {
-      transform: translateY(0);
-      box-shadow: none;
-    }
-
-    svg {
-      width: 14px;
-      height: 14px;
-    }
   }
 
-  // Save Draft — neutral outline instead of solid gray, reads as "secondary action"
   .btn-draft-action {
     background-color: #ffffff !important;
     border: 1px solid $primary-hover !important;
-    color:  #003a8c !important;
-
-    &:hover:not(:disabled) {
-      background-color: #f8f9fa !important;
-      border-color: #adb5bd !important;
-      color: #003a8c !important;
-    }
+    color: $primary-hover !important;
   }
 
-  // Cancel — outline danger instead of solid, less alarming until intentional
   .btn-cancel-action {
     background-color: #ffffff !important;
     border: 1px solid $danger-color !important;
@@ -304,5 +224,78 @@ $border-color:   #ced4da;
       border-color: $danger-color !important;
       color: #ffffff !important;
     }
+  }
+}
+
+.modal-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100vw;
+  height: 100vh;
+  background-color: rgba(0, 0, 0, 0.45);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 2000;
+  animation: fadeInOverlay 0.2s ease-out;
+
+  .modal-container {
+    width: 90%;
+    max-width: 580px;
+    background-color: #ffffff;
+    border: 1px solid rgba(0, 0, 0, 0.15);
+    border-radius: 0.4rem;
+    overflow: hidden;
+    animation: slideInModal 0.25s cubic-bezier(0.1, 0.8, 0.3, 1);
+  }
+}
+
+.type-radio-card {
+  border: 1px solid $border-color;
+  border-radius: 0.25rem;
+  background-color: #ffffff;
+  transition: all 0.15s ease-in-out;
+  cursor: pointer;
+
+  &:hover {
+    border-color: lighten($primary-color, 15%);
+    background-color: #fcfdfe;
+  }
+
+  &.active {
+    border-color: $primary-color !important;
+    background-color: rgba(0, 80, 179, 0.04) !important;
+
+    label {
+      color: $primary-color !important;
+    }
+
+    .form-check-input {
+      border-color: $primary-color;
+      background-color: $primary-color;
+    }
+  }
+}
+
+.dynamic-modal-inputs {
+  border: 1px solid rgba(0, 80, 179, 0.12) !important;
+  background-color: rgba(0, 80, 179, 0.02) !important;
+}
+
+@keyframes fadeInOverlay {
+  from { opacity: 0; }
+  to { opacity: 1; }
+}
+
+@keyframes slideInModal {
+  from {
+    opacity: 0;
+    transform: translateY(-20px);
+  }
+
+  to {
+    opacity: 1;
+    transform: translateY(0);
   }
 }

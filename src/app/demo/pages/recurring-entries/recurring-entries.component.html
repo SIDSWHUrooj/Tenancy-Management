@@ -2,52 +2,19 @@
 
   <!-- CARD HEADER -->
   <div class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
-      <div>
-        <h4 class="mb-0 text-dark fw-bold">Recurring Entries</h4>
-        <span class="receipt-subtitle d-inline-flex align-items-center gap-2 mt-1">
-          <span *ngIf="currentBatch">Batch ID: {{ currentBatch.id }} | Period: {{ months[currentBatch.month - 1].label }} {{ currentBatch.year }}</span>
-          <span *ngIf="!currentBatch">No Batch Loaded</span>
-          <span *ngIf="currentBatch" 
-                class="status-badge"
-                [ngClass]="getBatchStatusClass(currentBatch.status)">
-            {{ currentBatch.status }}
-          </span>
-        </span>
-      </div>
-      <div class="d-flex gap-2 header-actions">
-        <button
-          class="btn btn-outline-print"
-          type="button"
-          (click)="refreshGrid()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-clockwise me-1 align-middle" viewBox="0 0 16 16">
-            <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-            <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
-          </svg>
-          Refresh
-        </button>
-        <button
-          class="btn btn-save-action"
-          type="button"
-          [disabled]="!canCreateInvoices()"
-          (click)="createInvoices()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-file-earmark-plus me-1 align-middle" viewBox="0 0 16 16">
-            <path d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
-          </svg>
-          Create Invoices
-        </button>
-      </div>
+    <div class="card-header bg-white border-bottom py-3">
+      <h4 class="mb-0 text-dark fw-bold">Recurring Entries</h4>
     </div>
 
     <div class="card-body p-4">
       <div class="row g-4">
 
-        <!-- 1. FILTER SECTION -->
-        <div class="col-lg-6">
+        <!-- PERIOD SELECTION -->
+        <div class="col-lg-12">
           <div class="card border border-light-subtle h-100">
             <div class="card-header bg-white py-3">
               <h6 class="mb-0 fw-semibold text-secondary d-flex align-items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event section-icon me-2" ,viewBox="0 0 16 16">
+                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calendar-event section-icon me-2" viewBox="0 0 16 16">
                   <path d="M11 6.5a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1z"/>
                   <path d="M3.5 0a.5.5 0 0 1 .5.5V1h8V.5a.5.5 0 0 1 1 0V1h1a2 2 0 0 1 2 2v11a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V3a2 2 0 0 1 2-2h1V.5a.5.5 0 0 1 .5-.5zM1 4v10a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V4H1z"/>
                 </svg>
@@ -57,22 +24,19 @@
             <div class="card-body">
               <div class="row g-3">
                 <div class="col-md-6">
-                  <label class="form-label fw-semibold">Year</label>
-                  <select class="form-select bg-white" [(ngModel)]="selectedYear">
-                    <option *ngFor="let yr of years" [value]="yr">{{ yr }}</option>
-                  </select>
-                </div>
-                <div class="col-md-6">
                   <label class="form-label fw-semibold">Month</label>
                   <select class="form-select bg-white" [(ngModel)]="selectedMonth">
                     <option *ngFor="let m of months" [value]="m.value">{{ m.label }}</option>
                   </select>
                 </div>
-                <div class="col-12 d-flex gap-2 mt-4">
-                  <button class="btn btn-outline-print flex-grow-1" type="button" (click)="generateEntries()">
-                    Generate Entries
-                  </button>
-                  <button class="btn btn-primary flex-grow-1 btn-save-action" type="button" (click)="loadEntries()">
+                <div class="col-md-6">
+                  <label class="form-label fw-semibold">Year</label>
+                  <select class="form-select bg-white" [(ngModel)]="selectedYear">
+                    <option *ngFor="let yr of years" [value]="yr">{{ yr }}</option>
+                  </select>
+                </div>
+                <div class="col-12 mt-4">
+                  <button class="btn btn-primary btn-save-action w-100" type="button" (click)="loadEntries()">
                     Load Entries
                   </button>
                 </div>
@@ -81,44 +45,7 @@
           </div>
         </div>
 
-        <!-- 2. SUMMARY CARD (Batch Info) -->
-        <div class="col-lg-6">
-          <div class="card border border-light-subtle h-100 bg-light-panel">
-            <div class="card-header bg-white py-3">
-              <h6 class="mb-0 fw-semibold text-secondary d-flex align-items-center">
-                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-info-circle section-icon me-2" viewBox="0 0 16 16">
-                  <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
-                  <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
-                </svg>
-                Batch Information
-              </h6>
-            </div>
-            <div class="card-body">
-              <div class="row g-3">
-                <div class="col-md-6">
-                  <label class="form-label text-muted-dark fw-semibold">Batch ID</label>
-                  <input type="text" class="form-control bg-light" [value]="currentBatch ? currentBatch.id : '—'" readonly>
-                </div>
-                <div class="col-md-6">
-                  <label class="form-label text-muted-dark fw-semibold">Period</label>
-                  <input type="text" class="form-control bg-light" [value]="currentBatch ? months[currentBatch.month - 1].label + ' ' + currentBatch.year : '—'" readonly>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted-dark fw-semibold">Status</label>
-                  <input type="text" class="form-control bg-light" [value]="currentBatch ? currentBatch.status : '—'" readonly>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted-dark fw-semibold">Created Date</label>
-                  <input type="text" class="form-control bg-light" [value]="currentBatch ? currentBatch.createdDate : '—'" readonly>
-                </div>
-                <div class="col-md-4">
-                  <label class="form-label text-muted-dark fw-semibold">Updated Date</label>
-                  <input type="text" class="form-control bg-light" [value]="currentBatch ? currentBatch.updatedDate : '—'" readonly>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
+       
 
       </div>
     </div>
@@ -127,12 +54,12 @@
   <!-- TOOLBAR & DATA GRID CARD -->
   <div class="card border-0 shadow-sm mb-4">
     <div class="card-body p-4">
-      
-      <!-- 3. TOOLBAR SECTION -->
+
+      <!-- TOOLBAR SECTION -->
       <div class="row g-3 align-items-center mb-4 border-bottom pb-4">
-        
+
         <!-- Search Input -->
-        <div class="col-md-4 col-lg-3">
+        <div class="col-md-6 col-lg-4">
           <div class="input-group">
             <input
               type="text"
@@ -148,98 +75,52 @@
           </div>
         </div>
 
-        <!-- Show Processed Checkbox -->
-        <div class="col-md-3 col-lg-2">
-          <div class="form-check pt-1">
-            <input 
-              class="form-check-input cursor-pointer"
-              type="checkbox"
-              id="showProcessedCheck"
-              [(ngModel)]="showProcessed"
-              (change)="applyFilters()">
-            <label class="form-check-label cursor-pointer" for="showProcessedCheck">
-              Show Processed
-            </label>
-          </div>
-        </div>
-
         <!-- Action Toolbar Buttons -->
-        <div class="col-md-5 col-lg-7 d-flex justify-content-md-end gap-2">
+        <div class="col-md-6 col-lg-8 d-flex justify-content-md-end gap-2">
           <button
             class="btn btn-outline-print"
             type="button"
             (click)="refreshGrid()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-clockwise me-1 align-middle" viewBox="0 0 16 16">
+              <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
+              <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+            </svg>
             Refresh
-          </button>
-          
-          <button
-            class="btn btn-save-action"
-            type="button"
-            [disabled]="!canCreateInvoices()"
-            (click)="createInvoices()">
-            Create Invoices
           </button>
 
           <button
-            class="btn btn-primary btn-process-action"
+            class="btn btn-outline-print"
             type="button"
-            [disabled]="selectedDetailIds.size === 0"
-            (click)="processSelected()">
-            Process Selected ({{ selectedDetailIds.size }})
+            (click)="openHistory()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-clock-history me-1 align-middle" viewBox="0 0 16 16">
+              <path d="M8.515 1.019A7 7 0 0 0 8 1V0a8 8 0 0 1 .589.022zm2.004.45a7 7 0 0 0-.985-.299l.219-.976q.576.129 1.126.342zm1.37.71a7 7 0 0 0-.439-.27l.493-.87a8 8 0 0 1 .979.654l-.615.789a7 7 0 0 0-.418-.302zm1.834 1.79a7 7 0 0 0-.653-.796l.724-.69q.406.429.747.91zm.744 1.352a7 7 0 0 0-.214-.468l.893-.45a8 8 0 0 1 .45 1.088l-.95.313a7 7 0 0 0-.179-.483zm.53 2.507a7 7 0 0 0-.1-1.025l.985-.17q.1.58.116 1.17zm-.131 1.538q.05-.254.075-.512l.995.1a8 8 0 0 1-.178 1.129l-.975-.213q.05-.251.083-.504zm-.877 2.185q.276-.436.487-.908l.914.405q-.24.54-.555 1.038zm-.758.968q.161-.19.308-.39l.804.583a8 8 0 0 1-.443.55z"/>
+              <path d="M8 1a7 7 0 1 0 4.95 11.95l.707.707A8.001 8.001 0 1 1 8 0z"/>
+              <path d="M7.5 3a.5.5 0 0 1 .5.5v5.21l3.248 1.856a.5.5 0 0 1-.496.868l-3.5-2A.5.5 0 0 1 7 9V3.5a.5.5 0 0 1 .5-.5"/>
+            </svg>
+            History
           </button>
         </div>
 
       </div>
 
-      <!-- 4. MAIN DETAILS GRID -->
+      <!-- MAIN DETAILS GRID (pending only, single-action rows) -->
       <div class="table-responsive border rounded bg-white">
         <table class="table table-hover align-middle mb-0 custom-entries-table" id="recurringTable">
           <thead>
             <tr>
-              <th width="50" class="text-center">
-                <input
-                  type="checkbox"
-                  class="form-check-input"
-                  [checked]="isAllSelected()"
-                  (change)="toggleSelectAll($event)">
-              </th>
-              <th width="100" class="text-center">Process</th>
               <th width="120">Invoice No</th>
               <th width="110">Customer ID</th>
               <th>Customer Name</th>
               <th width="90" class="text-center">Unit No</th>
               <th width="70" class="text-center">Days</th>
               <th width="150" class="text-center">Amount</th>
+              <th width="130" class="text-center">Action</th>
             </tr>
           </thead>
           <tbody>
-            <tr *ngFor="let item of filteredDetails" 
-                [class.row-processed]="item.processed"
-                [class.row-selected]="isRowSelected(item.id)">
-              <td class="text-center">
-                <input
-                  type="checkbox"
-                  class="form-check-input cursor-pointer"
-                  [disabled]="item.processed"
-                  [checked]="isRowSelected(item.id)"
-                  (change)="toggleRowSelection(item.id)">
-              </td>
-              <td class="text-center">
-                <span *ngIf="item.processed" class="badge-processed">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-check-circle-fill me-1" viewBox="0 0 16 16">
-                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zm-3.97-3.03a.75.75 0 0 0-1.08.022L7.477 9.417 5.384 7.323a.75.75 0 0 0-1.06 1.06L6.97 11.03a.75.75 0 0 0 1.079-.02l3.992-4.99a.75.75 0 0 0-.01-1.05z"/>
-                  </svg>
-                  ✔
-                </span>
-                <span *ngIf="!item.processed" class="badge-pending">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" fill="currentColor" class="bi bi-x-circle-fill me-1" viewBox="0 0 16 16">
-                    <path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0zM5.354 4.646a.5.5 0 1 0-.708.708L7.293 8l-2.647 2.646a.5.5 0 0 0 .708.708L8 8.707l2.646 2.647a.5.5 0 0 0 .708-.708L8.707 8l2.647-2.646a.5.5 0 0 0-.708-.708L8 7.293 5.354 4.646z"/>
-                  </svg>
-                  ✖
-                </span>
-              </td>
+            <tr *ngFor="let item of filteredDetails">
               <td>
-                <span class="fw-semibold" [class.text-muted]="item.processed">{{ item.invoiceNumber }}</span>
+                <span class="fw-semibold text-muted">{{ item.invoiceNumber }}</span>
               </td>
               <td>{{ item.customer }}</td>
               <td class="fw-semibold text-dark">{{ item.customerName }}</td>
@@ -248,20 +129,75 @@
               <td class="text-center fw-bold text-navy">
                 AED {{ item.amount | number:'1.2-2' }}
               </td>
+              <td class="text-center">
+                <button
+                  class="btn btn-sm btn-process-row"
+                  type="button"
+                  [disabled]="isProcessing(item.id)"
+                  (click)="processEntry(item)">
+                  {{ isProcessing(item.id) ? 'Processing...' : 'Process' }}
+                </button>
+              </td>
             </tr>
             <tr *ngIf="filteredDetails.length === 0">
-              <td colspan="10" class="text-center py-4 text-muted">
+              <td colspan="7" class="text-center py-4 text-muted">
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="currentColor" class="bi bi-info-circle mb-2 d-block mx-auto text-secondary" viewBox="0 0 16 16">
                   <path d="M8 15A7 7 0 1 1 8 1a7 7 0 0 1 0 14zm0 1A8 8 0 1 0 8 0a8 8 0 0 0 0 16z"/>
                   <path d="m8.93 6.588-2.29.287-.082.38.45.083c.294.07.352.176.288.469l-.738 3.468c-.194.897.105 1.319.808 1.319.545 0 1.178-.252 1.465-.598l.088-.416c-.2.176-.492.246-.686.246-.275 0-.375-.193-.304-.533L8.93 6.588zM9 4.5a1 1 0 1 1-2 0 1 1 0 0 1 2 0z"/>
                 </svg>
-                No recurring entries found. Select a Year and Month, and click Load Entries or Generate.
+                No pending recurring entries for this period. 
               </td>
             </tr>
           </tbody>
         </table>
       </div>
 
+    </div>
+  </div>
+
+  <!-- HISTORY MODAL -->
+  <div class="modal-overlay" *ngIf="showHistoryModal" (click)="closeHistory()">
+    <div class="modal-container" (click)="$event.stopPropagation()">
+      <div class="modal-header d-flex justify-content-between align-items-center px-4 py-3">
+        <h5 class="mb-0 fw-bold">Recurring Entries History</h5>
+        <button class="btn-close-modal" type="button" (click)="closeHistory()">&times;</button>
+      </div>
+      <div class="modal-body">
+        <div class="d-flex gap-4 mb-3">
+          <div><span class="text-muted-dark fw-semibold">Month:</span> {{ selectedMonthLabel }}</div>
+          <div><span class="text-muted-dark fw-semibold">Year:</span> {{ selectedYear }}</div>
+        </div>
+        <div class="table-responsive border rounded">
+          <table class="table table-hover align-middle mb-0 custom-entries-table">
+            <thead>
+              <tr>
+                <th>Invoice No</th>
+                <th>Customer</th>
+                <th class="text-center">Unit</th>
+                <th class="text-center">Amount</th>
+                <th class="text-center">Processed On</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let item of processedDetails">
+                <td class="fw-semibold">{{ item.invoiceNumber }}</td>
+                <td>{{ item.customerName }}</td>
+                <td class="text-center">{{ item.unitNo }}</td>
+                <td class="text-center fw-bold text-navy">AED {{ item.amount | number:'1.2-2' }}</td>
+                <td class="text-center">{{ item.processedOn }}</td>
+              </tr>
+              <tr *ngIf="processedDetails.length === 0">
+                <td colspan="5" class="text-center py-4 text-muted">
+                  No processed entries yet for this period.
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+      <div class="modal-footer d-flex justify-content-end px-4 py-3">
+        <button class="btn btn-secondary" type="button" (click)="closeHistory()">Close</button>
+      </div>
     </div>
   </div>
 

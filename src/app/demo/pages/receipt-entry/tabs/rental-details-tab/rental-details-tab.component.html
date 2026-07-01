@@ -45,8 +45,11 @@
           <label class="form-label">VAT %</label>
           <input
             type="number"
-            class="form-control text-end bg-white"
+            class="form-control text-end"
+            [class.bg-light]="isTaxRateLocked(form.rentTaxGroup)"
+            [class.bg-white]="!isTaxRateLocked(form.rentTaxGroup)"
             [(ngModel)]="form.rentTaxRate"
+            [readonly]="isTaxRateLocked(form.rentTaxGroup)"
             (ngModelChange)="calculateRent()">
         </div>
 
@@ -121,8 +124,11 @@
           <label class="form-label">VAT %</label>
           <input
             type="number"
-            class="form-control text-end bg-white"
+            class="form-control text-end"
+            [class.bg-light]="isTaxRateLocked(form.depositTaxGroup)"
+            [class.bg-white]="!isTaxRateLocked(form.depositTaxGroup)"
             [(ngModel)]="form.depositTaxRate"
+            [readonly]="isTaxRateLocked(form.depositTaxGroup)"
             (ngModelChange)="calculateDeposit()">
         </div>
 
@@ -155,7 +161,7 @@
   </div>
 
   <!-- ── 3. Administration Fee Card ───────────────────────────── -->
-  <div class="card charge-card border-0 shadow-sm mb-4">
+  <div class="card charge-card border-0 shadow-sm mb-3">
     <div class="card-header bg-white border-bottom py-2 px-4">
       <div class="d-flex align-items-center gap-2">
         <span class="charge-icon charge-icon--admin">
@@ -197,8 +203,11 @@
           <label class="form-label">VAT %</label>
           <input
             type="number"
-            class="form-control text-end bg-white"
+            class="form-control text-end"
+            [class.bg-light]="isTaxRateLocked(form.adminFeeTaxGroup)"
+            [class.bg-white]="!isTaxRateLocked(form.adminFeeTaxGroup)"
             [(ngModel)]="form.adminFeeTaxRate"
+            [readonly]="isTaxRateLocked(form.adminFeeTaxGroup)"
             (ngModelChange)="calculateAdminFee()">
         </div>
 
@@ -230,30 +239,125 @@
     </div>
   </div>
 
-  <!-- ── Summary Row: 3 boxes + blue Invoice Total ────────────── -->
+  <!-- ── 4. Penalty / Other Charges Card ──────────────────────── -->
+  <div class="card charge-card border-0 shadow-sm mb-4">
+    <div class="card-header bg-white border-bottom py-2 px-4">
+      <div class="d-flex align-items-center gap-2">
+        <span class="charge-icon charge-icon--additional">
+  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-wallet2" viewBox="0 0 16 16">
+    <path d="M15 4a1 1 0 0 0-1-1H3V2a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1z"/>
+    <path d="M3 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a1 1 0 0 0 1-1V6a2 2 0 0 0-2-2zm10 4a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+  </svg>
+</span>
+        <h6 class="mb-0 fw-bold text-dark">Aditional Charges</h6>
+      </div>
+    </div>
+    <div class="card-body px-4 py-3">
+      <div class="row g-3 align-items-end">
+
+        <!-- Step 1: Cause selection -->
+        <div class="col-md-3">
+          <label class="form-label">Cause</label>
+          <select
+            class="form-select bg-white"
+            [(ngModel)]="form.penaltyCause"
+            (change)="onPenaltyCauseChange()">
+            <option [ngValue]="null">Select a cause...</option>
+            <option *ngFor="let cause of penaltyCauses" [value]="cause">{{ cause }}</option>
+          </select>
+        </div>
+
+        <!-- Step 2: Amount (shown once a cause is chosen) -->
+          <div class="col-md-3">
+            <label class="form-label">Amount</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text bg-light">AED</span>
+              <input
+                type="number"
+                class="form-control text-end bg-white"
+                [(ngModel)]="form.penaltyAmount"
+                (ngModelChange)="calculatePenalty()">
+            </div>
+          </div>
+
+          
+            <div class="col-md-3">
+              <label class="form-label">Tax Group</label>
+              <select
+                class="form-select bg-white"
+                [(ngModel)]="form.penaltyTaxGroup"
+                (change)="calculatePenalty()">
+                <option value="Standard VAT">Standard VAT</option>
+                <option value="Zero Rated">Zero Rated</option>
+                <option value="Out of Scope">Out of Scope</option>
+              </select>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">VAT %</label>
+              <input
+                type="number"
+                class="form-control text-end"
+                [class.bg-light]="isTaxRateLocked(form.penaltyTaxGroup)"
+                [class.bg-white]="!isTaxRateLocked(form.penaltyTaxGroup)"
+                [(ngModel)]="form.penaltyTaxRate"
+                [readonly]="isTaxRateLocked(form.penaltyTaxGroup)"
+                (ngModelChange)="calculatePenalty()">
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label">Tax Amount</label>
+              <div class="input-group input-group-sm">
+                <span class="input-group-text bg-light">AED</span>
+                <input
+                  type="number"
+                  class="form-control text-end bg-light"
+                  [value]="form.penaltyTaxAmount"
+                  readonly>
+              </div>
+            </div>
+         
+
+          <div class="col-md-3">
+            <label class="form-label fw-semibold text-primary">Total</label>
+            <div class="input-group input-group-sm">
+              <span class="input-group-text charge-total-prefix">AED</span>
+              <input
+                type="number"
+                class="form-control text-end fw-bold charge-total-field"
+                [value]="form.penaltyTotal"
+                readonly>
+            </div>
+          </div>
+
+      </div>
+    </div>
+  </div>
+
+  <!-- ── Summary Row: Subtotal / Tax Total / Invoice Total ────── -->
   <div class="row g-3">
+
+    <!-- Subtotal box (no tax) -->
+    <div class="col-md-4">
+      <div class="summary-box summary-box--prev">
+        <div class="summary-box__label">Subtotal</div>
+        <div class="summary-box__value">AED {{ form.subTotal | number:'1.2-2' }}</div>
+      </div>
+    </div>
+
+    <!-- Tax Total box -->
+    <div class="col-md-4">
+      <div class="summary-box summary-box--balance">
+        <div class="summary-box__label">Tax Total</div>
+        <div class="summary-box__value">AED {{ form.taxTotal | number:'1.2-2' }}</div>
+      </div>
+    </div>
 
     <!-- Invoice Total box -->
     <div class="col-md-4">
       <div class="summary-box summary-box--total">
         <div class="summary-box__label">Invoice Total</div>
         <div class="summary-box__value">AED {{ form.invoiceTotal | number:'1.2-2' }}</div>
-      </div>
-    </div>
-
-    <!-- Previous Receipts box -->
-    <div class="col-md-4">
-      <div class="summary-box summary-box--prev">
-        <div class="summary-box__label">Previous Receipts</div>
-        <div class="summary-box__value">AED {{ form.lastReceiptTotal | number:'1.2-2' }}</div>
-      </div>
-    </div>
-
-    <!-- Balance Amount box -->
-    <div class="col-md-4  ">
-      <div class="summary-box summary-box--balance">
-        <div class="summary-box__label">Balance Amount</div>
-        <div class="summary-box__value">AED {{ form.balanceAmount | number:'1.2-2' }}</div>
       </div>
     </div>
 

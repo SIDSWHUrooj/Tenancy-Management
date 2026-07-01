@@ -1,9 +1,9 @@
-import { Component, Input } from '@angular/core';
+import { Component, DoCheck, Input } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CheckGridComponent } from '../../shared/check-grid/check-grid.component';
 import { CheckItem, distributeChecks, calculateSettlementStatus } from '../../utils/receipt-calculation';
-import { ReceiptAttachment } from '../../receipt-entry.component'; // 🔥 NEW
+import { ReceiptAttachment } from '../../receipt-entry.component';
 
 @Component({
   selector: 'app-receipt-details-tab',
@@ -12,7 +12,7 @@ import { ReceiptAttachment } from '../../receipt-entry.component'; // 🔥 NEW
   templateUrl: './receipt-details-tab.component.html',
   styleUrls: ['./receipt-details-tab.component.scss']
 })
-export class ReceiptDetailsTabComponent {
+export class ReceiptDetailsTabComponent implements DoCheck {
   @Input() form: any;
 
   banksList = [
@@ -25,35 +25,79 @@ export class ReceiptDetailsTabComponent {
     'Standard Chartered'
   ];
 
-  // 🔥 NEW: max file size (5MB) + allowed types
+  // Fixed dropdown per spec — no free-typed cheque counts allowed
+  chequeCountOptions = [1, 2, 3, 4, 6, 12];
+
   private readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
   private readonly ALLOWED_TYPES = ['application/pdf', 'image/png', 'image/jpeg'];
 
-  onChecksCountChange(): void {
-    if (this.form.numberOfChecks > 0) {
+  // Watches the inputs that drive the auto-generated cheque schedule.
+  // form is a mutable object passed by reference, so ngOnChanges alone
+  // won't fire when nested fields (e.g. periodFrom set on another tab)
+  // change — ngDoCheck picks those up and regenerates the schedule.
+  private lastScheduleKey = '';
+
+  ngDoCheck(): void {
+    if (!this.form) return;
+    const key = [
+      this.form.periodFrom,
+      this.form.periodTo,
+      this.form.rentAmount,
+      this.form.rentTaxAmount,
+      this.form.numberOfChecks,
+      this.form.detailsBank,
+    ].join('|');
+
+    if (key !== this.lastScheduleKey) {
+      this.lastScheduleKey = key;
+      this.regenerateChecks();
+    }
+  }
+
+  /**
+   * Rent amount, tax-inclusive. Cheques must divide up this figure — not the
+   * bare rentAmount — so the schedule matches how Admin Fee / Deposit /
+   * Penalty are already passed as "*Total" (tax-inclusive) values.
+   *
+   * Assumes `form.rentTaxAmount` holds the VAT/tax portion on rent. If your
+   * form already tracks a combined tax-inclusive rent under a different
+   * field name, point this getter at that field instead.
+   */
+  get rentTotalAmount(): number {
+    const base = Number(this.form?.rentAmount) || 0;
+    const tax = Number(this.form?.rentTaxAmount) || 0;
+    return Math.round((base + tax) * 100) / 100;
+  }
+
+  private regenerateChecks(): void {
+    const totalRent = this.rentTotalAmount;
+    if (this.form.numberOfChecks > 0 && totalRent > 0) {
       this.form.checks = distributeChecks(
-        this.form.receiptTotal,
+        totalRent,
         this.form.numberOfChecks,
-        this.form.receiptDate
+        this.form.periodFrom,
+        this.form.periodTo,
+        this.form.detailsBank
       );
     } else {
       this.form.checks = [];
     }
-    this.recalculateSettlement();
   }
 
   onChecksUpdated(updatedChecks: CheckItem[]): void {
     this.form.checks = updatedChecks;
-    this.form.numberOfChecks = updatedChecks.length;
   }
 
-  onReceiptTotalChanged(newTotal: number): void {
-    this.form.receiptTotal = newTotal;
-    this.recalculateSettlement();
+  onChequeTotalChanged(_chequeSum: number): void {
+    // Reserved for future use if the cheque-only subtotal needs surfacing elsewhere.
+  }
+
+  onGrandTotalChanged(scheduleTotal: number): void {
+    this.form.grandTotal = scheduleTotal;
   }
 
   onReceiptTotalInput(): void {
-    this.onChecksCountChange();
+    this.recalculateSettlement();
   }
 
   private recalculateSettlement(): void {
@@ -66,7 +110,7 @@ export class ReceiptDetailsTabComponent {
     this.form.settlementStatus = result.status;
   }
 
-  // ── 🔥 NEW: Attachment handling ──────────────────────────────
+  // ── Attachments (multiple, add/remove) ──────────────────────
 
   onFilesSelected(event: Event): void {
     const input = event.target as HTMLInputElement;
@@ -94,7 +138,7 @@ export class ReceiptDetailsTabComponent {
       this.form.attachments = [...(this.form.attachments || []), attachment];
     });
 
-    // reset the input so the same file can be re-selected if removed
+    // Reset the input so the same file can be re-selected after removal
     input.value = '';
   }
 
