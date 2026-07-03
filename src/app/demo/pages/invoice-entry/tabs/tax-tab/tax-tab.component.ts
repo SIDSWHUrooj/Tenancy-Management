@@ -35,7 +35,6 @@ export class TaxTabComponent {
   documentAmount = 25000;
 
   get totalTaxAmount(): number {
-
     return this.taxes
       .filter(x => x.selected)
       .reduce(
@@ -44,5 +43,5 @@ export class TaxTabComponent {
         0
       );
   }
-
 }
+  

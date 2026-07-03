@@ -4,6 +4,9 @@ import { FormsModule } from '@angular/forms';
 import { CheckGridComponent } from '../../shared/check-grid/check-grid.component';
 import { CheckItem, distributeChecks, calculateSettlementStatus } from '../../utils/receipt-calculation';
 import { ReceiptAttachment } from '../../receipt-entry.component';
+import { AttachmentService } from 'src/app/services';
+import { TyAttachment } from '../../../../../models';
+// or wherever your model file is located
 
 @Component({
   selector: 'app-receipt-details-tab',
@@ -30,7 +33,9 @@ export class ReceiptDetailsTabComponent implements DoCheck {
 
   private readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
   private readonly ALLOWED_TYPES = ['application/pdf', 'image/png', 'image/jpeg'];
-
+constructor(
+    private attachmentService: AttachmentService
+) {}
   // Watches the inputs that drive the auto-generated cheque schedule.
   // form is a mutable object passed by reference, so ngOnChanges alone
   // won't fire when nested fields (e.g. periodFrom set on another tab)
@@ -113,41 +118,74 @@ export class ReceiptDetailsTabComponent implements DoCheck {
   // ── Attachments (multiple, add/remove) ──────────────────────
 
   onFilesSelected(event: Event): void {
-    const input = event.target as HTMLInputElement;
-    if (!input.files || input.files.length === 0) return;
+  const input = event.target as HTMLInputElement;
 
-    Array.from(input.files).forEach((file) => {
-      if (file.size > this.MAX_FILE_SIZE) {
-        alert(`"${file.name}" exceeds the 5MB limit and was skipped.`);
-        return;
+  if (!input.files?.length) return;
+
+  Array.from(input.files).forEach(file => {
+
+    if (file.size > this.MAX_FILE_SIZE) {
+      alert(`${file.name} exceeds 5MB.`);
+      return;
+    }
+
+    if (!this.ALLOWED_TYPES.includes(file.type)) {
+      alert(`${file.name} is not supported.`);
+      return;
+    }
+
+    this.attachmentService.upload(
+      file,
+      'TY',
+      'Receipt',
+      this.form.receiptNumber ?? '',
+      ''
+    ).subscribe({
+
+      next: (response) => {
+
+        if (!response.success) {
+          alert(response.message);
+          return;
+        }
+
+        this.form.attachments.push(response.data);
+
+      },
+
+      error: () => {
+        alert('Attachment upload failed.');
       }
-      if (!this.ALLOWED_TYPES.includes(file.type)) {
-        alert(`"${file.name}" has an unsupported file type and was skipped.`);
-        return;
-      }
 
-      const attachment: ReceiptAttachment = {
-        id: crypto.randomUUID(),
-        name: file.name,
-        size: file.size,
-        type: file.type,
-        file,
-        uploadedAt: new Date().toISOString(),
-      };
-
-      this.form.attachments = [...(this.form.attachments || []), attachment];
     });
 
-    // Reset the input so the same file can be re-selected after removal
-    input.value = '';
-  }
+  });
 
-  removeAttachment(id: string): void {
-    this.form.attachments = (this.form.attachments || []).filter(
-      (a: ReceiptAttachment) => a.id !== id
-    );
-  }
+  input.value = '';
+}
 
+  removeAttachment(id: number): void {
+
+  this.attachmentService.delete(id).subscribe({
+
+    next: () => {
+
+      this.form.attachments =
+        this.form.attachments.filter(
+          (x: TyAttachment) => x.id !== id
+        );
+
+    },
+
+    error: () => {
+
+      alert('Unable to delete attachment.');
+
+    }
+
+  });
+
+}
   formatFileSize(bytes: number): string {
     if (bytes < 1024) return bytes + ' B';
     if (bytes < 1024 * 1024) return (bytes / 1024).toFixed(1) + ' KB';

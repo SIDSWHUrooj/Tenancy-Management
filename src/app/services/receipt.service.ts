@@ -1,48 +1,62 @@
 import { Injectable } from '@angular/core';
 import { HttpClient } from '@angular/common/http';
 import { Observable } from 'rxjs';
+import { AuthService } from './auth.service';
+import { ApiResponse, Receipt, ReceiptRequest } from '../models';
 
-import { environment } from '../../environments/environment';
-
-import { Receipt } from '../models/receipt/receipt.model';
-import { ReceiptResponse } from '../models/receipt/receipt-response.model';
-import { ReceiptListResponse } from '../models/receipt/receipt-list-response.model';
-
-@Injectable({
-  providedIn: 'root'
-})
+@Injectable({ providedIn: 'root' })
 export class ReceiptService {
 
-  private api = `${environment.apiUrl}/api/Receipt`;
+  private readonly BASE = 'https://tenancyapi.siddev.online/api/ty/receipts';
 
-  constructor(private http: HttpClient) {}
+  constructor(private http: HttpClient, private auth: AuthService) {}
 
-  // GET ALL
-  getAllReceipts(): Observable<ReceiptListResponse> {
-    return this.http.get<ReceiptListResponse>(this.api);
+  // ── GET /api/ty/receipts ─────────────────────────────────────────────
+  getAll(): Observable<ApiResponse<Receipt[]>> {
+    return this.http.get<ApiResponse<Receipt[]>>(this.BASE, {
+      headers: this.auth.authHeaders()
+    });
   }
 
-  // GET BY ID
-  getReceipt(id: number): Observable<ReceiptResponse> {
-    return this.http.get<ReceiptResponse>(`${this.api}/${id}`);
+  // ── GET /api/ty/receipts/{id} ────────────────────────────────────────
+  getById(id: number): Observable<ApiResponse<Receipt>> {
+    return this.http.get<ApiResponse<Receipt>>(`${this.BASE}/${id}`, {
+      headers: this.auth.authHeaders()
+    });
   }
 
-  // CREATE
-  createReceipt(data: any): Observable<ReceiptResponse> {
-    return this.http.post<ReceiptResponse>(this.api, data);
+  // ── POST /api/ty/receipts ────────────────────────────────────────────
+  create(body: ReceiptRequest): Observable<ApiResponse<Receipt>> {
+    return this.http.post<ApiResponse<Receipt>>(this.BASE, body, {
+      headers: this.auth.authHeaders()
+    });
   }
 
-  // UPDATE
-  updateReceipt(id: number, data: any): Observable<ReceiptResponse> {
-    return this.http.put<ReceiptResponse>(
-      `${this.api}/${id}`,
-      data
-    );
+  // ── PUT /api/ty/receipts/{id} ────────────────────────────────────────
+  update(id: number, body: ReceiptRequest): Observable<ApiResponse<Receipt>> {
+    return this.http.put<ApiResponse<Receipt>>(`${this.BASE}/${id}`, body, {
+      headers: this.auth.authHeaders()
+    });
   }
 
-  // DELETE
-  deleteReceipt(id: number) {
-    return this.http.delete(`${this.api}/${id}`);
+  // ── DELETE /api/ty/receipts/{id} ─────────────────────────────────────
+  delete(id: number): Observable<ApiResponse<string>> {
+    return this.http.delete<ApiResponse<string>>(`${this.BASE}/${id}`, {
+      headers: this.auth.authHeaders()
+    });
   }
 
+  // ── POST /api/ty/receipts/{id}/post ──────────────────────────────────
+  post(id: number): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.BASE}/${id}/post`, {}, {
+      headers: this.auth.authHeaders()
+    });
+  }
+
+  // ── POST /api/ty/receipts/{id}/cancel ────────────────────────────────
+  cancel(id: number): Observable<ApiResponse<string>> {
+    return this.http.post<ApiResponse<string>>(`${this.BASE}/${id}/cancel`, {}, {
+      headers: this.auth.authHeaders()
+    });
+  }
 }
