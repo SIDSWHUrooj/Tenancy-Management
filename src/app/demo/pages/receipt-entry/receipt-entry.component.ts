@@ -201,7 +201,7 @@ export class ReceiptEntryComponent implements OnInit {
   }
 
   // ── Invoice Lookup ───────────────────────────────────────────
-  openInvoiceLookup(): void {
+  /*openInvoiceLookup(): void {
     this.showInvoiceLookup = true;
     this.invoiceLookupLoading = true;
     this.invoiceService.getAll().subscribe({
@@ -219,8 +219,40 @@ export class ReceiptEntryComponent implements OnInit {
         alert('Failed to load invoices.');
       },
     });
-  }
+  }*/
+openInvoiceLookup(): void {
+  this.showInvoiceLookup = true;
+  this.invoiceLookupLoading = true;
+  this.invoiceResults = [];
 
+  this.invoiceService.getAll().subscribe({
+    next: (res) => {
+      this.invoiceLookupLoading = false;
+
+      if (!res || res.success === false) {
+        alert(res?.message || 'Failed to load invoices.');
+        return;
+      }
+
+      // Handle both "data: Invoice[]" and "data: { items: Invoice[] }" shapes
+      const data: any = res.data;
+      this.invoiceResults = Array.isArray(data)
+        ? data
+        : Array.isArray(data?.items)
+          ? data.items
+          : [];
+
+      if (this.invoiceResults.length === 0) {
+        console.warn('Invoice lookup returned no rows. Raw response:', res);
+      }
+    },
+    error: (err) => {
+      this.invoiceLookupLoading = false;
+      console.error('Invoice lookup failed:', err);
+      alert(err?.error?.message || 'Failed to load invoices. Check console for details.');
+    },
+  });
+}
   closeInvoiceLookup(): void {
     this.showInvoiceLookup = false;
   }
@@ -532,11 +564,11 @@ export class ReceiptEntryComponent implements OnInit {
 
     if (this.form.numberOfChecks > 0) {
       const sumChecks = this.form.checks.reduce((s, c) => s + (+c.amount || 0), 0);
-      const diff      = Math.abs(sumChecks - this.form.receiptTotal);
+      const diff      = Math.abs(sumChecks - this.form.invoiceTotal);
       if (diff > 0.01) {
         alert(
           `Cheque total (${sumChecks.toFixed(2)}) does not match ` +
-          `Receipt Total (${this.form.receiptTotal.toFixed(2)}).`
+          `Invoice Total (${this.form.invoiceTotal.toFixed(2)}).`
         );
         return false;
       }
