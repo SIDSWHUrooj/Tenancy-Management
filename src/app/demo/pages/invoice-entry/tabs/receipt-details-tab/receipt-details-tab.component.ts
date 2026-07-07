@@ -1,9 +1,9 @@
-import { Component, DoCheck, Input } from '@angular/core';
+import { Component, DoCheck, Input, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { CheckGridComponent } from '../../shared/check-grid/check-grid.component';
 import { CheckItem, distributeChecks, calculateSettlementStatus } from '../../utils/receipt-calculation';
-import { ReceiptAttachment } from '../../receipt-entry.component';
+import { ReceiptAttachment } from '../../invoice-entry.component';
 import { AttachmentService } from 'src/app/services';
 import { TyAttachment } from '../../../../../models';
 // or wherever your model file is located
@@ -17,6 +17,21 @@ import { TyAttachment } from '../../../../../models';
 })
 export class ReceiptDetailsTabComponent implements DoCheck {
   @Input() form: any;
+
+  // ── Workflow state inputs ──────────────────────────────────────
+  @Input() rentalPosted = false;  // receipt can only be edited when true
+  @Input() isLocked     = false;  // true after receipt is posted
+  @Input() isSaving     = false;
+  @Input() canSaveDraft = false;
+  @Input() canPost      = false;
+  @Input() canCancel    = false;
+  @Input() canPrint     = false;
+
+  // ── Action button outputs ──────────────────────────────────────
+  @Output() saveReceiptDraft = new EventEmitter<void>();
+  @Output() postReceipt      = new EventEmitter<void>();
+  @Output() cancelReceipt    = new EventEmitter<void>();
+  @Output() printReceipt     = new EventEmitter<void>();
 
   banksList = [
     'Emirates NBD',
@@ -34,7 +49,8 @@ export class ReceiptDetailsTabComponent implements DoCheck {
   private readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
   private readonly ALLOWED_TYPES = ['application/pdf', 'image/png', 'image/jpeg'];
 constructor(
-    private attachmentService: AttachmentService
+    private attachmentService: AttachmentService,
+    private cdr: ChangeDetectorRef,
 ) {}
   // Watches the inputs that drive the auto-generated cheque schedule.
   // form is a mutable object passed by reference, so ngOnChanges alone
@@ -43,22 +59,34 @@ constructor(
   private lastScheduleKey = '';
 
   ngDoCheck(): void {
-    if (!this.form) return;
-    const key = [
-      this.form.periodFrom,
-      this.form.periodTo,
-      this.form.rentAmount,
-      this.form.rentTaxAmount,
-      this.form.numberOfChecks,
-      this.form.detailsBank,
-    ].join('|');
+  if (!this.form) return;
 
-    if (key !== this.lastScheduleKey) {
-      this.lastScheduleKey = key;
-      this.regenerateChecks();
-    }
+  // Consume the backend flag on its own, without eating a real key change.
+  if (this.form.checksSource === 'backend') {
+    this.form.checksSource = 'auto';
+    this.lastScheduleKey = this.computeScheduleKey();
+    this.cdr.markForCheck();
+    return;
   }
 
+  const key = this.computeScheduleKey();
+  if (key !== this.lastScheduleKey) {
+    this.lastScheduleKey = key;
+    this.regenerateChecks();
+    this.cdr.markForCheck();
+  }
+}
+
+private computeScheduleKey(): string {
+  return [
+    this.form.periodFrom,
+    this.form.periodTo,
+    this.form.rentAmount,
+    this.form.rentTaxAmount,
+    this.form.numberOfChecks,
+    this.form.detailsBank,
+  ].join('|');
+}
   /**
    * Rent amount, tax-inclusive. Cheques must divide up this figure — not the
    * bare rentAmount — so the schedule matches how Admin Fee / Deposit /

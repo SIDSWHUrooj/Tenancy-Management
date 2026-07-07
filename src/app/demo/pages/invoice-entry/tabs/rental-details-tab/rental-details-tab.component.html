@@ -1,5 +1,40 @@
 <div class="container-fluid p-0">
 
+  <!-- ── Tab Action Bar ─────────────────────────────────────── -->
+  <div class="tab-action-bar d-flex justify-content-between align-items-center mb-4 p-3 rounded-3">
+    <div class="d-flex align-items-center gap-2">
+      <span class="fw-semibold text-dark" style="font-size:0.9rem;">Rental Details</span>
+      <span *ngIf="isLocked" class="tab-locked-badge">
+        <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" class="bi bi-lock-fill me-1" viewBox="0 0 16 16">
+          <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+        </svg>
+        Posted — Read Only
+      </span>
+    </div>
+    <div class="d-flex gap-2 tab-btn-group">
+      <button class="btn btn-draft-action" type="button"
+              [disabled]="!canSaveDraft || isSaving"
+              (click)="saveRentalDraft.emit()">
+        {{ isSaving ? 'Saving...' : 'Save' }}
+      </button>
+      <button class="btn btn-save-action" type="button"
+              [disabled]="!canPost || isSaving"
+              (click)="postRental.emit()">
+        {{ isSaving ? 'Posting...' : 'Post' }}
+      </button>
+      <button class="btn btn-outline-print" type="button"
+              [disabled]="!canPrint"
+              (click)="printRental.emit()">
+        Print
+      </button>
+      <button class="btn btn-cancel-action" type="button"
+              [disabled]="!canCancel || isSaving"
+              (click)="cancelRental.emit()">
+        Cancel
+      </button>
+    </div>
+  </div>
+
   <!-- ── 1. Rent Card ─────────────────────────────────────────── -->
   <div class="card charge-card border-0 shadow-sm mb-3">
     <div class="card-header bg-white border-bottom py-2 px-4">
@@ -23,8 +58,11 @@
             <span class="input-group-text bg-light">AED</span>
             <input
               type="number"
-              class="form-control text-end bg-white"
+              class="form-control text-end"
+              [class.bg-white]="!isLocked"
+              [class.bg-light]="isLocked"
               [(ngModel)]="form.rentAmount"
+              [disabled]="isLocked"
               (ngModelChange)="calculateRent()">
           </div>
         </div>
@@ -32,8 +70,11 @@
         <div class="col-md-3">
           <label class="form-label">Tax Group</label>
           <select
-            class="form-select bg-white"
+            class="form-select"
+            [class.bg-white]="!isLocked"
+            [class.bg-light]="isLocked"
             [(ngModel)]="form.rentTaxGroup"
+            [disabled]="isLocked"
             (change)="calculateRent()">
             <option value="Standard VAT">Standard VAT</option>
             <option value="Zero Rated">Zero Rated</option>
@@ -46,10 +87,10 @@
           <input
             type="number"
             class="form-control text-end"
-            [class.bg-light]="isTaxRateLocked(form.rentTaxGroup)"
-            [class.bg-white]="!isTaxRateLocked(form.rentTaxGroup)"
+            [class.bg-light]="isTaxRateLocked(form.rentTaxGroup) || isLocked"
+            [class.bg-white]="!isTaxRateLocked(form.rentTaxGroup) && !isLocked"
             [(ngModel)]="form.rentTaxRate"
-            [readonly]="isTaxRateLocked(form.rentTaxGroup)"
+            [readonly]="isTaxRateLocked(form.rentTaxGroup) || isLocked"
             (ngModelChange)="calculateRent()">
         </div>
 
@@ -57,11 +98,7 @@
           <label class="form-label">Tax Amount</label>
           <div class="input-group input-group-sm">
             <span class="input-group-text bg-light">AED</span>
-            <input
-              type="number"
-              class="form-control text-end bg-light"
-              [value]="form.rentTaxAmount"
-              readonly>
+            <input type="number" class="form-control text-end bg-light" [value]="form.rentTaxAmount" readonly>
           </div>
         </div>
 
@@ -69,11 +106,7 @@
           <label class="form-label fw-semibold text-primary">Total</label>
           <div class="input-group input-group-sm">
             <span class="input-group-text charge-total-prefix">AED</span>
-            <input
-              type="number"
-              class="form-control text-end fw-bold charge-total-field"
-              [value]="form.rentTotal"
-              readonly>
+            <input type="number" class="form-control text-end fw-bold charge-total-field" [value]="form.rentTotal" readonly>
           </div>
         </div>
 
@@ -102,8 +135,11 @@
             <span class="input-group-text bg-light">AED</span>
             <input
               type="number"
-              class="form-control text-end bg-white"
+              class="form-control text-end"
+              [class.bg-white]="!isLocked"
+              [class.bg-light]="isLocked"
               [(ngModel)]="form.depositAmount"
+              [disabled]="isLocked"
               (ngModelChange)="calculateDeposit()">
           </div>
         </div>
@@ -111,8 +147,11 @@
         <div class="col-md-3">
           <label class="form-label">Tax Group</label>
           <select
-            class="form-select bg-white"
+            class="form-select"
+            [class.bg-white]="!isLocked"
+            [class.bg-light]="isLocked"
             [(ngModel)]="form.depositTaxGroup"
+            [disabled]="isLocked"
             (change)="calculateDeposit()">
             <option value="Standard VAT">Standard VAT</option>
             <option value="Zero Rated">Zero Rated</option>
@@ -125,10 +164,10 @@
           <input
             type="number"
             class="form-control text-end"
-            [class.bg-light]="isTaxRateLocked(form.depositTaxGroup)"
-            [class.bg-white]="!isTaxRateLocked(form.depositTaxGroup)"
+            [class.bg-light]="isTaxRateLocked(form.depositTaxGroup) || isLocked"
+            [class.bg-white]="!isTaxRateLocked(form.depositTaxGroup) && !isLocked"
             [(ngModel)]="form.depositTaxRate"
-            [readonly]="isTaxRateLocked(form.depositTaxGroup)"
+            [readonly]="isTaxRateLocked(form.depositTaxGroup) || isLocked"
             (ngModelChange)="calculateDeposit()">
         </div>
 
@@ -136,11 +175,7 @@
           <label class="form-label">Tax Amount</label>
           <div class="input-group input-group-sm">
             <span class="input-group-text bg-light">AED</span>
-            <input
-              type="number"
-              class="form-control text-end bg-light"
-              [value]="form.depositTaxAmount"
-              readonly>
+            <input type="number" class="form-control text-end bg-light" [value]="form.depositTaxAmount" readonly>
           </div>
         </div>
 
@@ -148,11 +183,7 @@
           <label class="form-label fw-semibold text-primary">Total</label>
           <div class="input-group input-group-sm">
             <span class="input-group-text charge-total-prefix">AED</span>
-            <input
-              type="number"
-              class="form-control text-end fw-bold charge-total-field"
-              [value]="form.depositTotal"
-              readonly>
+            <input type="number" class="form-control text-end fw-bold charge-total-field" [value]="form.depositTotal" readonly>
           </div>
         </div>
 
@@ -181,8 +212,11 @@
             <span class="input-group-text bg-light">AED</span>
             <input
               type="number"
-              class="form-control text-end bg-white"
+              class="form-control text-end"
+              [class.bg-white]="!isLocked"
+              [class.bg-light]="isLocked"
               [(ngModel)]="form.adminFeeAmount"
+              [disabled]="isLocked"
               (ngModelChange)="calculateAdminFee()">
           </div>
         </div>
@@ -190,8 +224,11 @@
         <div class="col-md-3">
           <label class="form-label">Tax Group</label>
           <select
-            class="form-select bg-white"
+            class="form-select"
+            [class.bg-white]="!isLocked"
+            [class.bg-light]="isLocked"
             [(ngModel)]="form.adminFeeTaxGroup"
+            [disabled]="isLocked"
             (change)="calculateAdminFee()">
             <option value="Standard VAT">Standard VAT</option>
             <option value="Zero Rated">Zero Rated</option>
@@ -204,10 +241,10 @@
           <input
             type="number"
             class="form-control text-end"
-            [class.bg-light]="isTaxRateLocked(form.adminFeeTaxGroup)"
-            [class.bg-white]="!isTaxRateLocked(form.adminFeeTaxGroup)"
+            [class.bg-light]="isTaxRateLocked(form.adminFeeTaxGroup) || isLocked"
+            [class.bg-white]="!isTaxRateLocked(form.adminFeeTaxGroup) && !isLocked"
             [(ngModel)]="form.adminFeeTaxRate"
-            [readonly]="isTaxRateLocked(form.adminFeeTaxGroup)"
+            [readonly]="isTaxRateLocked(form.adminFeeTaxGroup) || isLocked"
             (ngModelChange)="calculateAdminFee()">
         </div>
 
@@ -215,11 +252,7 @@
           <label class="form-label">Tax Amount</label>
           <div class="input-group input-group-sm">
             <span class="input-group-text bg-light">AED</span>
-            <input
-              type="number"
-              class="form-control text-end bg-light"
-              [value]="form.adminFeeTaxAmount"
-              readonly>
+            <input type="number" class="form-control text-end bg-light" [value]="form.adminFeeTaxAmount" readonly>
           </div>
         </div>
 
@@ -227,11 +260,7 @@
           <label class="form-label fw-semibold text-primary">Total</label>
           <div class="input-group input-group-sm">
             <span class="input-group-text charge-total-prefix">AED</span>
-            <input
-              type="number"
-              class="form-control text-end fw-bold charge-total-field"
-              [value]="form.adminFeeTotal"
-              readonly>
+            <input type="number" class="form-control text-end fw-bold charge-total-field" [value]="form.adminFeeTotal" readonly>
           </div>
         </div>
 
@@ -244,91 +273,88 @@
     <div class="card-header bg-white border-bottom py-2 px-4">
       <div class="d-flex align-items-center gap-2">
         <span class="charge-icon charge-icon--additional">
-  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-wallet2" viewBox="0 0 16 16">
-    <path d="M15 4a1 1 0 0 0-1-1H3V2a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1z"/>
-    <path d="M3 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a1 1 0 0 0 1-1V6a2 2 0 0 0-2-2zm10 4a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
-  </svg>
-</span>
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-wallet2" viewBox="0 0 16 16">
+            <path d="M15 4a1 1 0 0 0-1-1H3V2a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1z"/>
+            <path d="M3 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a1 1 0 0 0 1-1V6a2 2 0 0 0-2-2zm10 4a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+          </svg>
+        </span>
         <h6 class="mb-0 fw-bold text-dark">Aditional Charges</h6>
       </div>
     </div>
     <div class="card-body px-4 py-3">
       <div class="row g-3 align-items-end">
 
-        <!-- Step 1: Cause selection -->
         <div class="col-md-3">
           <label class="form-label">Cause</label>
           <select
-            class="form-select bg-white"
+            class="form-select"
+            [class.bg-white]="!isLocked"
+            [class.bg-light]="isLocked"
             [(ngModel)]="form.penaltyCause"
+            [disabled]="isLocked"
             (change)="onPenaltyCauseChange()">
             <option [ngValue]="null">Select a cause...</option>
             <option *ngFor="let cause of penaltyCauses" [value]="cause">{{ cause }}</option>
           </select>
         </div>
 
-        <!-- Step 2: Amount (shown once a cause is chosen) -->
-          <div class="col-md-3">
-            <label class="form-label">Amount</label>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text bg-light">AED</span>
-              <input
-                type="number"
-                class="form-control text-end bg-white"
-                [(ngModel)]="form.penaltyAmount"
-                (ngModelChange)="calculatePenalty()">
-            </div>
+        <div class="col-md-3">
+          <label class="form-label">Amount</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light">AED</span>
+            <input
+              type="number"
+              class="form-control text-end"
+              [class.bg-white]="!isLocked"
+              [class.bg-light]="isLocked"
+              [(ngModel)]="form.penaltyAmount"
+              [disabled]="isLocked"
+              (ngModelChange)="calculatePenalty()">
           </div>
+        </div>
 
-          
-            <div class="col-md-3">
-              <label class="form-label">Tax Group</label>
-              <select
-                class="form-select bg-white"
-                [(ngModel)]="form.penaltyTaxGroup"
-                (change)="calculatePenalty()">
-                <option value="Standard VAT">Standard VAT</option>
-                <option value="Zero Rated">Zero Rated</option>
-                <option value="Out of Scope">Out of Scope</option>
-              </select>
-            </div>
+        <div class="col-md-3">
+          <label class="form-label">Tax Group</label>
+          <select
+            class="form-select"
+            [class.bg-white]="!isLocked"
+            [class.bg-light]="isLocked"
+            [(ngModel)]="form.penaltyTaxGroup"
+            [disabled]="isLocked"
+            (change)="calculatePenalty()">
+            <option value="Standard VAT">Standard VAT</option>
+            <option value="Zero Rated">Zero Rated</option>
+            <option value="Out of Scope">Out of Scope</option>
+          </select>
+        </div>
 
-            <div class="col-md-3">
-              <label class="form-label">VAT %</label>
-              <input
-                type="number"
-                class="form-control text-end"
-                [class.bg-light]="isTaxRateLocked(form.penaltyTaxGroup)"
-                [class.bg-white]="!isTaxRateLocked(form.penaltyTaxGroup)"
-                [(ngModel)]="form.penaltyTaxRate"
-                [readonly]="isTaxRateLocked(form.penaltyTaxGroup)"
-                (ngModelChange)="calculatePenalty()">
-            </div>
+        <div class="col-md-3">
+          <label class="form-label">VAT %</label>
+          <input
+            type="number"
+            class="form-control text-end"
+            [class.bg-light]="isTaxRateLocked(form.penaltyTaxGroup) || isLocked"
+            [class.bg-white]="!isTaxRateLocked(form.penaltyTaxGroup) && !isLocked"
+            [(ngModel)]="form.penaltyTaxRate"
+            [readonly]="isTaxRateLocked(form.penaltyTaxGroup) || isLocked"
+            (ngModelChange)="calculatePenalty()">
+        </div>
 
-            <div class="col-md-3">
-              <label class="form-label">Tax Amount</label>
-              <div class="input-group input-group-sm">
-                <span class="input-group-text bg-light">AED</span>
-                <input
-                  type="number"
-                  class="form-control text-end bg-light"
-                  [value]="form.penaltyTaxAmount"
-                  readonly>
-              </div>
-            </div>
-         
-
-          <div class="col-md-3">
-            <label class="form-label fw-semibold text-primary">Total</label>
-            <div class="input-group input-group-sm">
-              <span class="input-group-text charge-total-prefix">AED</span>
-              <input
-                type="number"
-                class="form-control text-end fw-bold charge-total-field"
-                [value]="form.penaltyTotal"
-                readonly>
-            </div>
+        <div class="col-md-3">
+          <label class="form-label">Tax Amount</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text bg-light">AED</span>
+            <input type="number" class="form-control text-end bg-light" [value]="form.penaltyTaxAmount" readonly>
           </div>
+        </div>
+
+        <div class="col-md-3">
+          <label class="form-label fw-semibold text-primary">Total</label>
+          <div class="input-group input-group-sm">
+            <span class="input-group-text charge-total-prefix">AED</span>
+            <input type="number" class="form-control text-end fw-bold charge-total-field" [value]="form.penaltyTotal" readonly>
+          </div>
+        </div>
 
       </div>
     </div>
@@ -337,7 +363,6 @@
   <!-- ── Summary Row: Subtotal / Tax Total / Invoice Total ────── -->
   <div class="row g-3">
 
-    <!-- Subtotal box (no tax) -->
     <div class="col-md-4">
       <div class="summary-box summary-box--prev">
         <div class="summary-box__label">Subtotal</div>
@@ -345,7 +370,6 @@
       </div>
     </div>
 
-    <!-- Tax Total box -->
     <div class="col-md-4">
       <div class="summary-box summary-box--balance">
         <div class="summary-box__label">Tax Total</div>
@@ -353,7 +377,6 @@
       </div>
     </div>
 
-    <!-- Invoice Total box -->
     <div class="col-md-4">
       <div class="summary-box summary-box--total">
         <div class="summary-box__label">Invoice Total</div>

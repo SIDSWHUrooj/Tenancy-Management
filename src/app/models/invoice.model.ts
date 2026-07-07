@@ -101,10 +101,10 @@ export interface InvoiceRequest {
   leaseType: string;
   securityDeposit: number;
   annualRent: number;
-  gracePeriodStartDate: string;
-  gracePeriodEndDate: string;
+  gracePeriodStartDate: string | null;  // optional — null when not provided
+  gracePeriodEndDate:   string | null;  // optional — null when not provided
   contractNo: string;
-  contractDate: string;
+  contractDate: string | null;          // optional — null when not provided
   documentNumber: string;
   ejariNumber: string;
   comments: string;

@@ -60,7 +60,7 @@ export class AuthLoginComponent {
 
           console.log(response.data);
 
-          this.router.navigate(['/receipt-entry']);
+          this.router.navigate(['/invoice-entry']);
 
         }
         else {

@@ -1,0 +1,157 @@
+<!-- ── Tab Action Bar ─────────────────────────────────────── -->
+<div class="tab-action-bar d-flex justify-content-between align-items-center mb-4 p-3 rounded-3">
+  <div class="d-flex align-items-center gap-2">
+    <span class="fw-semibold text-dark" style="font-size:0.9rem;">Receipt Details</span>
+    <span *ngIf="isLocked" class="tab-locked-badge">
+      <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" class="bi bi-lock-fill me-1" viewBox="0 0 16 16">
+        <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+      </svg>
+      Posted — Read Only
+    </span>
+  </div>
+  <div class="d-flex gap-2 tab-btn-group">
+    <button class="btn btn-draft-action" type="button"
+            [disabled]="!canSaveDraft || isSaving"
+            (click)="saveReceiptDraft.emit()">
+      {{ isSaving ? 'Saving...' : 'Save' }}
+    </button>
+    <button class="btn btn-save-action" type="button"
+            [disabled]="!canPost || isSaving"
+            (click)="postReceipt.emit()">
+      {{ isSaving ? 'Posting...' : 'Post' }}
+    </button>
+    <button class="btn btn-outline-print" type="button"
+            [disabled]="!canPrint"
+            (click)="printReceipt.emit()">
+      Print
+    </button>
+    <button class="btn btn-cancel-action" type="button"
+            [disabled]="!canCancel || isSaving"
+            (click)="cancelReceipt.emit()">
+      Cancel
+    </button>
+  </div>
+</div>
+
+<!-- ── Lock banner: rental not yet posted ─────────────────── -->
+<div *ngIf="!rentalPosted" class="tab-lock-banner mb-4">
+  <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" fill="currentColor" class="bi bi-lock-fill flex-shrink-0" viewBox="0 0 16 16">
+    <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
+  </svg>
+  <div>
+    <div class="fw-semibold">Rental Details Not Posted Yet</div>
+    <div class="small">Post Rental Details first to enable Receipt entry.</div>
+  </div>
+</div>
+
+<!-- ── Receipt content (only shown when rental is posted) ──── -->
+<div *ngIf="rentalPosted">
+
+  <div class="card border-0 shadow-sm mb-4">
+    <div class="card-body">
+
+      <!-- Receipt Configuration Row -->
+      <div class="row g-3 mb-4">
+
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Receipt Date</label>
+          <input type="date" class="form-control"
+                 [class.bg-white]="!isLocked"
+                 [class.bg-light]="isLocked"
+                 [(ngModel)]="form.receiptDate"
+                 [disabled]="isLocked">
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Clearing Bank</label>
+          <select class="form-select"
+                  [class.bg-white]="!isLocked"
+                  [class.bg-light]="isLocked"
+                  [(ngModel)]="form.detailsBank"
+                  [disabled]="isLocked">
+            <option value="">-- Select Bank --</option>
+            <option *ngFor="let bank of banksList" [value]="bank">{{ bank }}</option>
+          </select>
+        </div>
+
+        <div class="col-md-4">
+          <label class="form-label fw-semibold">Number of Cheques</label>
+          <select class="form-select"
+                  [class.bg-white]="!isLocked"
+                  [class.bg-light]="isLocked"
+                  [(ngModel)]="form.numberOfChecks"
+                  [disabled]="isLocked">
+            <option [ngValue]="0">-- Select --</option>
+            <option *ngFor="let n of chequeCountOptions" [ngValue]="n">{{ n }}</option>
+          </select>
+          <div class="form-text">Cheque dates are generated automatically from the rental period.</div>
+        </div>
+
+      </div>
+
+      <!-- Unified Payment Schedule -->
+      <div class="row">
+        <div class="col-12">
+          <app-check-grid
+            [checks]="form.checks"
+            [bank]="form.detailsBank"
+            [adminFeeTotal]="form.adminFeeTotal"
+            [adminFeeReference]="form.adminFeeReference"
+            [depositTotal]="form.depositTotal"
+            [depositReference]="form.depositReference"
+            [penaltyTotal]="form.penaltyTotal"
+            [penaltyCause]="form.penaltyCause"
+            [penaltyReference]="form.penaltyReference"
+            [periodFrom]="form.periodFrom"
+            [periodTo]="form.periodTo"
+            [invoiceTotal]="form.invoiceTotal"
+            (checksChange)="onChecksUpdated($event)"
+            (totalAmountChange)="onChequeTotalChanged($event)"
+            (grandTotalChange)="onGrandTotalChanged($event)">
+          </app-check-grid>
+        </div>
+      </div>
+
+      <!-- Attachments -->
+      <div class="row mt-4">
+        <div class="col-12">
+          <label class="form-label fw-semibold">Attachments</label>
+
+          <div class="border rounded p-3 bg-light">
+            <input
+              *ngIf="!isLocked"
+              type="file"
+              class="form-control bg-white mb-3"
+              multiple
+              accept=".pdf,.png,.jpg,.jpeg"
+              (change)="onFilesSelected($event)">
+
+            @if (this.form.attachments?.length) {
+              <ul class="list-group">
+                @for (att of this.form.attachments; track att.id) {
+                  <li class="list-group-item d-flex justify-content-between align-items-center bg-white">
+                    <div>
+                      <span class="fw-semibold">{{ att.name }}</span>
+                      <span class="text-muted ms-2">({{ formatFileSize(att.size) }})</span>
+                    </div>
+                    <button
+                      *ngIf="!isLocked"
+                      type="button"
+                      class="btn btn-sm btn-outline-danger"
+                      (click)="removeAttachment(att.id)">
+                      Remove
+                    </button>
+                  </li>
+                }
+              </ul>
+            } @else {
+              <p class="text-muted small mb-0">No files attached yet. PDF, PNG, JPG — max 5MB each.</p>
+            }
+          </div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+
+</div>

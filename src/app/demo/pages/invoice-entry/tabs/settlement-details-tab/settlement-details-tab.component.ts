@@ -13,6 +13,8 @@ import { calculateSettlementStatus } from '../../utils/receipt-calculation';
 export class SettlementDetailsTabComponent implements OnChanges {
   // Single shared form object — same reference as parent + other tabs
   @Input() form: any;
+  /** True once Receipt Details have been posted; enables editing this tab */
+  @Input() receiptPosted = false;
 
   ngOnChanges(changes: SimpleChanges): void {
     // Recalculate whenever the parent patches form (e.g. invoice loaded)

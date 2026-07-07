@@ -1,7 +1,6 @@
 // angular import
 import { NgModule } from '@angular/core';
 import { RouterModule, Routes } from '@angular/router';
-import{ BuildingTabComponent } from './demo/pages/invoice-entry/tabs/building-tab/building-tab.component';
 
 import { InvoiceEntryComponent } from './demo/pages/invoice-entry/invoice-entry.component';
 import { AdminLayout } from './theme/layouts/admin-layout/admin-layout.component';
@@ -14,7 +13,7 @@ const routes: Routes = [
     children: [
       {
         path: '',
-        redirectTo: '/receipt-entry',
+        redirectTo: '/invoice-entry',
         pathMatch: 'full'
       },
       {
@@ -35,33 +34,9 @@ const routes: Routes = [
       },
      {
   path: 'invoice-entry',
-  component: InvoiceEntryComponent,
-  children: [
-    {
-      path: 'building',
-      loadComponent: () =>
-        import('./demo/pages/invoice-entry/tabs/building-tab/building-tab.component')
-          .then(m => m.BuildingTabComponent)
-    },
-    {
-      path: 'tax',
-      loadComponent: () =>
-        import('./demo/pages/invoice-entry/tabs/tax-tab/tax-tab.component')
-          .then(m => m.TaxTabComponent)
-    },
-    {
-      path: 'totals',
-      loadComponent: () =>
-        import('./demo/pages/invoice-entry/tabs/totals-tab/totals-tab.component')
-          .then(m => m.TotalsTabComponent)
-    },
-  
-  ]
-}, {
-  path: 'receipt-entry',
   loadComponent: () =>
-    import('./demo/pages/receipt-entry/receipt-entry.component')
-      .then(m => m.ReceiptEntryComponent)
+    import('./demo/pages/invoice-entry/invoice-entry.component')
+      .then(m => m.InvoiceEntryComponent)
 },
 {
   path: 'recurring-entries',

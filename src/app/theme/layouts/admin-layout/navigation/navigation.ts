@@ -41,10 +41,10 @@ export const NavigationItems: NavigationItem[] = [
   icon: 'file-text',
   children: [
     {
-      id: 'receipt-entry',
-      title: 'Receipt Entry',
+      id: 'invoice-entry',
+      title: 'Invoice Entry',
       type: 'item',
-      url: '/receipt-entry'
+      url: '/invoice-entry'
     },
     {
       id: 'recurring-entries',

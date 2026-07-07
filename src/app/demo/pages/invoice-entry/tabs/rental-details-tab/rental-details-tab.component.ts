@@ -1,4 +1,4 @@
-import { Component, Input } from '@angular/core';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -14,6 +14,20 @@ type TaxGroup = 'Standard VAT' | 'Zero Rated' | 'Out of Scope';
 export class RentalDetailsTabComponent {
   @Input() form: any;
 
+  // ── Workflow state inputs ──────────────────────────────────────
+  @Input() isLocked   = false;  // true after rental is posted
+  @Input() isSaving   = false;
+  @Input() canSaveDraft = true;
+  @Input() canPost    = true;
+  @Input() canCancel  = false;
+  @Input() canPrint   = false;
+
+  // ── Action button outputs ──────────────────────────────────────
+  @Output() saveRentalDraft = new EventEmitter<void>();
+  @Output() postRental      = new EventEmitter<void>();
+  @Output() cancelRental    = new EventEmitter<void>();
+  @Output() printRental     = new EventEmitter<void>();
+
   // Causes available for the Penalty / Other Charges card
   readonly penaltyCauses: string[] = ['Utility Charges', 'Penalty', 'Miscellaneous'];
 
@@ -24,13 +38,14 @@ export class RentalDetailsTabComponent {
     return taxGroup === 'Out of Scope' || taxGroup === 'Zero Rated';
   }
 
-  private resolveTaxRate(taxGroup: TaxGroup, currentRate: number): number {
+private resolveTaxRate(taxGroup: TaxGroup, currentRate: number): number {
     if (this.isTaxRateLocked(taxGroup)) {
       return 0;
     }
-    // If coming back to Standard VAT from a locked state with no rate set, default to 5%.
-    return currentRate || 5;
-  }
+    // Only fall back to 5 when there's truly no rate set yet (undefined/null),
+    // not when the user has explicitly set it to 0.
+    return currentRate === null || currentRate === undefined ? 5 : currentRate;
+}
 
   // ── Rent ─────────────────────────────────────────────────────
   calculateRent(): void {
@@ -43,6 +58,7 @@ export class RentalDetailsTabComponent {
 
   // ── Security Deposit ──────────────────────────────────────────
   calculateDeposit(): void {
+  
     this.form.depositTaxRate = this.resolveTaxRate(this.form.depositTaxGroup, this.form.depositTaxRate);
     const rate = this.form.depositTaxRate || 0;
     this.form.depositTaxAmount = this.round(this.form.depositAmount * rate / 100);
@@ -61,18 +77,16 @@ export class RentalDetailsTabComponent {
 
   // ── Penalty / Other Charges ────────────────────────────────────
   // Called when the user selects a cause (Utility / Penalty / Miscellaneous).
-  onPenaltyCauseChange(): void {
-    if (!this.form.penaltyCause) {
-      // No cause selected: reset everything for this block.
-      this.form.penaltyAmount     = 0;
-      this.form.penaltyApplyTax   = false;
-      this.form.penaltyTaxGroup   = 'Standard VAT';
-      this.form.penaltyTaxRate    = 0;
-      this.form.penaltyTaxAmount  = 0;
-      this.form.penaltyTotal      = 0;
-    }
-    this.calculatePenalty();
+onPenaltyCauseChange(): void {
+  if (!this.form.penaltyCause) {
+    this.form.penaltyAmount    = 0;
+    this.form.penaltyTaxGroup  = 'Standard VAT';
+    this.form.penaltyTaxRate   = 0;
+    this.form.penaltyTaxAmount = 0;
+    this.form.penaltyTotal     = 0;
   }
+  this.calculatePenalty();
+}
 
   // Called when the "Apply Tax" toggle changes.
   onPenaltyApplyTaxChange(): void {
@@ -85,23 +99,20 @@ export class RentalDetailsTabComponent {
   }
 
   calculatePenalty(): void {
-    if (!this.form.penaltyCause) {
-      this.form.penaltyTotal = 0;
-      this.recalculateTotals();
-      return;
-    }
-
-    if (this.form.penaltyApplyTax) {
-      this.form.penaltyTaxRate = this.resolveTaxRate(this.form.penaltyTaxGroup, this.form.penaltyTaxRate);
-      const rate = this.form.penaltyTaxRate || 0;
-      this.form.penaltyTaxAmount = this.round(this.form.penaltyAmount * rate / 100);
-    } else {
-      this.form.penaltyTaxAmount = 0;
-    }
-
-    this.form.penaltyTotal = this.round(this.form.penaltyAmount + this.form.penaltyTaxAmount);
+  if (!this.form.penaltyCause) {
+    this.form.penaltyTaxAmount = 0;
+    this.form.penaltyTotal     = 0;
     this.recalculateTotals();
+    return;
   }
+
+  this.form.penaltyTaxRate   = this.resolveTaxRate(this.form.penaltyTaxGroup, this.form.penaltyTaxRate);
+  const rate = this.form.penaltyTaxRate || 0;
+  this.form.penaltyTaxAmount = this.round(this.form.penaltyAmount * rate / 100);
+  this.form.penaltyTotal     = this.round(this.form.penaltyAmount + this.form.penaltyTaxAmount);
+
+  this.recalculateTotals();
+}
 
   // ── Recalculate Subtotal / Tax Total / Invoice Total ───────────
   private recalculateTotals(): void {
