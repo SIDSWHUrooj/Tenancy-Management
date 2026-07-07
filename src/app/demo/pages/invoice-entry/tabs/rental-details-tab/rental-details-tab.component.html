@@ -268,98 +268,148 @@
     </div>
   </div>
 
-  <!-- ── 4. Penalty / Other Charges Card ──────────────────────── -->
+<!-- ── 4. Additional Charges Card ───────────────────────────── -->
   <div class="card charge-card border-0 shadow-sm mb-4">
     <div class="card-header bg-white border-bottom py-2 px-4">
-      <div class="d-flex align-items-center gap-2">
-        <span class="charge-icon charge-icon--additional">
-          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-wallet2" viewBox="0 0 16 16">
-            <path d="M15 4a1 1 0 0 0-1-1H3V2a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1z"/>
-            <path d="M3 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a1 1 0 0 0 1-1V6a2 2 0 0 0-2-2zm10 4a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+      <div class="d-flex align-items-center justify-content-between">
+        <div class="d-flex align-items-center gap-2">
+          <span class="charge-icon charge-icon--additional">
+            <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-wallet2" viewBox="0 0 16 16">
+              <path d="M15 4a1 1 0 0 0-1-1H3V2a1 1 0 0 1 1-1h9a1 1 0 0 1 1 1z"/>
+              <path d="M3 4a2 2 0 0 0-2 2v6a2 2 0 0 0 2 2h11a1 1 0 0 0 1-1V6a2 2 0 0 0-2-2zm10 4a1 1 0 1 1 0 2 1 1 0 0 1 0-2"/>
+            </svg>
+          </span>
+          <h6 class="mb-0 fw-bold text-dark">Additional Charges</h6>
+        </div>
+
+        <button type="button"
+                class="btn btn-sm btn-outline-primary d-inline-flex align-items-center gap-1"
+                [disabled]="isLocked"
+                (click)="addAdditionalCharge()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-plus-lg" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
           </svg>
-        </span>
-        <h6 class="mb-0 fw-bold text-dark">Aditional Charges</h6>
+          Add Additional Charge
+        </button>
       </div>
     </div>
+
     <div class="card-body px-4 py-3">
-      <div class="row g-3 align-items-end">
 
-        <div class="col-md-3">
-          <label class="form-label">Cause</label>
-          <select
-            class="form-select"
-            [class.bg-white]="!isLocked"
-            [class.bg-light]="isLocked"
-            [(ngModel)]="form.penaltyCause"
-            [disabled]="isLocked"
-            (change)="onPenaltyCauseChange()">
-            <option [ngValue]="null">Select a cause...</option>
-            <option *ngFor="let cause of penaltyCauses" [value]="cause">{{ cause }}</option>
-          </select>
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label">Amount</label>
-          <div class="input-group input-group-sm">
-            <span class="input-group-text bg-light">AED</span>
-            <input
-              type="number"
-              class="form-control text-end"
-              [class.bg-white]="!isLocked"
-              [class.bg-light]="isLocked"
-              [(ngModel)]="form.penaltyAmount"
-              [disabled]="isLocked"
-              (ngModelChange)="calculatePenalty()">
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label">Tax Group</label>
-          <select
-            class="form-select"
-            [class.bg-white]="!isLocked"
-            [class.bg-light]="isLocked"
-            [(ngModel)]="form.penaltyTaxGroup"
-            [disabled]="isLocked"
-            (change)="calculatePenalty()">
-            <option value="Standard VAT">Standard VAT</option>
-            <option value="Zero Rated">Zero Rated</option>
-            <option value="Out of Scope">Out of Scope</option>
-          </select>
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label">VAT %</label>
-          <input
-            type="number"
-            class="form-control text-end"
-            [class.bg-light]="isTaxRateLocked(form.penaltyTaxGroup) || isLocked"
-            [class.bg-white]="!isTaxRateLocked(form.penaltyTaxGroup) && !isLocked"
-            [(ngModel)]="form.penaltyTaxRate"
-            [readonly]="isTaxRateLocked(form.penaltyTaxGroup) || isLocked"
-            (ngModelChange)="calculatePenalty()">
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label">Tax Amount</label>
-          <div class="input-group input-group-sm">
-            <span class="input-group-text bg-light">AED</span>
-            <input type="number" class="form-control text-end bg-light" [value]="form.penaltyTaxAmount" readonly>
-          </div>
-        </div>
-
-        <div class="col-md-3">
-          <label class="form-label fw-semibold text-primary">Total</label>
-          <div class="input-group input-group-sm">
-            <span class="input-group-text charge-total-prefix">AED</span>
-            <input type="number" class="form-control text-end fw-bold charge-total-field" [value]="form.penaltyTotal" readonly>
-          </div>
-        </div>
-
+      <div *ngIf="!form.additionalCharges || form.additionalCharges.length === 0"
+           class="text-center text-muted py-4 small">
+        No additional charges added yet. Click "Add Additional Charge" to add one.
       </div>
+
+      <div class="table-responsive" *ngIf="form.additionalCharges?.length > 0">
+        <table class="table align-middle mb-0 additional-charges-table">
+          <thead>
+            <tr class="text-muted small">
+              <th style="min-width:190px;">Reason</th>
+              <th style="min-width:130px;">Amount (AED)</th>
+              <th style="min-width:160px;">Tax Group</th>
+              <th style="min-width:90px;">VAT %</th>
+              <th style="min-width:120px;">Tax Amount</th>
+              <th style="min-width:130px;">Total</th>
+              <th style="min-width:160px;">Description</th>
+              <th style="width:60px;" class="text-center">Action</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let charge of form.additionalCharges">
+              <td>
+                <select class="form-select form-select-sm"
+                        [class.bg-white]="!isLocked"
+                        [class.bg-light]="isLocked"
+                        [(ngModel)]="charge.cause"
+                        [disabled]="isLocked"
+                        (change)="calculateChargeRow(charge)">
+                  <option [ngValue]="''" disabled>Select a reason...</option>
+                  <option *ngFor="let cause of additionalChargeCauses" [value]="cause">{{ cause }}</option>
+                </select>
+              </td>
+
+              <td>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light">AED</span>
+                  <input type="number" class="form-control text-end"
+                         [class.bg-white]="!isLocked"
+                         [class.bg-light]="isLocked"
+                         [(ngModel)]="charge.amount"
+                         [disabled]="isLocked"
+                         (ngModelChange)="calculateChargeRow(charge)">
+                </div>
+              </td>
+
+              <td>
+                <select class="form-select form-select-sm"
+                        [class.bg-white]="!isLocked"
+                        [class.bg-light]="isLocked"
+                        [(ngModel)]="charge.taxGroup"
+                        [disabled]="isLocked"
+                        (change)="calculateChargeRow(charge)">
+                  <option value="Standard VAT">Standard VAT</option>
+                  <option value="Zero Rated">Zero Rated</option>
+                  <option value="Out of Scope">Out of Scope</option>
+                </select>
+              </td>
+
+              <td>
+                <input type="number" class="form-control form-control-sm text-end"
+                       [class.bg-light]="isTaxRateLocked(charge.taxGroup) || isLocked"
+                       [class.bg-white]="!isTaxRateLocked(charge.taxGroup) && !isLocked"
+                       [(ngModel)]="charge.taxRate"
+                       [readonly]="isTaxRateLocked(charge.taxGroup) || isLocked"
+                       (ngModelChange)="calculateChargeRow(charge)">
+              </td>
+
+              <td>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text bg-light">AED</span>
+                  <input type="number" class="form-control text-end bg-light" [value]="charge.taxAmount" readonly>
+                </div>
+              </td>
+
+              <td>
+                <div class="input-group input-group-sm">
+                  <span class="input-group-text charge-total-prefix">AED</span>
+                  <input type="number" class="form-control text-end fw-bold charge-total-field" [value]="charge.total" readonly>
+                </div>
+              </td>
+
+              <td>
+                <input type="text" class="form-control form-control-sm"
+                       [class.bg-white]="!isLocked"
+                       [class.bg-light]="isLocked"
+                       [(ngModel)]="charge.description"
+                       [disabled]="isLocked"
+                       placeholder="Optional note">
+              </td>
+
+              <td class="text-center">
+                <button type="button" class="btn btn-sm btn-outline-danger"
+                        [disabled]="isLocked"
+                        title="Remove charge"
+                        (click)="removeAdditionalCharge(charge.id)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                    <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-1.5Z"/>
+                  </svg>
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+
+      <div class="d-flex justify-content-end mt-3" *ngIf="form.additionalCharges?.length > 0">
+        <div class="additional-charges-total px-3 py-2 rounded-3">
+          <span class="text-muted small me-2">Total Additional Charges:</span>
+          <span class="fw-bold text-primary">AED {{ additionalChargesGrandTotal | number:'1.2-2' }}</span>
+        </div>
+      </div>
+
     </div>
   </div>
-
   <!-- ── Summary Row: Subtotal / Tax Total / Invoice Total ────── -->
   <div class="row g-3">
 

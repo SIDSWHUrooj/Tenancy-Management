@@ -154,6 +154,15 @@ $border-color:   #ced4da;
     color: #155724;
   }
 }
+.additional-charges-table {
+  th { font-weight: 600; }
+  td, th { vertical-align: middle; }
+}
+
+.additional-charges-total {
+  background: #f8f9fa;
+  border: 1px solid #e9ecef;
+}
 .charge-icon--additional {
   background-color: rgba(111, 66, 193, 0.12);
   color: #6f42c1;

@@ -25,6 +25,16 @@ export type ReceiptTab    = 'rental' | 'receipt' | 'settlement';
 export type InvoiceType   = 'New' | 'Renewal';
 export type ReceiptStatus = 'Draft' | 'Posted' | 'Cancelled';
 
+export interface AdditionalCharge {
+  id: string;
+  cause: string;
+  amount: number;
+  taxGroup: 'Standard VAT' | 'Zero Rated' | 'Out of Scope';
+  taxRate: number;
+  taxAmount: number;
+  total: number;
+  description: string;
+}
 export interface ReceiptAttachment {
   id:         string;
   name:       string;
@@ -94,13 +104,8 @@ export interface InvoiceForm {
   adminFeeTaxAmount:      number;
   adminFeeTotal:          number;
 
-  penaltyCause:           string;
-  penaltyApplyTax:        boolean;
-  penaltyAmount:          number;
-  penaltyTaxGroup:        string;
-  penaltyTaxRate:         number;
-  penaltyTaxAmount:       number;
-  penaltyTotal:           number;
+  additionalCharges: AdditionalCharge[];
+
 
   subTotal:               number;
   taxTotal:               number;
@@ -908,7 +913,6 @@ private applyInvoiceToForm(invoice: Invoice): void {
   draft.rentAmount     = findAmount('Rent');
   draft.depositAmount  = invoice.securityDeposit || findAmount('Deposit');
   draft.adminFeeAmount = findAmount('AdminFee');
-  draft.penaltyAmount  = findAmount('Penalty');
 
   // Rent tax
   const rentTax = findTax(draft.rentAmount);
@@ -946,45 +950,33 @@ private applyInvoiceToForm(invoice: Invoice): void {
   }
   draft.adminFeeTotal = round(draft.adminFeeAmount + draft.adminFeeTaxAmount);
 
-  // Penalty tax
-  if (draft.penaltyAmount > 0 && draft.penaltyCause) {
-  const penTax = findTax(draft.penaltyAmount);
-  if (penTax) {
-    draft.penaltyTaxGroup  = penTax.taxGroup || 'Standard VAT';
-    draft.penaltyTaxAmount = round(penTax.taxAmount);
-    draft.penaltyTaxRate   = draft.penaltyAmount > 0 ? round(draft.penaltyTaxAmount / draft.penaltyAmount * 100) : 0;
-    draft.penaltyApplyTax  = draft.penaltyTaxAmount > 0;
-  } else {
-    draft.penaltyTaxAmount = 0;
-    draft.penaltyApplyTax  = false;
-  }
-  draft.penaltyTotal = round(draft.penaltyAmount + draft.penaltyTaxAmount);
-}
-   const penaltyDetail = invoice.details?.find(
-    d => (d.serviceType || '').toLowerCase() === 'penalty'
-  );
-  draft.penaltyCause = penaltyDetail?.description && penaltyDetail.description !== 'Additional Charge'
-    ? penaltyDetail.description
-    : '';
+  // ── Additional Charges (multiple rows) ────────────────────────
+// Pull every detail line that represents an additional charge —
+// anything that isn't Rent / Deposit / AdminFee counts as one.
+const additionalChargeDetails = (invoice.details || []).filter(d => {
+  const t = (d.serviceType || '').toLowerCase();
+  return t === 'penalty' || t === 'additionalcharge';
+});
 
-  if (draft.penaltyAmount > 0 && draft.penaltyCause) {
-    const penTax = findTax(draft.penaltyAmount);
-    if (penTax) {
-      draft.penaltyTaxGroup  = penTax.taxGroup || 'Standard VAT';
-      draft.penaltyTaxAmount = round(penTax.taxAmount);
-      draft.penaltyTaxRate   = draft.penaltyAmount > 0
-        ? round(draft.penaltyTaxAmount / draft.penaltyAmount * 100)
-        : 0;
-      draft.penaltyApplyTax  = draft.penaltyTaxAmount > 0;
-    } else {
-      draft.penaltyTaxAmount = 0;
-      draft.penaltyApplyTax  = false;
-    }
-    draft.penaltyTotal = round(draft.penaltyAmount + draft.penaltyTaxAmount);
-  } else {
-    draft.penaltyTaxAmount = 0;
-    draft.penaltyTotal = 0;
-  }
+draft.additionalCharges = additionalChargeDetails.map((d, idx): AdditionalCharge => {
+  const amount = d.amount || 0;
+  const matchedTax = findTax(amount); // consumes from remainingTaxes so it can't be reused
+
+  const taxGroup  = (matchedTax?.taxGroup as any) || 'Standard VAT';
+  const taxAmount = matchedTax ? round(matchedTax.taxAmount) : 0;
+  const taxRate   = amount > 0 ? round(taxAmount / amount * 100) : 0;
+
+  return {
+    id:          'chg_' + Date.now() + '_' + idx,
+    cause:       (d.description && d.description !== 'Additional Charge') ? d.description : '',
+    amount,
+    taxGroup,
+    taxRate,
+    taxAmount,
+    total:       round(amount + taxAmount),
+    description: '', // free-text note field — not stored on TYINVD today
+  };
+});
   draft.subTotal      = round(invoice.documentAmount);
   draft.taxTotal      = round(invoice.taxAmount);
   draft.invoiceTotal  = round(invoice.documentTotal);
@@ -1079,14 +1071,14 @@ private loadReceiptForInvoice(invoiceNumber: string): void {
     this.form.adminFeeTaxAmount = round(this.form.adminFeeAmount * this.form.adminFeeTaxRate / 100);
     this.form.adminFeeTotal     = round(this.form.adminFeeAmount + this.form.adminFeeTaxAmount);
 
-    // Penalty
-    if (this.form.penaltyAmount > 0 && this.form.penaltyCause) {
-      this.form.penaltyTaxRate   = taxRate(this.form.penaltyTaxGroup, this.form.penaltyTaxRate);
-      this.form.penaltyTaxAmount = this.form.penaltyApplyTax
-        ? round(this.form.penaltyAmount * this.form.penaltyTaxRate / 100)
-        : 0;
-      this.form.penaltyTotal     = round(this.form.penaltyAmount + this.form.penaltyTaxAmount);
-    }
+    // Additional Charges (dynamic array)
+if (this.form.additionalCharges?.length) {
+  this.form.additionalCharges.forEach((charge: AdditionalCharge) => {
+    charge.taxRate   = taxRate(charge.taxGroup, charge.taxRate);
+    charge.taxAmount = round((charge.amount || 0) * charge.taxRate / 100);
+    charge.total     = round((charge.amount || 0) + charge.taxAmount);
+  });
+}
 
     // Recompute subtotals from the freshly derived amounts so the Rental Details
     // summary boxes are correct immediately (not relying on the API values
@@ -1095,12 +1087,12 @@ private loadReceiptForInvoice(invoiceNumber: string): void {
       (this.form.rentAmount      || 0) +
       (this.form.depositAmount   || 0) +
       (this.form.adminFeeAmount  || 0) +
-      (this.form.penaltyAmount   || 0);
+      (this.form.additionalCharges?.reduce((sum, charge) => sum + (charge.total || 0), 0) || 0);
     const taxAmounts =
       (this.form.rentTaxAmount      || 0) +
       (this.form.depositTaxAmount   || 0) +
       (this.form.adminFeeTaxAmount  || 0) +
-      (this.form.penaltyTaxAmount   || 0);
+      (this.form.additionalCharges?.reduce((sum, charge) => sum + (charge.taxAmount || 0), 0) || 0);
 
     this.form.subTotal     = round(baseAmounts);
     this.form.taxTotal     = round(taxAmounts);
@@ -1508,7 +1500,6 @@ cancelReceipt(): void {
       'customer', 'customerName',
       'propertyId', 'propertyName', 'unitNo',
       'contractNumber', 'contractDate',
-      'gracePeriodStart', 'gracePeriodEnd',
       'periodFrom', 'periodTo',
     ];
 
@@ -1572,99 +1563,111 @@ cancelReceipt(): void {
 
   // ── DTO Mapper: InvoiceForm → InvoiceRequest ──────────────────
   private mapFormToInvoiceRequest(): InvoiceRequest | null {
-    const details: InvoiceDetail[] = [];
-    let lineNo = 1;
+  const details: InvoiceDetail[] = [];
+  const taxes: InvoiceTax[] = [];
+  let lineNo = 1;
 
-    if (this.form.rentAmount > 0) {
-      details.push({
-        lineNo: lineNo++, unitNo: this.form.unitNo, serviceType: 'Rent',
-        description: 'Annual Rent', amount: this.form.rentAmount, remarks: '',
-      });
-    }
-    if (this.form.depositAmount > 0) {
-      details.push({
-        lineNo: lineNo++, unitNo: this.form.unitNo, serviceType: 'Deposit',
-        description: 'Security Deposit', amount: this.form.depositAmount, remarks: '',
-      });
-    }
-    if (this.form.adminFeeAmount > 0) {
-      details.push({
-        lineNo: lineNo++, unitNo: this.form.unitNo, serviceType: 'AdminFee',
-        description: 'Administration Fee', amount: this.form.adminFeeAmount, remarks: '',
-      });
-    }
-    if (this.form.penaltyAmount > 0) {
-      details.push({
-        lineNo: lineNo++, unitNo: this.form.unitNo, serviceType: 'Penalty',
-        description: this.form.penaltyCause || 'Additional Charge', amount: this.form.penaltyAmount, remarks: '',
-      });
-    }
-
-    if (details.length === 0) {
-      alert('Please enter at least one charge amount (Rent, Deposit, Admin Fee, or Penalty) greater than 0.');
-      return null;
-    }
-
-    const taxes: InvoiceTax[] = [];
-    if (this.form.rentTaxAmount > 0) {
-      taxes.push({
-        taxGroup: this.form.rentTaxGroup, calculateTax: this.form.rentTaxRate > 0,
-        taxAuthority: 'FTA', customerTaxClass: 'Standard',
-        taxBase: this.form.rentAmount, taxAmount: this.form.rentTaxAmount,
-      });
-    }
-    if (this.form.depositTaxAmount > 0) {
-      taxes.push({
-        taxGroup: this.form.depositTaxGroup, calculateTax: this.form.depositTaxRate > 0,
-        taxAuthority: 'FTA', customerTaxClass: 'Standard',
-        taxBase: this.form.depositAmount, taxAmount: this.form.depositTaxAmount,
-      });
-    }
-    if (this.form.adminFeeTaxAmount > 0) {
-      taxes.push({
-        taxGroup: this.form.adminFeeTaxGroup, calculateTax: this.form.adminFeeTaxRate > 0,
-        taxAuthority: 'FTA', customerTaxClass: 'Standard',
-        taxBase: this.form.adminFeeAmount, taxAmount: this.form.adminFeeTaxAmount,
-      });
-    }
-    if (this.form.penaltyTaxAmount > 0) {
-      taxes.push({
-        taxGroup: this.form.penaltyTaxGroup, calculateTax: this.form.penaltyTaxRate > 0,
-        taxAuthority: 'FTA', customerTaxClass: 'Standard',
-        taxBase: this.form.penaltyAmount, taxAmount: this.form.penaltyTaxAmount,
-      });
-    }
-
-    return {
-      invoiceNumber:        this.form.invoiceNumber,
-      invoiceType:          this.form.invoiceType.toLowerCase(),
-      invoiceDate:          this.toIsoRequired(this.form.invoiceDate),
-      customer:             this.form.customer,
-      customerName:         this.form.customerName,
-      landlordCode:         this.form.landlordCode  || '',
-      landlordName:         this.form.landlordName  || '',
-      propertyId:           this.form.propertyId,
-      propertyName:         this.form.propertyName,
-      purposeOfLease:       this.form.purposeOfLease,
-      buildingStatus:       '',
-      unitNo:               this.form.unitNo,
-      multipleUnits:        this.form.multipleInvoices,
-      periodFrom:           this.toIsoRequired(this.form.periodFrom),
-      periodTo:             this.toIsoRequired(this.form.periodTo),
-      leaseType:            this.form.purposeOfLease,
-      securityDeposit:      this.form.depositAmount || 0,
-      annualRent:           this.form.annualRent    || 0,
-      gracePeriodStartDate: this.toIso(this.form.gracePeriodStart),
-      gracePeriodEndDate:   this.toIso(this.form.gracePeriodEnd),
-      contractNo:           this.form.contractNumber || '',
-      contractDate:         this.toIso(this.form.contractDate),
-      documentNumber:       this.form.documentNumber || '',
-      ejariNumber:          this.form.ejariNumber    || '',
-      comments:             '',
-      details,
-      taxes,
-    };
+  if (this.form.rentAmount > 0) {
+    details.push({
+      lineNo: lineNo++, unitNo: this.form.unitNo, serviceType: 'Rent',
+      description: 'Annual Rent', amount: this.form.rentAmount, remarks: '',
+    });
   }
+  if (this.form.depositAmount > 0) {
+    details.push({
+      lineNo: lineNo++, unitNo: this.form.unitNo, serviceType: 'Deposit',
+      description: 'Security Deposit', amount: this.form.depositAmount, remarks: '',
+    });
+  }
+  if (this.form.adminFeeAmount > 0) {
+    details.push({
+      lineNo: lineNo++, unitNo: this.form.unitNo, serviceType: 'AdminFee',
+      description: 'Administration Fee', amount: this.form.adminFeeAmount, remarks: '',
+    });
+  }
+
+  // Additional Charges (multiple rows) — ONLY ONE COPY of this block
+  (this.form.additionalCharges || []).forEach((charge: AdditionalCharge) => {
+    if (charge.amount > 0) {
+      details.push({
+        lineNo: lineNo++,
+        unitNo: this.form.unitNo,
+        serviceType: 'AdditionalCharge',
+        description: charge.cause || 'Additional Charge',
+        amount: charge.amount,
+        remarks: charge.description || '',
+      });
+
+      if (charge.taxAmount > 0) {
+        taxes.push({
+          taxGroup: charge.taxGroup,
+          calculateTax: charge.taxRate > 0,
+          taxAuthority: 'FTA',
+          customerTaxClass: 'Standard',
+          taxBase: charge.amount,
+          taxAmount: charge.taxAmount,
+        });
+      }
+    }
+  });
+
+  if (details.length === 0) {
+    alert('Please enter at least one charge amount (Rent, Deposit, Admin Fee, or Additional Charge) greater than 0.');
+    return null;
+  }
+
+  if (this.form.rentTaxAmount > 0) {
+    taxes.push({
+      taxGroup: this.form.rentTaxGroup, calculateTax: this.form.rentTaxRate > 0,
+      taxAuthority: 'FTA', customerTaxClass: 'Standard',
+      taxBase: this.form.rentAmount, taxAmount: this.form.rentTaxAmount,
+    });
+  }
+  if (this.form.depositTaxAmount > 0) {
+    taxes.push({
+      taxGroup: this.form.depositTaxGroup, calculateTax: this.form.depositTaxRate > 0,
+      taxAuthority: 'FTA', customerTaxClass: 'Standard',
+      taxBase: this.form.depositAmount, taxAmount: this.form.depositTaxAmount,
+    });
+  }
+  if (this.form.adminFeeTaxAmount > 0) {
+    taxes.push({
+      taxGroup: this.form.adminFeeTaxGroup, calculateTax: this.form.adminFeeTaxRate > 0,
+      taxAuthority: 'FTA', customerTaxClass: 'Standard',
+      taxBase: this.form.adminFeeAmount, taxAmount: this.form.adminFeeTaxAmount,
+    });
+  }
+
+  return {
+    invoiceNumber:        this.form.invoiceNumber,
+    invoiceType:          this.form.invoiceType.toLowerCase(),
+    invoiceDate:          this.toIsoRequired(this.form.invoiceDate),
+    customer:             this.form.customer,
+    customerName:         this.form.customerName,
+    landlordCode:         this.form.landlordCode  || '',
+    landlordName:         this.form.landlordName  || '',
+    propertyId:           this.form.propertyId,
+    propertyName:         this.form.propertyName,
+    purposeOfLease:       this.form.purposeOfLease,
+    buildingStatus:       '',
+    unitNo:               this.form.unitNo,
+    multipleUnits:        this.form.multipleInvoices,
+    periodFrom:           this.toIsoRequired(this.form.periodFrom),
+    periodTo:             this.toIsoRequired(this.form.periodTo),
+    leaseType:            this.form.purposeOfLease,
+    securityDeposit:      this.form.depositAmount || 0,
+    annualRent:           this.form.annualRent    || 0,
+    gracePeriodStartDate: this.toIso(this.form.gracePeriodStart),
+    gracePeriodEndDate:   this.toIso(this.form.gracePeriodEnd),
+    contractNo:           this.form.contractNumber || '',
+    contractDate:         this.toIso(this.form.contractDate),
+    documentNumber:       this.form.documentNumber || '',
+    ejariNumber:          this.form.ejariNumber    || '',
+    comments:             '',
+    details,
+    taxes,
+  };
+}
 
   // ── Date helpers ─────────────────────────────────────────────
   /**
@@ -1748,13 +1751,7 @@ cancelReceipt(): void {
       adminFeeTaxAmount:      0,
       adminFeeTotal:          0,
 
-      penaltyCause:           '',
-      penaltyApplyTax:        false,
-      penaltyAmount:          0,
-      penaltyTaxGroup:        'Standard VAT',
-      penaltyTaxRate:         5,
-      penaltyTaxAmount:       0,
-      penaltyTotal:           0,
+      additionalCharges: [],
 
       subTotal:               0,
       taxTotal:               0,

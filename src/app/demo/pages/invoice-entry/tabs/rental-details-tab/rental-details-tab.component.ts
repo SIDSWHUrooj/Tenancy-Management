@@ -4,6 +4,17 @@ import { FormsModule } from '@angular/forms';
 
 type TaxGroup = 'Standard VAT' | 'Zero Rated' | 'Out of Scope';
 
+export interface AdditionalCharge {
+  id: string;
+  cause: string;
+  amount: number;
+  taxGroup: TaxGroup;
+  taxRate: number;
+  taxAmount: number;
+  total: number;
+  description: string;
+}
+
 @Component({
   selector: 'app-rental-details-tab',
   standalone: true,
@@ -14,41 +25,35 @@ type TaxGroup = 'Standard VAT' | 'Zero Rated' | 'Out of Scope';
 export class RentalDetailsTabComponent {
   @Input() form: any;
 
-  // ── Workflow state inputs ──────────────────────────────────────
-  @Input() isLocked   = false;  // true after rental is posted
+  @Input() isLocked   = false;
   @Input() isSaving   = false;
   @Input() canSaveDraft = true;
   @Input() canPost    = true;
   @Input() canCancel  = false;
   @Input() canPrint   = false;
 
-  // ── Action button outputs ──────────────────────────────────────
   @Output() saveRentalDraft = new EventEmitter<void>();
   @Output() postRental      = new EventEmitter<void>();
   @Output() cancelRental    = new EventEmitter<void>();
   @Output() printRental     = new EventEmitter<void>();
 
-  // Causes available for the Penalty / Other Charges card
-  readonly penaltyCauses: string[] = ['Utility Charges', 'Penalty', 'Miscellaneous'];
+  // Dropdown options for Additional Charges
+  readonly additionalChargeCauses: string[] = [
+    'Penalty', 'Utility', 'Miscellaneous','Other Charges'
+  ];
 
-  // ── Shared tax-group helper ─────────────────────────────────
-  // Out of Scope / Zero Rated => rate is forced to 0 and locked.
-  // Standard VAT => rate field is editable by the user.
   isTaxRateLocked(taxGroup: TaxGroup): boolean {
     return taxGroup === 'Out of Scope' || taxGroup === 'Zero Rated';
   }
 
-private resolveTaxRate(taxGroup: TaxGroup, currentRate: number): number {
-    if (this.isTaxRateLocked(taxGroup)) {
-      return 0;
-    }
-    // Only fall back to 5 when there's truly no rate set yet (undefined/null),
-    // not when the user has explicitly set it to 0.
+  private resolveTaxRate(taxGroup: TaxGroup, currentRate: number): number {
+    if (this.isTaxRateLocked(taxGroup)) return 0;
     return currentRate === null || currentRate === undefined ? 5 : currentRate;
-}
+  }
 
   // ── Rent ─────────────────────────────────────────────────────
   calculateRent(): void {
+    this.form.annualRent = this.form.rentAmount || 0;
     this.form.rentTaxRate = this.resolveTaxRate(this.form.rentTaxGroup, this.form.rentTaxRate);
     const rate = this.form.rentTaxRate || 0;
     this.form.rentTaxAmount = this.round(this.form.rentAmount * rate / 100);
@@ -58,7 +63,6 @@ private resolveTaxRate(taxGroup: TaxGroup, currentRate: number): number {
 
   // ── Security Deposit ──────────────────────────────────────────
   calculateDeposit(): void {
-  
     this.form.depositTaxRate = this.resolveTaxRate(this.form.depositTaxGroup, this.form.depositTaxRate);
     const rate = this.form.depositTaxRate || 0;
     this.form.depositTaxAmount = this.round(this.form.depositAmount * rate / 100);
@@ -75,58 +79,79 @@ private resolveTaxRate(taxGroup: TaxGroup, currentRate: number): number {
     this.recalculateTotals();
   }
 
-  // ── Penalty / Other Charges ────────────────────────────────────
-  // Called when the user selects a cause (Utility / Penalty / Miscellaneous).
-onPenaltyCauseChange(): void {
-  if (!this.form.penaltyCause) {
-    this.form.penaltyAmount    = 0;
-    this.form.penaltyTaxGroup  = 'Standard VAT';
-    this.form.penaltyTaxRate   = 0;
-    this.form.penaltyTaxAmount = 0;
-    this.form.penaltyTotal     = 0;
-  }
-  this.calculatePenalty();
-}
-
-  // Called when the "Apply Tax" toggle changes.
-  onPenaltyApplyTaxChange(): void {
-    if (!this.form.penaltyApplyTax) {
-      this.form.penaltyTaxAmount = 0;
-    } else if (!this.form.penaltyTaxGroup) {
-      this.form.penaltyTaxGroup = 'Standard VAT';
-    }
-    this.calculatePenalty();
+  // ── Additional Charges (dynamic rows) ─────────────────────────
+  private newChargeId(): string {
+    return 'chg_' + Date.now() + '_' + Math.floor(Math.random() * 1000);
   }
 
-  calculatePenalty(): void {
-  if (!this.form.penaltyCause) {
-    this.form.penaltyTaxAmount = 0;
-    this.form.penaltyTotal     = 0;
+  addAdditionalCharge(): void {
+    if (!this.form.additionalCharges) this.form.additionalCharges = [];
+    this.form.additionalCharges = [
+      ...this.form.additionalCharges,
+      {
+        id: this.newChargeId(),
+        cause: '',
+        amount: 0,
+        taxGroup: 'Standard VAT',
+        taxRate: 5,
+        taxAmount: 0,
+        total: 0,
+        description: '',
+      } as AdditionalCharge,
+    ];
+  }
+
+  removeAdditionalCharge(id: string): void {
+    this.form.additionalCharges = this.form.additionalCharges.filter(
+      (c: AdditionalCharge) => c.id !== id
+    );
     this.recalculateTotals();
-    return;
   }
 
-  this.form.penaltyTaxRate   = this.resolveTaxRate(this.form.penaltyTaxGroup, this.form.penaltyTaxRate);
-  const rate = this.form.penaltyTaxRate || 0;
-  this.form.penaltyTaxAmount = this.round(this.form.penaltyAmount * rate / 100);
-  this.form.penaltyTotal     = this.round(this.form.penaltyAmount + this.form.penaltyTaxAmount);
+  calculateChargeRow(charge: AdditionalCharge): void {
+    charge.taxRate   = this.resolveTaxRate(charge.taxGroup, charge.taxRate);
+    const rate        = charge.taxRate || 0;
+    charge.taxAmount  = this.round((charge.amount || 0) * rate / 100);
+    charge.total      = this.round((charge.amount || 0) + charge.taxAmount);
+    this.recalculateTotals();
+  }
 
-  this.recalculateTotals();
-}
+  get additionalChargesBaseTotal(): number {
+    return this.round(
+      (this.form.additionalCharges || []).reduce(
+        (sum: number, c: AdditionalCharge) => sum + (c.amount || 0), 0
+      )
+    );
+  }
+
+  get additionalChargesTaxTotal(): number {
+    return this.round(
+      (this.form.additionalCharges || []).reduce(
+        (sum: number, c: AdditionalCharge) => sum + (c.taxAmount || 0), 0
+      )
+    );
+  }
+
+  get additionalChargesGrandTotal(): number {
+    return this.round(this.additionalChargesBaseTotal + this.additionalChargesTaxTotal);
+  }
 
   // ── Recalculate Subtotal / Tax Total / Invoice Total ───────────
   private recalculateTotals(): void {
+    const chargesBase = this.additionalChargesBaseTotal;
+    const chargesTax  = this.additionalChargesTaxTotal;
+
     const baseAmounts =
       (this.form.rentAmount || 0) +
       (this.form.depositAmount || 0) +
       (this.form.adminFeeAmount || 0) +
-      (this.form.penaltyAmount || 0);
+      chargesBase;
 
     const taxAmounts =
       (this.form.rentTaxAmount || 0) +
       (this.form.depositTaxAmount || 0) +
       (this.form.adminFeeTaxAmount || 0) +
-      (this.form.penaltyTaxAmount || 0);
+      chargesTax;
 
     this.form.subTotal     = this.round(baseAmounts);
     this.form.taxTotal     = this.round(taxAmounts);
