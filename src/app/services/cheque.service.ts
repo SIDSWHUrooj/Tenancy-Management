@@ -9,7 +9,7 @@ import { ChequeHeader, ChequeRequest } from '../models/cheque.model';
 
 @Injectable({ providedIn: 'root' })
 export class ChequeService {
-  private baseUrl = `${environment.apiUrl}api/ty/cheques`;
+  private baseUrl = 'https://tenancyapi.siddev.online/api/ty/cheques';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

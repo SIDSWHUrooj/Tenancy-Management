@@ -1,5 +1,5 @@
-<!-- ── Tab Action Bar ─────────────────────────────────────── -->
-<div class="tab-action-bar d-flex justify-content-between align-items-center mb-4 p-3 rounded-3">
+<!-- ── Tab Header ─────────────────────────────────────── -->
+<div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded-3 bg-light">
   <div class="d-flex align-items-center gap-2">
     <span class="fw-semibold text-dark" style="font-size:0.9rem;">Receipt Details</span>
     <span *ngIf="isLocked" class="tab-locked-badge">
@@ -8,28 +8,6 @@
       </svg>
       Posted — Read Only
     </span>
-  </div>
-  <div class="d-flex gap-2 tab-btn-group">
-    <button class="btn btn-draft-action" type="button"
-            [disabled]="!canSaveDraft || isSaving"
-            (click)="saveReceiptDraft.emit()">
-      {{ isSaving ? 'Saving...' : 'Save' }}
-    </button>
-    <button class="btn btn-save-action" type="button"
-            [disabled]="!canPost || isSaving"
-            (click)="postReceipt.emit()">
-      {{ isSaving ? 'Posting...' : 'Post' }}
-    </button>
-    <button class="btn btn-outline-print" type="button"
-            [disabled]="!canPrint"
-            (click)="printReceipt.emit()">
-      Print
-    </button>
-    <button class="btn btn-cancel-action" type="button"
-            [disabled]="!canCancel || isSaving"
-            (click)="cancelReceipt.emit()">
-      Cancel
-    </button>
   </div>
 </div>
 
@@ -151,6 +129,32 @@
         </div>
       </div>
 
+    </div>
+  </div>
+
+  <!-- ── Action Bar ────────────────────────────────────────── -->
+  <div class="d-flex justify-content-between align-items-center mt-4">
+    <button class="btn btn-danger px-4" type="button"
+            [disabled]="!canCancel || isSaving"
+            (click)="cancelReceipt.emit()">
+      Cancel
+    </button>
+    <div class="d-flex gap-2">
+      <button class="btn btn-outline-secondary px-4" type="button"
+              [disabled]="!canPrint"
+              (click)="printReceipt.emit()">
+        Print
+      </button>
+      <button class="btn btn-outline-primary px-4" type="button"
+              [disabled]="!canSaveDraft || isSaving"
+              (click)="saveReceiptDraft.emit()">
+        {{ isSaving ? 'Saving...' : 'Save Draft' }}
+      </button>
+      <button class="btn btn-success px-4" type="button"
+              [disabled]="!canPost || isSaving"
+              (click)="postReceipt.emit()">
+        {{ isSaving ? 'Posting...' : 'Save (Post)' }}
+      </button>
     </div>
   </div>
 

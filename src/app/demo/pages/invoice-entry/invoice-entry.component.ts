@@ -20,6 +20,8 @@ import {
   InvoiceDetail,
   InvoiceTax,
 } from '../../../models/invoice.model';
+import { FinalSettlementService } from '../../../services/final-settlement.service';
+import { FinalSettlement, FinalSettlementRequest, FinalSettlementCreditNoteRequest } from '../../../models/final-settlement.model';
 
 export type ReceiptTab    = 'rental' | 'receipt' | 'settlement';
 export type InvoiceType   = 'New' | 'Renewal';
@@ -57,6 +59,9 @@ export interface InvoiceForm {
   receiptId:              number | null;
   /** Status of the receipt record ('Draft' | 'Posted' | 'Cancelled') */
   receiptStatus:          ReceiptStatus;
+
+  /** Backend ID of the TYFinalSettlement record linked to this invoice/receipt */
+  settlementId:           number | null;
 
   receiptNumber:          string;
   receiptDate:            string;
@@ -122,7 +127,18 @@ export interface InvoiceForm {
 
   leaveDate:              string;
   earlyTermination:       boolean;
-  settlementStatus:       'Fully Paid' | 'Partially Paid' | 'Outstanding' | '';
+  settlementStatus:       string;
+  settlementNumber:       string;
+
+  recurringDays:          number;
+  recurringAmount:        number;
+  daysConsumed:           number;
+  rentCollected:          number;
+  securityDepositCollected: number;
+  rentForDaysConsumed:    number;
+  rentForUnutilizedDays:  number;
+
+  creditNotes:            any[];
 }
 
 @Component({
@@ -174,6 +190,7 @@ export class InvoiceEntryComponent implements OnInit {
     private receiptService: ReceiptService,
     private documentNumberService: DocumentNumberService,
     private chequeService: ChequeService,
+    private finalSettlementService: FinalSettlementService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private elRef: ElementRef,
@@ -417,6 +434,22 @@ openInvoiceLookup(): void {
   openPropertyLookup(): void {
     console.log('Property lookup — will be mapped in a later step.');
   }
+  onPeriodFromChange(newDate: string): void {
+    if (!newDate) return;
+    const fromDate = new Date(newDate);
+    if (isNaN(fromDate.getTime())) return;
+    
+    // Add 1 year and subtract 1 day to match a typical 1-year contract period
+    fromDate.setFullYear(fromDate.getFullYear() + 1);
+    fromDate.setDate(fromDate.getDate() - 1);
+    
+    // Format as YYYY-MM-DD
+    const yyyy = fromDate.getFullYear();
+    const mm = String(fromDate.getMonth() + 1).padStart(2, '0');
+    const dd = String(fromDate.getDate()).padStart(2, '0');
+    this.form.periodTo = `${yyyy}-${mm}-${dd}`;
+  }
+
 
   resetReceipt(): void {
     const today = new Date().toISOString().substring(0, 10);
@@ -900,6 +933,7 @@ private applyInvoiceToForm(invoice: Invoice): void {
 
   draft.periodFrom = this.toDateInput(invoice.periodFrom);
   draft.periodTo   = this.toDateInput(invoice.periodTo);
+  draft.leaveDate  = draft.periodTo; // default leaveDate to periodTo
 
   draft.contractNumber = invoice.contractNo;
   draft.contractDate   = this.toDateInput(invoice.contractDate);
@@ -1041,9 +1075,51 @@ private loadReceiptForInvoice(invoiceNumber: string): void {
           checksSource: 'backend',
         };
         this.cdr.detectChanges();
+        
+        if (rStatus === 'Posted') {
+          this.loadSettlementForInvoice(this.form.contractNumber);
+        }
       }
     },
     error: (err) => console.warn('Could not auto-load receipt for invoice:', err),
+  });
+}
+
+/** Load any settlement linked to this contract number */
+private loadSettlementForInvoice(contractNumber: string): void {
+  if (!contractNumber) return;
+  this.finalSettlementService.getAll().subscribe({
+    next: (res) => {
+      const data: any = res?.data;
+      const settlements: FinalSettlement[] = Array.isArray(data) ? data : Array.isArray(data?.items) ? data.items : [];
+      const linked = settlements.find(s => 
+        (s.contractNo || '').toLowerCase() === contractNumber.toLowerCase()
+      );
+      if (linked) {
+        this.form = {
+          ...this.form,
+          settlementId: linked.id || null,
+          settlementStatus: this.normalizeStatus(linked.status),
+          settlementNumber: linked.settlementNumber || '',
+          leaveDate: this.toDateInput(linked.leavingDate || '') || this.form.periodTo,
+          earlyTermination: linked.earlyTermination || false,
+          recurringDays: linked.recurringDays || 0,
+          recurringAmount: linked.recurringAmount || 0,
+          daysConsumed: linked.daysConsumed || 0,
+          rentCollected: linked.rentCollected || 0,
+          securityDepositCollected: linked.securityDepositCollected || 0,
+          rentForDaysConsumed: linked.rentForDaysConsumed || 0,
+          rentForUnutilizedDays: linked.rentForUnutilizedDays || 0,
+          creditNotes: (linked.creditNotes || []).map((cn: any) => ({
+            serviceType: cn.serviceType || '',
+            amount: cn.amount || 0,
+            remarks: cn.remarks || ''
+          }))
+        };
+        this.cdr.detectChanges();
+      }
+    },
+    error: (err: any) => console.warn('Could not auto-load settlement:', err)
   });
 }
   /**
@@ -1669,6 +1745,144 @@ cancelReceipt(): void {
   };
 }
 
+  // ── Settlement Actions ────────────────────────────────────────
+
+  private buildSettlementPayload(): FinalSettlementRequest {
+    return {
+      settlementNumber: this.form.settlementNumber,
+      contractNo: this.form.contractNumber, // map contractNumber from InvoiceForm
+      customer: this.form.customer,
+      customerName: this.form.customerName,
+      landlordCode: this.form.landlordCode,
+      landlordName: this.form.landlordName,
+      propertyId: this.form.propertyId,
+      propertyName: this.form.propertyName,
+      postingDate: this.toIsoRequired(new Date().toISOString()),
+      recurringDays: this.form.recurringDays,
+      recurringAmount: this.form.recurringAmount,
+      unitNo: this.form.unitNo,
+      earlyTermination: this.form.earlyTermination,
+      leavingDate: this.toIso(this.form.leaveDate) || '',
+      daysConsumed: this.form.daysConsumed,
+      rentCollected: this.form.rentCollected,
+      securityDepositCollected: this.form.securityDepositCollected,
+      rentForDaysConsumed: this.form.rentForDaysConsumed,
+      rentForUnutilizedDays: this.form.rentForUnutilizedDays,
+      creditNotes: (this.form.creditNotes || []).map((cn: any, idx: number) => ({
+        lineNo: idx + 1,
+        serviceType: cn.serviceType,
+        description: cn.remarks || '',
+        amount: cn.amount,
+        remarks: cn.remarks || ''
+      }))
+    };
+  }
+
+  cancelSettlement(): void {
+    // Reset to last loaded state or clear if no settlementId
+    if (this.form.contractNumber) {
+      this.loadSettlementForInvoice(this.form.contractNumber);
+    }
+  }
+
+  saveSettlementDraft(): void {
+    if (this.isSaving) return;
+    this.isSaving = true;
+    const payload = this.buildSettlementPayload();
+    
+    const req$ = this.form.settlementId
+      ? this.finalSettlementService.update(this.form.settlementId, payload)
+      : this.finalSettlementService.create(payload);
+
+    req$.subscribe({
+      next: (res: any) => {
+        this.isSaving = false;
+        this.form.settlementStatus = this.normalizeStatus(res.data?.status || 'Draft');
+        this.form.settlementId = res.data?.id || null;
+        alert('Settlement saved successfully.');
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.isSaving = false;
+        alert('Failed to save settlement draft.');
+        console.error(err);
+      }
+    });
+  }
+
+  postSettlement(): void {
+    if (this.isSaving || !this.form.settlementId) return;
+    this.isSaving = true;
+    const payload = this.buildSettlementPayload();
+    this.finalSettlementService.update(this.form.settlementId, payload).subscribe({
+      next: (res: any) => {
+        this.isSaving = false;
+        this.form.settlementStatus = 'Posted'; // Assuming API changes status or we assume it
+        alert('Settlement posted successfully.');
+        this.cdr.detectChanges();
+      },
+      error: (err: any) => {
+        this.isSaving = false;
+        alert('Failed to post settlement.');
+        console.error(err);
+      }
+    });
+  }
+
+  generateSettlementInvoice(): void {
+    if (!this.form.settlementId) return;
+    this.finalSettlementService.invoice(this.form.settlementId).subscribe({
+      next: () => alert('Invoice generated successfully.'),
+      error: (err: any) => alert('Failed to generate invoice: ' + err.message)
+    });
+  }
+
+  postSettlementAR(): void {
+    if (!this.form.settlementId) return;
+    this.finalSettlementService.postAR(this.form.settlementId).subscribe({
+      next: () => alert('AR posted successfully.'),
+      error: (err: any) => alert('Failed to post AR: ' + err.message)
+    });
+  }
+
+  postSettlementCashWorks(): void {
+    if (!this.form.settlementId) return;
+    this.finalSettlementService.postCashWorks(this.form.settlementId).subscribe({
+      next: () => alert('CashWorks posted successfully.'),
+      error: (err: any) => alert('Failed to post CashWorks: ' + err.message)
+    });
+  }
+
+  markSettlementVacant(): void {
+    if (!this.form.settlementId) return;
+    this.finalSettlementService.vacant(this.form.settlementId).subscribe({
+      next: () => alert('Marked vacant successfully.'),
+      error: (err: any) => alert('Failed to mark vacant: ' + err.message)
+    });
+  }
+
+  uploadSettlementAttachment(event: {file: File, remarks: string}): void {
+    if (!this.form.settlementId) {
+      alert('Please save the settlement draft first before uploading attachments.');
+      return;
+    }
+    this.finalSettlementService.uploadAttachment(this.form.settlementId, event.file, event.remarks).subscribe({
+      next: (res: any) => {
+        if (!this.form.attachments) this.form.attachments = [];
+        this.form.attachments.push({
+          id: res.data.id || '',
+          fileName: res.data.fileName || event.file.name,
+          fileSize: res.data.fileSize || event.file.size,
+          fileExtension: res.data.fileExtension || event.file.type,
+          uploadedDate: res.data.uploadedDate || new Date().toISOString()
+        } as TyAttachment);
+        this.cdr.detectChanges();
+        alert('Attachment uploaded successfully.');
+      },
+      error: (err: any) => alert('Failed to upload attachment: ' + err.message)
+    });
+  }
+
   // ── Date helpers ─────────────────────────────────────────────
   /**
    * Converts a date string to ISO 8601. Returns null (not today's date)
@@ -1704,6 +1918,7 @@ cancelReceipt(): void {
       receiptPosted:          false,
       receiptId:              null,
       receiptStatus:          'Draft',
+      settlementId:           null,
 
       receiptNumber:          '',
       receiptDate:            '',
@@ -1769,6 +1984,16 @@ cancelReceipt(): void {
       leaveDate:              '',
       earlyTermination:       false,
       settlementStatus:       '',
+      settlementNumber:       '',
+
+      recurringDays:          0,
+      recurringAmount:        0,
+      daysConsumed:           0,
+      rentCollected:          0,
+      securityDepositCollected: 0,
+      rentForDaysConsumed:    0,
+      rentForUnutilizedDays:  0,
+      creditNotes:            [],
     };
   }
 }

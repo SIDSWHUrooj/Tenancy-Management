@@ -11,128 +11,265 @@
     </div>
   </div>
 
-  <!-- ── Settlement Information Card ────────────────────────── -->
-  <div *ngIf="receiptPosted" class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white border-bottom py-3">
-      <h6 class="mb-0 fw-bold text-dark">Settlement Information</h6>
-    </div>
-    <div class="card-body">
-      <div class="row g-3">
+  <div *ngIf="receiptPosted">
 
-       
-       <!-- To Date -->
-<div class="col-md-3">
-  <label class="form-label fw-semibold">To Date</label>
-  <input
-  type="date"
-  class="form-control"
-  [disabled]="!form.earlyTermination"
-  [(ngModel)]="form.periodTo"
-  [max]="form.periodTo">
-</div>
-
-<!-- Early Termination Checkbox -->
-<div class="col-md-3 d-flex align-items-end pb-1">
-  <div class="form-check mb-1">
-    <input
-      class="form-check-input"
-      type="checkbox"
-      id="earlyTermination"
-      [(ngModel)]="form.earlyTermination"
-      (ngModelChange)="onEarlyTerminationChange()">
-
-    <label
-      class="form-check-label cursor-pointer fw-semibold"
-      for="earlyTermination">
-      Early Termination
-    </label>
-  </div>
-</div>
-
+    <!-- ── Settlement Information Card ────────────────────────── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom py-3">
+        <h6 class="mb-0 fw-bold text-dark">Settlement Information</h6>
       </div>
+      <div class="card-body">
+        <div class="row g-3">
+          
+          <!-- Settlement Number -->
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Settlement Number</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="form.settlementNumber" readonly placeholder="Auto Generated">
+          </div>
 
-      <!-- Early Termination Notice -->
-     @if (form.earlyTermination) {
-<div class="alert alert-warning alert-early-term mt-3 mb-0 d-flex align-items-start gap-2">
-  <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16"
-       fill="currentColor"
-       class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1"
-       viewBox="0 0 16 16">
-    <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
-  </svg>
-
-  <span class="small">
-    Early termination is enabled. Select the actual termination date.
-    The date cannot be later than the tenancy end date. Settlement,
-    penalties and refunds will be calculated accordingly.
-  </span>
-</div>
-}
-    </div>
-  </div>
-
-  <!-- ── Payment Summary Card ────────────────────────────────── -->
-  <div *ngIf="receiptPosted" class="card border-0 shadow-sm mb-4">
-    <div class="card-header bg-white border-bottom py-3">
-      <h6 class="mb-0 fw-bold text-dark">Payment Summary</h6>
-    </div>
-    <div class="card-body">
-      <div class="row g-3">
-
-        <!-- Invoice Total -->
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Invoice Total</label>
-          <div class="input-group">
-            <span class="input-group-text bg-light">AED</span>
+          <!-- To Date -->
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Leaving Date</label>
             <input
-              type="text"
-              class="form-control text-end bg-light fw-semibold"
-              [value]="form.invoiceTotal | number:'1.2-2'"
-              readonly>
+            type="date"
+            class="form-control"
+            [ngClass]="form.earlyTermination ? 'bg-white' : 'bg-light'"
+            [(ngModel)]="form.leaveDate"
+            [readonly]="!form.earlyTermination"
+            [max]="form.periodTo">
+          </div>
+
+          <!-- Status -->
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Status</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="form.settlementStatus" readonly placeholder="Status">
+          </div>
+
+          <!-- Early Termination Checkbox -->
+          <div class="col-md-3 d-flex align-items-center">
+            <div class="form-check mt-4">
+              <input
+                class="form-check-input shadow-sm"
+                type="checkbox"
+                id="earlyTermination"
+                [(ngModel)]="form.earlyTermination"
+                (ngModelChange)="onEarlyTerminationChange()">
+              <label class="form-check-label cursor-pointer fw-semibold ms-2" for="earlyTermination">
+                Early Termination
+              </label>
+            </div>
           </div>
         </div>
 
-        <!-- Previous Receipts -->
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Previous Receipts</label>
-          <div class="input-group">
-            <span class="input-group-text bg-light">AED</span>
-            <input
-              type="text"
-              class="form-control text-end bg-light text-success fw-semibold"
-              [value]="form.lastReceiptTotal | number:'1.2-2'"
-              readonly>
-          </div>
+        <!-- Early Termination Notice -->
+        <div *ngIf="form.earlyTermination" class="alert alert-warning alert-early-term mt-3 mb-0 d-flex align-items-start gap-2">
+          <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-exclamation-triangle-fill flex-shrink-0 mt-1" viewBox="0 0 16 16">
+            <path d="M8.982 1.566a1.13 1.13 0 0 0-1.96 0L.165 13.233c-.457.778.091 1.767.98 1.767h13.713c.889 0 1.438-.99.98-1.767L8.982 1.566zM8 5c.535 0 .954.462.9.995l-.35 3.507a.552.552 0 0 1-1.1 0L7.1 5.995A.905.905 0 0 1 8 5zm.002 6a1 1 0 1 1 0 2 1 1 0 0 1 0-2z"/>
+          </svg>
+          <span class="small">
+            Early termination is enabled. Select the actual termination date.
+            The date cannot be later than the tenancy end date. Settlement,
+            penalties and refunds will be calculated accordingly.
+          </span>
         </div>
-
-        <!-- Current Receipt -->
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Current Receipt</label>
-          <div class="input-group">
-            <span class="input-group-text bg-light">AED</span>
-            <input
-              type="text"
-              class="form-control text-end bg-light text-primary fw-semibold"
-              [value]="form.receiptTotal | number:'1.2-2'"
-              readonly>
-          </div>
-        </div>
-
-        <!-- Outstanding Balance -->
-        <div class="col-md-3">
-          <label class="form-label fw-semibold">Outstanding Balance</label>
-          <div class="input-group">
-            <span class="input-group-text balance-prefix">AED</span>
-            <input
-              type="text"
-              class="form-control text-end fw-bold balance-field"
-              [value]="form.balanceAmount | number:'1.2-2'"
-              readonly>
-          </div>
-        </div>
-
       </div>
     </div>
-  </div>
 
+    <!-- ── Financial Information Card ────────────────────────── -->
+    <div *ngIf="form.settlementId" class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom py-3">
+        <h6 class="mb-0 fw-bold text-dark">Financial Information</h6>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Recurring Days</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.recurringDays" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Recurring Amount (AED)</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.recurringAmount" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Days Consumed</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.daysConsumed" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Rent Collected (AED)</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.rentCollected" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Security Deposit Collected (AED)</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.securityDepositCollected" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Rent For Days Consumed (AED)</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.rentForDaysConsumed" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold text-danger">Rent For Unutilized Days (AED)</label>
+            <input type="number" class="form-control bg-light text-danger fw-bold" [(ngModel)]="form.rentForUnutilizedDays" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Credit Notes Card ────────────────────────── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
+        <h6 class="mb-0 fw-bold text-dark">Credit Notes</h6>
+        <button class="btn btn-sm btn-primary" (click)="addCreditNote()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus-lg me-1" viewBox="0 0 16 16">
+            <path fill-rule="evenodd" d="M8 2a.5.5 0 0 1 .5.5v5h5a.5.5 0 0 1 0 1h-5v5a.5.5 0 0 1-1 0v-5h-5a.5.5 0 0 1 0-1h5v-5A.5.5 0 0 1 8 2Z"/>
+          </svg>
+          Add Credit Note
+        </button>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Service Type</th>
+                <th class="text-end">Amount (AED)</th>
+                <th>Remarks</th>
+                <th class="text-center" style="width: 80px;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let note of form.creditNotes; let i = index">
+                <td>
+                  <select class="form-select form-select-sm bg-white" [(ngModel)]="note.serviceType">
+                    <option value="" disabled>Select Service Type...</option>
+                    <option *ngFor="let type of serviceTypes" [value]="type">{{ type }}</option>
+                  </select>
+                </td>
+                <td>
+                  <input type="number" class="form-control form-control-sm bg-white text-end" [(ngModel)]="note.amount" placeholder="0.00">
+                </td>
+                <td>
+                  <input type="text" class="form-control form-control-sm bg-white" [(ngModel)]="note.remarks" placeholder="Remarks">
+                </td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-danger border-0" (click)="removeCreditNote(i)" title="Delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                      <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.813 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.187 3.5h9.626Zm-8.113 2.5a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Zm3 0a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Zm3 0a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Z"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+              <tr *ngIf="!form.creditNotes || form.creditNotes.length === 0">
+                <td colspan="5" class="text-center text-muted py-4">No credit notes added. Click 'Add Credit Note' to add one.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Settlement Details Card ────────────────────────── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom py-3">
+        <h6 class="mb-0 fw-bold text-dark">Settlement Details</h6>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>Document No</th>
+                <th>Document Type</th>
+                <th>Document Date</th>
+                <th class="text-end">Amount (AED)</th>
+              </tr>
+            </thead>
+            <tbody>
+              <!-- This would be populated from form.details usually, mocking for now as per instructions -->
+              <tr>
+                <td colspan="4" class="text-center text-muted py-4">No document details available.</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Attachments Card ────────────────────────── -->
+    <div class="card border-0 shadow-sm mb-4">
+      <div class="card-header bg-white border-bottom py-3">
+        <h6 class="mb-0 fw-bold text-dark">Attachments</h6>
+      </div>
+      <div class="card-body">
+        <div class="row g-3 align-items-end mb-4">
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Upload File</label>
+            <input type="file" class="form-control bg-white" (change)="onFileSelected($event)">
+          </div>
+          <div class="col-md-5">
+            <label class="form-label fw-semibold">Remarks</label>
+            <input type="text" class="form-control bg-white" [(ngModel)]="newAttachmentRemark" placeholder="Optional remarks">
+          </div>
+          <div class="col-md-2">
+            <button class="btn btn-primary w-100" (click)="uploadAttachment()">Upload</button>
+          </div>
+        </div>
+
+        <div class="table-responsive" *ngIf="form.attachments && form.attachments.length > 0">
+          <table class="table table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th>File Name</th>
+                <th>Remarks</th>
+                <th class="text-end">Size</th>
+                <th class="text-center" style="width: 80px;">Action</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let att of form.attachments; let i = index">
+                <td>
+                  <a href="javascript:void(0)" class="text-decoration-none">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text me-2 text-primary" viewBox="0 0 16 16">
+                      <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                      <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2.5a1 1 0 0 0 1 1H13v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                    </svg>
+                    {{ att.name }}
+                  </a>
+                </td>
+                <td>{{ att.remarks }}</td>
+                <td class="text-end">{{ (att.size / 1024) | number:'1.0-1' }} KB</td>
+                <td class="text-center">
+                  <button class="btn btn-sm btn-outline-danger border-0" (click)="removeAttachment(i)" title="Delete">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                      <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.813 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.187 3.5h9.626Zm-8.113 2.5a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Zm3 0a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Zm3 0a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Z"/>
+                    </svg>
+                  </button>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- ── Action Bar ────────────────────────────────────────── -->
+    <div class="d-flex justify-content-between align-items-center mt-4">
+      <button class="btn btn-danger px-4" (click)="cancelSettlement()">Cancel</button>
+      <div class="d-flex gap-2">
+        <!-- These actions show when settlement is posted based on the design request -->
+        <ng-container *ngIf="form.settlementStatus === 'Posted'">
+          <button class="btn btn-outline-primary" (click)="generateInvoiceAction()">Generate Invoice</button>
+          <button class="btn btn-outline-primary" (click)="postARAction()">Post AR</button>
+          <button class="btn btn-outline-primary" (click)="postCashWorksAction()">Post CashWorks</button>
+          <button class="btn btn-outline-primary" (click)="markVacantAction()">Mark Vacant</button>
+        </ng-container>
+
+        <!-- Save Actions -->
+        <button class="btn btn-outline-secondary px-4" (click)="printSettlement()" *ngIf="form.settlementStatus === 'Posted' || form.settlementStatus === 'Draft'">Print</button>
+        <button class="btn btn-outline-primary px-4" (click)="saveSettlementDraft()" *ngIf="form.settlementStatus !== 'Posted'">Save Draft</button>
+        <button class="btn btn-success px-4" (click)="postSettlement()" *ngIf="form.settlementStatus !== 'Posted'">Save (Post)</button>
+      </div>
+    </div>
+
+  </div>
 </div>

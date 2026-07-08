@@ -39,26 +39,37 @@ export class RecurringEntriesComponent implements OnInit {
   }
 
   // GET /api/ty/recurring-entries?year=&month=
-  loadEntries(): void {
-    this.isLoading = true;
+ // POST generate -> then GET /api/ty/recurring-entries?year=&month=
+loadEntries(): void {
+  this.isLoading = true;
 
-    this.recurringService.getEntries(this.selectedYear, this.selectedMonth).subscribe({
-      next: (res) => {
-        if (res.success && res.data) {
-          this.mapHeadersToGrid(res.data);
-        } else {
-          this.allDetails = [];
-          this.processedDetails = [];
-        }
-        this.applyFilters();
-        this.isLoading = false;
-      },
-      error: (err) => {
-        console.error('Failed to load recurring entries', err);
-        this.isLoading = false;
+  this.recurringService.generateEntries(+this.selectedYear, +this.selectedMonth).subscribe({
+    next: () => this.fetchEntries(),
+    error: (err) => {
+      console.warn('Generate call failed (likely already generated for this period) — fetching existing entries anyway', err);
+      this.fetchEntries(); // always attempt to load, regardless of generate outcome
+    }
+  });
+}
+
+private fetchEntries(): void {
+  this.recurringService.getEntries(this.selectedYear, this.selectedMonth).subscribe({
+    next: (res) => {
+      if (res.success && res.data) {
+        this.mapHeadersToGrid(res.data);
+      } else {
+        this.allDetails = [];
+        this.processedDetails = [];
       }
-    });
-  }
+      this.applyFilters();
+      this.isLoading = false;
+    },
+    error: (err) => {
+      console.error('Failed to load recurring entries', err);
+      this.isLoading = false;
+    }
+  });
+}
 
   private mapHeadersToGrid(headers: RecurringHeaderDto[]): void {
     const allRows: RecurringDetail[] = [];

@@ -32,7 +32,7 @@
             <div class="col-md-3 ">
               <label class="form-label fw-semibold">Invoice Number</label>
               <div class="input-group">
-                <input type="text" class="form-control bg-light" [(ngModel)]="form.invoiceNumber" >
+                <input type="text" class="form-control bg-light" [(ngModel)]="form.invoiceNumber" [disabled]="isRentalLocked()" >
                 <button type="button" class="btn btn-outline-primary" title="Search Invoice" (click)="openInvoiceLookup()">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
@@ -49,12 +49,12 @@
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Invoice Date</label>
-              <input type="date" class="form-control bg-white" [(ngModel)]="form.invoiceDate">
+              <input type="date" class="form-control bg-white" [(ngModel)]="form.invoiceDate" [disabled]="isRentalLocked()">
             </div>
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Invoice Type</label>
-              <select class="form-select bg-white" [(ngModel)]="form.invoiceType" (change)="openTypeModal()">
+              <select class="form-select bg-white" [(ngModel)]="form.invoiceType" (change)="openTypeModal()" [disabled]="isRentalLocked()">
                 <option value="New">New</option>
                 <option value="Renewal">Renewal</option>
               </select>
@@ -62,7 +62,7 @@
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Purpose Of Lease</label>
-              <select class="form-select bg-white" [(ngModel)]="form.purposeOfLease">
+              <select class="form-select bg-white" [(ngModel)]="form.purposeOfLease" [disabled]="isRentalLocked()">
                 <option value="Commercial">Commercial</option>
                 <option value="Residential">Residential</option>
                 <option value="Office">Office</option>
@@ -75,7 +75,7 @@
           <div class="row g-3 mb-3">
             <div class="col-md-3">
               <label class="form-label fw-semibold">Previous Invoice Number</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.previousInvoiceNumber" placeholder="e.g., INV-000001">
+              <input type="text" class="form-control bg-white" [(ngModel)]="form.previousInvoiceNumber" placeholder="e.g., INV-000001" [disabled]="isRentalLocked()">
             </div>
           </div>
           }
@@ -84,8 +84,8 @@
             <div class="col-md-3">
               <label class="form-label fw-semibold">Customer ID</label>
               <div class="input-group">
-                <input type="text" class="form-control bg-white" [(ngModel)]="form.customer" placeholder="ID">
-                <button type="button" class="btn btn-outline-primary" title="Search Customer" (click)="openCustomerLookup()">
+                <input type="text" class="form-control bg-white" [(ngModel)]="form.customer" placeholder="ID" [disabled]="isRentalLocked()">
+                <button type="button" class="btn btn-outline-primary" title="Search Customer" (click)="openCustomerLookup()" [disabled]="isRentalLocked()">
                   Search
                 </button>
               </div>
@@ -93,7 +93,7 @@
 
             <div class="col-md-9">
               <label class="form-label fw-semibold">Customer Name</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.customerName" placeholder="Select Customer ID or enter name">
+              <input type="text" class="form-control bg-white" [(ngModel)]="form.customerName" placeholder="Select Customer ID or enter name" [disabled]="isRentalLocked()">
             </div>
           </div>
 
@@ -101,8 +101,8 @@
             <div class="col-md-3">
               <label class="form-label fw-semibold">Property ID</label>
               <div class="input-group">
-                <input type="text" class="form-control bg-white" [(ngModel)]="form.propertyId" placeholder="ID">
-                <button type="button" class="btn btn-outline-primary" title="Search Property" (click)="openPropertyLookup()">
+                <input type="text" class="form-control bg-white" [(ngModel)]="form.propertyId" placeholder="ID" [disabled]="isRentalLocked()">
+                <button type="button" class="btn btn-outline-primary" title="Search Property" (click)="openPropertyLookup()" [disabled]="isRentalLocked()">
                   Search
                 </button>
               </div>
@@ -110,12 +110,12 @@
 
             <div class="col-md-6">
               <label class="form-label fw-semibold">Property Name</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.propertyName" placeholder="Select Property ID or enter property name">
+              <input type="text" class="form-control bg-white" [(ngModel)]="form.propertyName" placeholder="Select Property ID or enter property name" [disabled]="isRentalLocked()">
             </div>
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Unit Number</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.unitNo" placeholder="Unit Number">
+              <input type="text" class="form-control bg-white" [(ngModel)]="form.unitNo" placeholder="Unit Number" [disabled]="isRentalLocked()">
             </div>
           </div>
 
@@ -123,41 +123,42 @@
             <div class="col-md-3">
               <label class="form-label fw-semibold">Period From <span class="text-danger">*</span></label>
               <input type="date" class="form-control bg-white" [(ngModel)]="form.periodFrom"
-                    [ngClass]="{'required-field': isRequired('periodFrom')}">
+                    (ngModelChange)="onPeriodFromChange($event)"
+                    [ngClass]="{'required-field': isRequired('periodFrom')}" [disabled]="isRentalLocked()">
             </div>
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Period To <span class="text-danger">*</span></label>
               <input type="date" class="form-control bg-white" [(ngModel)]="form.periodTo"
-                    [ngClass]="{'required-field': isRequired('periodTo')}">
+                    [ngClass]="{'required-field': isRequired('periodTo')}" [disabled]="isRentalLocked()">
             </div>
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Grace Period Start <span class="text-danger">*</span></label>
               <input type="date" class="form-control bg-white" [(ngModel)]="form.gracePeriodStart"
-                    [ngClass]="{'required-field': isRequired('gracePeriodStart')}">
+                    [ngClass]="{'required-field': isRequired('gracePeriodStart')}" [disabled]="isRentalLocked()">
             </div>
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Grace Period End <span class="text-danger">*</span></label>
               <input type="date" class="form-control bg-white" [(ngModel)]="form.gracePeriodEnd"
-                    [ngClass]="{'required-field': isRequired('gracePeriodEnd')}">
+                    [ngClass]="{'required-field': isRequired('gracePeriodEnd')}" [disabled]="isRentalLocked()">
             </div>
           </div>
 
           <div class="row g-3 mb-4 mt-1">
             <div class="col-md-3">
               <label class="form-label fw-semibold">Contract Number</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.contractNumber" placeholder="Enter Contract Number">
+              <input type="text" class="form-control bg-white" [(ngModel)]="form.contractNumber" placeholder="Enter Contract Number" [disabled]="isRentalLocked()">
             </div>
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Contract Date</label>
-              <input type="date" class="form-control bg-white" [(ngModel)]="form.contractDate">
+              <input type="date" class="form-control bg-white" [(ngModel)]="form.contractDate" [disabled]="isRentalLocked()">
             </div>
             <div class="col-md-3">
               <label class="form-label fw-semibold">Ejari Number</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.ejariNumber" placeholder="Enter Ejari Number">
+              <input type="text" class="form-control bg-white" [(ngModel)]="form.ejariNumber" placeholder="Enter Ejari Number" [disabled]="isRentalLocked()">
             </div>
           </div>
 
@@ -214,7 +215,15 @@
             <div [hidden]="activeTab !== 'settlement'">
               <app-settlement-details-tab
                 [form]="form"
-                [receiptPosted]="form.receiptPosted" />
+                [receiptPosted]="form.receiptPosted"
+                (cancel)="cancelSettlement()"
+                (saveDraft)="saveSettlementDraft()"
+                (post)="postSettlement()"
+                (generateInvoice)="generateSettlementInvoice()"
+                (postAR)="postSettlementAR()"
+                (postCashWorks)="postSettlementCashWorks()"
+                (markVacant)="markSettlementVacant()"
+                (uploadFile)="uploadSettlementAttachment($event)" />
             </div>
           </div>
         </div>

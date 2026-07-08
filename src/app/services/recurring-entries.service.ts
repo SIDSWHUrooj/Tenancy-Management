@@ -14,7 +14,7 @@ export interface ApiResponse<T> {
 @Injectable({ providedIn: 'root' })
 export class RecurringEntriesService {
 
-  private baseUrl = `${environment.apiUrl}api/ty/recurring-entries`;
+  private baseUrl = 'https://tenancyapi.siddev.online/api/ty/recurring-entries';
 
   constructor(private http: HttpClient, private authService: AuthService) {}
 

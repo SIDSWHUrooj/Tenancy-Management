@@ -9,3 +9,4 @@ export * from './receipt.model';
 export * from './property.model';
 export * from './unit.model';
 export * from './recurring-entry.model';
+export * from './final-settlement.model';
