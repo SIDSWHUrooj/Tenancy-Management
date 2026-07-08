@@ -137,8 +137,16 @@ export interface InvoiceForm {
   securityDepositCollected: number;
   rentForDaysConsumed:    number;
   rentForUnutilizedDays:  number;
-
   creditNotes:            any[];
+  
+  // New Settlement Calcs
+  totalContractDays:      number;
+  remainingDays:          number;
+  dailyRent:              number;
+  rentRefund:             number;
+  securityDepositRefund:  number;
+  grandRefund:            number;
+  isSettlementCalculated: boolean;
 }
 
 @Component({
@@ -1778,6 +1786,54 @@ cancelReceipt(): void {
     };
   }
 
+  calculateSettlement(): void {
+    const start = new Date(this.form.periodFrom);
+    const end = new Date(this.form.periodTo);
+    const leave = new Date(this.form.leaveDate);
+
+    // Default basic fallback
+    if (isNaN(start.getTime()) || isNaN(end.getTime()) || isNaN(leave.getTime())) {
+      alert('Invalid dates for settlement calculation.');
+      return;
+    }
+
+    // Days difference calculation
+    const msPerDay = 1000 * 60 * 60 * 24;
+    
+    // (Period To - Period From) + 1
+    const totalContractDays = Math.floor((end.getTime() - start.getTime()) / msPerDay) + 1;
+    
+    // (Leaving Date - Period From) + 1
+    const daysConsumed = Math.floor((leave.getTime() - start.getTime()) / msPerDay) + 1;
+
+    const remainingDays = totalContractDays - daysConsumed;
+
+    this.form.totalContractDays = totalContractDays;
+    this.form.daysConsumed = daysConsumed;
+    this.form.remainingDays = remainingDays;
+
+    // Financials
+    this.form.rentCollected = this.form.rentAmount || 0;
+    this.form.securityDepositCollected = this.form.depositAmount || 0;
+    
+    this.form.dailyRent = totalContractDays > 0 ? (this.form.rentCollected / totalContractDays) : 0;
+    this.form.rentForDaysConsumed = daysConsumed * this.form.dailyRent;
+    this.form.rentForUnutilizedDays = remainingDays * this.form.dailyRent;
+    
+    this.form.rentRefund = this.form.rentForUnutilizedDays;
+    this.form.securityDepositRefund = this.form.securityDepositCollected;
+
+    // Recalculate totals including credit notes
+    this.recalculateSettlementTotals();
+
+    this.form.isSettlementCalculated = true;
+  }
+
+  recalculateSettlementTotals(): void {
+    const totalCreditNotes = (this.form.creditNotes || []).reduce((sum, cn) => sum + (cn.amount || 0), 0);
+    this.form.grandRefund = this.form.rentRefund + this.form.securityDepositRefund - totalCreditNotes;
+  }
+
   cancelSettlement(): void {
     // Reset to last loaded state or clear if no settlementId
     if (this.form.contractNumber) {
@@ -1994,6 +2050,14 @@ cancelReceipt(): void {
       rentForDaysConsumed:    0,
       rentForUnutilizedDays:  0,
       creditNotes:            [],
+      
+      totalContractDays:      0,
+      remainingDays:          0,
+      dailyRent:              0,
+      rentRefund:             0,
+      securityDepositRefund:  0,
+      grandRefund:            0,
+      isSettlementCalculated: false,
     };
   }
 }

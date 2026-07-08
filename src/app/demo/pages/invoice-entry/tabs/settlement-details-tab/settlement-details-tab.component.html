@@ -75,45 +75,7 @@
       </div>
     </div>
 
-    <!-- ── Financial Information Card ────────────────────────── -->
-    <div *ngIf="form.settlementId" class="card border-0 shadow-sm mb-4">
-      <div class="card-header bg-white border-bottom py-3">
-        <h6 class="mb-0 fw-bold text-dark">Financial Information</h6>
-      </div>
-      <div class="card-body">
-        <div class="row g-3">
-          
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Recurring Days</label>
-            <input type="number" class="form-control bg-light" [(ngModel)]="form.recurringDays" readonly>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Recurring Amount (AED)</label>
-            <input type="number" class="form-control bg-light" [(ngModel)]="form.recurringAmount" readonly>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Days Consumed</label>
-            <input type="number" class="form-control bg-light" [(ngModel)]="form.daysConsumed" readonly>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Rent Collected (AED)</label>
-            <input type="number" class="form-control bg-light" [(ngModel)]="form.rentCollected" readonly>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Security Deposit Collected (AED)</label>
-            <input type="number" class="form-control bg-light" [(ngModel)]="form.securityDepositCollected" readonly>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Rent For Days Consumed (AED)</label>
-            <input type="number" class="form-control bg-light" [(ngModel)]="form.rentForDaysConsumed" readonly>
-          </div>
-          <div class="col-md-3">
-            <label class="form-label fw-semibold text-danger">Rent For Unutilized Days (AED)</label>
-            <input type="number" class="form-control bg-light text-danger fw-bold" [(ngModel)]="form.rentForUnutilizedDays" readonly>
-          </div>
-        </div>
-      </div>
-    </div>
+
 
     <!-- ── Credit Notes Card ────────────────────────── -->
     <div class="card border-0 shadow-sm mb-4">
@@ -146,7 +108,7 @@
                   </select>
                 </td>
                 <td>
-                  <input type="number" class="form-control form-control-sm bg-white text-end" [(ngModel)]="note.amount" placeholder="0.00">
+                  <input type="number" class="form-control form-control-sm bg-white text-end" [(ngModel)]="note.amount" (ngModelChange)="onCreditNoteChange()" placeholder="0.00">
                 </td>
                 <td>
                   <input type="text" class="form-control form-control-sm bg-white" [(ngModel)]="note.remarks" placeholder="Remarks">
@@ -252,6 +214,60 @@
       </div>
     </div>
 
+    <!-- ── Calculation Action ────────────────────────── -->
+    <div class="d-flex justify-content-end mb-4">
+      <button class="btn btn-primary px-4 shadow-sm" (click)="calculate.emit()" *ngIf="form.settlementStatus !== 'Posted'">
+        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-calculator me-1" viewBox="0 0 16 16">
+          <path d="M12 1a1 1 0 0 1 1 1v12a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h8zM4 0a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H4z"/>
+          <path d="M4 2.5a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.5.5h-7a.5.5 0 0 1-.5-.5v-2zm0 4a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm3-6a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-1zm0 3a.5.5 0 0 1 .5-.5h1a.5.5 0 0 1 .5.5v4a.5.5 0 0 1-.5.5h-1a.5.5 0 0 1-.5-.5v-4z"/>
+        </svg>
+        Go
+      </button>
+    </div>
+
+    <!-- ── Financial Information Card ────────────────────────── -->
+    <div class="card border-0 shadow-sm mb-4" *ngIf="form.isSettlementCalculated">
+      <div class="card-header bg-white border-bottom py-3">
+        <h6 class="mb-0 fw-bold text-dark">Financial Summary</h6>
+      </div>
+      <div class="card-body">
+        <div class="row g-3">
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Total Contract Days</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.totalContractDays" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Days Consumed</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.daysConsumed" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Remaining Days</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.remainingDays" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Daily Rent (AED)</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.dailyRent" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Rent For Days Consumed (AED)</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.rentForDaysConsumed" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Rent For Unutilized Days (AED)</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.rentForUnutilizedDays" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold">Security Deposit Refund (AED)</label>
+            <input type="number" class="form-control bg-light" [(ngModel)]="form.securityDepositRefund" readonly>
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-semibold text-success">Grand Refund (AED)</label>
+            <input type="number" class="form-control bg-light text-success fw-bold" [(ngModel)]="form.grandRefund" readonly>
+          </div>
+        </div>
+      </div>
+    </div>
+
     <!-- ── Action Bar ────────────────────────────────────────── -->
     <div class="d-flex justify-content-between align-items-center mt-4">
       <button class="btn btn-danger px-4" (click)="cancelSettlement()">Cancel</button>
@@ -266,7 +282,6 @@
 
         <!-- Save Actions -->
         <button class="btn btn-outline-secondary px-4" (click)="printSettlement()" *ngIf="form.settlementStatus === 'Posted' || form.settlementStatus === 'Draft'">Print</button>
-        <button class="btn btn-outline-primary px-4" (click)="saveSettlementDraft()" *ngIf="form.settlementStatus !== 'Posted'">Save Draft</button>
         <button class="btn btn-success px-4" (click)="postSettlement()" *ngIf="form.settlementStatus !== 'Posted'">Save (Post)</button>
       </div>
     </div>

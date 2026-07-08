@@ -81,6 +81,8 @@ export class SettlementDetailsTabComponent implements OnChanges {
   }
 
   // ── Credit Notes ──────────────────────────────────────────────
+  @Output() calculate = new EventEmitter<void>();
+
   addCreditNote(): void {
     if (!this.form.creditNotes) {
       this.form.creditNotes = [];
@@ -90,10 +92,16 @@ export class SettlementDetailsTabComponent implements OnChanges {
       amount: 0,
       remarks: ''
     });
+    if (this.form.isSettlementCalculated) this.calculate.emit();
   }
 
   removeCreditNote(index: number): void {
     this.form.creditNotes.splice(index, 1);
+    if (this.form.isSettlementCalculated) this.calculate.emit();
+  }
+
+  onCreditNoteChange(): void {
+    if (this.form.isSettlementCalculated) this.calculate.emit();
   }
 
   // ── Attachments ───────────────────────────────────────────────
