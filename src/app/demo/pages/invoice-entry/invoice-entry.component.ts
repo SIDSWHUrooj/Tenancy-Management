@@ -22,6 +22,8 @@ import {
 } from '../../../models/invoice.model';
 import { FinalSettlementService } from '../../../services/final-settlement.service';
 import { FinalSettlement, FinalSettlementRequest, FinalSettlementCreditNoteRequest } from '../../../models/final-settlement.model';
+import { ContractService } from '../../../services/contract.service';
+import { CreateContractRequest } from '../../../models/contract.model';
 
 export type ReceiptTab    = 'rental' | 'receipt' | 'settlement';
 export type InvoiceType   = 'New' | 'Renewal';
@@ -199,6 +201,7 @@ export class InvoiceEntryComponent implements OnInit {
     private documentNumberService: DocumentNumberService,
     private chequeService: ChequeService,
     private finalSettlementService: FinalSettlementService,
+    private contractService: ContractService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private elRef: ElementRef,
@@ -1755,6 +1758,52 @@ cancelReceipt(): void {
 
   // ── Settlement Actions ────────────────────────────────────────
 
+  createContract(): void {
+    if (this.isSaving) return;
+    this.isSaving = true;
+
+    // Format cheques into string
+    let chequeDetailsStr = '';
+    if (this.form.checks && this.form.checks.length > 0) {
+      const bankName = this.form.checks[0].bank || this.form.detailsBank || 'Unknown Bank';
+      chequeDetailsStr = `${this.form.checks.length} cheques, Bank: ${bankName}`;
+    }
+
+    const payload: CreateContractRequest = {
+      contractNo: this.form.contractNumber || '',
+      contractDate: this.toIsoRequired(this.form.contractDate),
+      customerCode: this.form.customer || '',
+      customerName: this.form.customerName || '',
+      propertyId: this.form.propertyId || '',
+      unitNo: this.form.unitNo || '',
+      leaseStartDate: this.toIsoRequired(this.form.periodFrom),
+      leaseEndDate: this.toIsoRequired(this.form.periodTo),
+      annualRent: this.form.rentTotal || 0,
+      securityDeposit: this.form.depositAmount || 0,
+      paymentTerms: '', // default to empty string as discussed
+      chequeDetails: chequeDetailsStr,
+      remarks: ''
+    };
+
+    this.contractService.create(payload).subscribe({
+      next: (res) => {
+        this.isSaving = false;
+        if (res.success && res.data) {
+          this.form.contractNumber = res.data.contractNo || '';
+          alert('Contract created successfully!');
+          this.cdr.detectChanges();
+        } else {
+          alert(res.message || 'Failed to create contract.');
+        }
+      },
+      error: (err) => {
+        this.isSaving = false;
+        console.error('[createContract] Failed:', err);
+        alert('Failed to create contract. Please try again.');
+      }
+    });
+  }
+
   private buildSettlementPayload(): FinalSettlementRequest {
     return {
       settlementNumber: this.form.settlementNumber,
@@ -1813,8 +1862,9 @@ cancelReceipt(): void {
     this.form.remainingDays = remainingDays;
 
     // Financials
-    this.form.rentCollected = this.form.rentAmount || 0;
-    this.form.securityDepositCollected = this.form.depositAmount || 0;
+    // Use rentAmount if it's set (e.g. from invoice), otherwise fall back to what was loaded from the DB
+    this.form.rentCollected = this.form.rentAmount ? this.form.rentAmount : (this.form.rentCollected || 0);
+    this.form.securityDepositCollected = this.form.depositAmount ? this.form.depositAmount : (this.form.securityDepositCollected || 0);
     
     this.form.dailyRent = totalContractDays > 0 ? (this.form.rentCollected / totalContractDays) : 0;
     this.form.rentForDaysConsumed = daysConsumed * this.form.dailyRent;
@@ -1822,6 +1872,32 @@ cancelReceipt(): void {
     
     this.form.rentRefund = this.form.rentForUnutilizedDays;
     this.form.securityDepositRefund = this.form.securityDepositCollected;
+
+    // Early Termination Penalty (Credit Note Sync)
+    if (this.form.earlyTermination) {
+      if (!this.form.creditNotes) this.form.creditNotes = [];
+      
+      // Look for an existing auto-populated ET note to keep synchronized
+      let etNote = this.form.creditNotes.find((n: any) => n.remarks === 'Early Termination Penalty');
+      
+      // If any amount is payable for the unutilized period, apply it as the early termination penalty
+      const earlyTerminationPenalty = this.form.rentForUnutilizedDays > 0 ? this.form.rentForUnutilizedDays : 0;
+      
+      if (earlyTerminationPenalty > 0) {
+        if (etNote) {
+          etNote.amount = earlyTerminationPenalty;
+        } else {
+          this.form.creditNotes.push({
+            serviceType: 'Utility',
+            amount: earlyTerminationPenalty,
+            remarks: 'Early Termination Penalty'
+          });
+        }
+      } else if (etNote) {
+        // Remove it if penalty is 0
+        this.form.creditNotes = this.form.creditNotes.filter((n: any) => n.remarks !== 'Early Termination Penalty');
+      }
+    }
 
     // Recalculate totals including credit notes
     this.recalculateSettlementTotals();
@@ -1844,8 +1920,33 @@ cancelReceipt(): void {
   saveSettlementDraft(): void {
     if (this.isSaving) return;
     this.isSaving = true;
+     console.log('[saveSettlementDraft] BEFORE calc:', {
+    rentAmount: this.form.rentAmount,
+    depositAmount: this.form.depositAmount,
+    rentCollected: this.form.rentCollected,
+    securityDepositCollected: this.form.securityDepositCollected,
+    invoiceId: this.form.invoiceId,
+    contractNumber: this.form.contractNumber,
+  });
+      this.calculateSettlement();  
+      console.log('[saveSettlementDraft] dates:', {
+  periodFrom: this.form.periodFrom,
+  periodTo: this.form.periodTo,
+  leaveDate: this.form.leaveDate,
+}); 
+       console.log('[saveSettlementDraft] AFTER calc:', {
+    totalContractDays: this.form.totalContractDays,
+    daysConsumed: this.form.daysConsumed,
+    dailyRent: this.form.dailyRent,
+    rentCollected: this.form.rentCollected,
+    securityDepositCollected: this.form.securityDepositCollected,
+    rentForDaysConsumed: this.form.rentForDaysConsumed,
+    rentForUnutilizedDays: this.form.rentForUnutilizedDays,
+  });            // ← force fresh calc
+
     const payload = this.buildSettlementPayload();
-    
+      console.log('[saveSettlementDraft] PAYLOAD:', JSON.stringify(payload, null, 2));
+
     const req$ = this.form.settlementId
       ? this.finalSettlementService.update(this.form.settlementId, payload)
       : this.finalSettlementService.create(payload);
@@ -1866,25 +1967,74 @@ cancelReceipt(): void {
     });
   }
 
-  postSettlement(): void {
-    if (this.isSaving || !this.form.settlementId) return;
-    this.isSaving = true;
-    const payload = this.buildSettlementPayload();
-    this.finalSettlementService.update(this.form.settlementId, payload).subscribe({
-      next: (res: any) => {
-        this.isSaving = false;
-        this.form.settlementStatus = 'Posted'; // Assuming API changes status or we assume it
-        alert('Settlement posted successfully.');
-        this.cdr.detectChanges();
-      },
-      error: (err: any) => {
-        this.isSaving = false;
-        alert('Failed to post settlement.');
-        console.error(err);
-      }
-    });
-  }
+  // postSettlement(): void {
+  //   if (this.isSaving || !this.form.settlementId) return;
+  //   this.isSaving = true;
+  //    console.log('[postSettlement] BEFORE calc:', {
+  //   rentAmount: this.form.rentAmount,
+  //   depositAmount: this.form.depositAmount,
+  //   periodFrom: this.form.periodFrom,
+  //   periodTo: this.form.periodTo,
+  //   leaveDate: this.form.leaveDate,
+  // });
+  //   this.calculateSettlement();               // ← force fresh calc
 
+  //   const payload = this.buildSettlementPayload();
+  //   this.finalSettlementService.update(this.form.settlementId, payload).subscribe({
+  //     next: (res: any) => {
+  //       this.isSaving = false;
+  //       this.form.settlementStatus = 'Posted'; // Assuming API changes status or we assume it
+  //       alert('Settlement posted successfully.');
+  //       this.cdr.detectChanges();
+  //     },
+  //     error: (err: any) => {
+  //       this.isSaving = false;
+  //       alert('Failed to post settlement.');
+  //       console.error(err);
+  //     }
+  //   });
+  // }
+postSettlement(): void {
+  if (this.isSaving || !this.form.settlementId) return;
+  this.isSaving = true;
+  console.log('[postSettlement] BEFORE calc:', {
+    rentAmount: this.form.rentAmount,
+    depositAmount: this.form.depositAmount,
+    periodFrom: this.form.periodFrom,
+    periodTo: this.form.periodTo,
+    leaveDate: this.form.leaveDate,
+  });
+
+  this.calculateSettlement();
+
+  console.log('[postSettlement] AFTER calc:', {
+    totalContractDays: this.form.totalContractDays,
+    daysConsumed: this.form.daysConsumed,
+    dailyRent: this.form.dailyRent,
+    rentCollected: this.form.rentCollected,
+    securityDepositCollected: this.form.securityDepositCollected,
+    rentForDaysConsumed: this.form.rentForDaysConsumed,
+    rentForUnutilizedDays: this.form.rentForUnutilizedDays,
+  });
+
+  const payload = this.buildSettlementPayload();
+  console.log('[postSettlement] PAYLOAD:', JSON.stringify(payload, null, 2));
+
+  this.finalSettlementService.update(this.form.settlementId, payload).subscribe({
+    next: (res: any) => {
+      this.isSaving = false;
+      this.form.settlementStatus = 'Posted';
+      console.log('[postSettlement] RESPONSE:', JSON.stringify(res, null, 2));
+      alert('Settlement posted successfully.');
+      this.cdr.detectChanges();
+    },
+    error: (err: any) => {
+      this.isSaving = false;
+      alert('Failed to post settlement.');
+      console.error(err);
+    }
+  });
+}
   generateSettlementInvoice(): void {
     if (!this.form.settlementId) return;
     this.finalSettlementService.invoice(this.form.settlementId).subscribe({
@@ -1895,10 +2045,14 @@ cancelReceipt(): void {
 
   postSettlementAR(): void {
     if (!this.form.settlementId) return;
+    // TODO: AR API connected previously but removed per user request. Will be used later in future.
+    /*
     this.finalSettlementService.postAR(this.form.settlementId).subscribe({
       next: () => alert('AR posted successfully.'),
       error: (err: any) => alert('Failed to post AR: ' + err.message)
     });
+    */
+    alert('AR API connection temporarily disabled for future use.');
   }
 
   postSettlementCashWorks(): void {

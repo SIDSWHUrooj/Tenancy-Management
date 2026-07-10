@@ -28,6 +28,10 @@ export class SettlementDetailsTabComponent implements OnChanges {
   newAttachmentRemark = '';
   selectedFile: File | null = null;
   
+  isLeaveDateValid: boolean = true;
+  leaveDateValidationMessage: string = '';
+  isDirty: boolean = true;
+  
   readonly serviceTypes: string[] = [
     'Penalty', 'Utility', 'Miscellaneous','Other Charges'
   ];
@@ -45,8 +49,18 @@ export class SettlementDetailsTabComponent implements OnChanges {
     }
   }
 
+  markDirty(): void {
+    this.isDirty = true;
+  }
+
+  triggerUpdate(): void {
+    this.calculate.emit();
+    this.isDirty = false;
+  }
+
   // ── Called when Early Termination toggle changes ──────────────
   onEarlyTerminationChange(): void {
+    this.markDirty();
     if (!this.form.earlyTermination) {
       // Reset when disabled
       this.form.leaveDate = this.form.periodTo;
@@ -55,15 +69,26 @@ export class SettlementDetailsTabComponent implements OnChanges {
   }
 
   onToDateChange(): void {
-    if (!this.form.leaveDate || !this.form.periodTo) {
+    this.markDirty();
+    if (!this.form.leaveDate || !this.form.periodTo || !this.form.periodFrom) {
+      this.isLeaveDateValid = false;
+      this.leaveDateValidationMessage = 'Please ensure Period From, Period To, and Leaving Date are set.';
       return;
     }
 
     const selected = new Date(this.form.leaveDate);
     const periodEnd = new Date(this.form.periodTo);
+    const periodStart = new Date(this.form.periodFrom);
 
     if (selected > periodEnd) {
-      this.form.leaveDate = this.form.periodTo;
+      this.isLeaveDateValid = false;
+      this.leaveDateValidationMessage = 'Leaving date cannot exceed the contract end date.';
+    } else if (selected < periodStart) {
+      this.isLeaveDateValid = false;
+      this.leaveDateValidationMessage = 'Leaving date cannot be before the contract start date.';
+    } else {
+      this.isLeaveDateValid = true;
+      this.leaveDateValidationMessage = 'Date is valid.';
     }
 
     this.recalculate();
@@ -84,6 +109,7 @@ export class SettlementDetailsTabComponent implements OnChanges {
   @Output() calculate = new EventEmitter<void>();
 
   addCreditNote(): void {
+    this.markDirty();
     if (!this.form.creditNotes) {
       this.form.creditNotes = [];
     }
@@ -96,12 +122,31 @@ export class SettlementDetailsTabComponent implements OnChanges {
   }
 
   removeCreditNote(index: number): void {
+    this.markDirty();
     this.form.creditNotes.splice(index, 1);
     if (this.form.isSettlementCalculated) this.calculate.emit();
   }
 
   onCreditNoteChange(): void {
     if (this.form.isSettlementCalculated) this.calculate.emit();
+  }
+
+  getTotalCreditNotes(): number {
+    return (this.form.creditNotes || []).reduce((sum: number, note: any) => sum + (note.amount || 0), 0);
+  }
+
+  getFinalBalance(): number {
+    // As per user request: calculate the outstanding balance directly from the fields shown in Payment Summary
+    // Outstanding = Credit Amount Notes - Security Deposit
+    const deposit = this.form.depositAmount || 0;
+    const credits = this.getTotalCreditNotes();
+
+    return credits - deposit;
+  }
+
+  getFinancialSummaryTotal(): number {
+    // Inverse of grandRefund so positive means Tenant Owes Us (Outstanding), negative means we owe tenant (Credit)
+    return -(this.form.grandRefund || 0);
   }
 
   // ── Attachments ───────────────────────────────────────────────

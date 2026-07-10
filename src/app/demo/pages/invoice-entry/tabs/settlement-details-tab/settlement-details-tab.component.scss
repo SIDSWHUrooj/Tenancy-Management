@@ -168,3 +168,93 @@ $border-color:   #ced4da;
 .progress-bar-bg {
   background-color: $primary-color;
 }
+
+// ─────────────────────────────────────────────
+// Summary Boxes
+// ─────────────────────────────────────────────
+.summary-box {
+  border-radius: 0.3rem;
+  padding: 1.5rem 1.25rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.3rem;
+  border: 1px solid transparent;
+
+  &__label {
+    font-size: 0.78rem;
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+
+  &__value {
+    font-size: 1.15rem;
+    font-weight: 700;
+    letter-spacing: 0.01em;
+  }
+}
+
+.summary-box--total {
+  background-color: $primary-color;
+  border-color: $primary-color;
+
+  .summary-box__label {
+    color: rgba(255, 255, 255, 0.75);
+  }
+
+  .summary-box__value {
+    color: #ffffff;
+  }
+}
+
+.summary-box--success {
+  background-color: #28a745;
+  border-color: #28a745;
+
+  .summary-box__label {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .summary-box__value {
+    color: #ffffff;
+  }
+}
+
+.summary-box--prev {
+  background-color: rgba(40, 167, 69, 0.08);
+  border-color: rgba(40, 167, 69, 0.25);
+
+  .summary-box__label {
+    color: #1e7e34;
+  }
+
+  .summary-box__value {
+    color: #155724;
+  }
+}
+
+.summary-box--balance {
+  background-color: rgba(0, 80, 179, 0.06);
+  border-color: rgba(0, 80, 179, 0.2);
+
+  .summary-box__label {
+    color: $primary-color;
+  }
+
+  .summary-box__value {
+    color: $primary-hover;
+  }
+}
+
+.summary-box--danger {
+  background-color: $danger-color;
+  border-color: $danger-color;
+
+  .summary-box__label {
+    color: rgba(255, 255, 255, 0.9);
+  }
+
+  .summary-box__value {
+    color: #ffffff;
+  }
+}
