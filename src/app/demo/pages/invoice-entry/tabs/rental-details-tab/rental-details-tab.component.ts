@@ -36,6 +36,7 @@ export class RentalDetailsTabComponent {
   @Output() postRental      = new EventEmitter<void>();
   @Output() cancelRental    = new EventEmitter<void>();
   @Output() printRental     = new EventEmitter<void>();
+  @Output() generateContract = new EventEmitter<void>();
 
   // Dropdown options for Additional Charges
   readonly additionalChargeCauses: string[] = [

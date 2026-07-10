@@ -2,6 +2,7 @@ import { Component } from '@angular/core';
 import { Router } from '@angular/router';
 import { FormsModule } from '@angular/forms';
 import { RouterModule } from '@angular/router';
+import { CommonModule } from '@angular/common';
 
 import { AuthService } from '../../../../services/auth.service';
 import { LoginRequest } from '../../../../models';
@@ -10,6 +11,7 @@ import { LoginRequest } from '../../../../models';
   selector: 'app-auth-login',
   standalone: true,
   imports: [
+    CommonModule,
     RouterModule,
     FormsModule
   ],

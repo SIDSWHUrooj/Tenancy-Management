@@ -66,6 +66,12 @@ constructor(
     this.form.checksSource = 'auto';
     this.lastScheduleKey = this.computeScheduleKey();
     this.cdr.markForCheck();
+    
+    // Auto-fix if backend checks are totally out of sync with rent amount
+    const currentCheckSum = Math.round(this.form.checks.reduce((acc: any, c: any) => acc + (c.amount || 0), 0) * 100) / 100;
+    if (this.form.numberOfChecks > 0 && currentCheckSum !== this.rentTotalAmount) {
+      this.regenerateChecks();
+    }
     return;
   }
 
@@ -115,6 +121,10 @@ private computeScheduleKey(): string {
     } else {
       this.form.checks = [];
     }
+  }
+
+  onNumberOfChecksChange(): void {
+    this.regenerateChecks();
   }
 
   onChecksUpdated(updatedChecks: CheckItem[]): void {

@@ -4,27 +4,42 @@
 
 export interface Unit {
   id: number;
-  unitNo: string;
-  propertyId: string;
-  description: string;
-  floor: string;
-  status: string;
-  annualRent: number;
-  createdBy: string;
-  createdDate: string;
-  updatedBy: string;
-  updatedDate: string;
-  isDeleted: boolean;
+  unitId?: string;
+  propertyKey?: number;
+  propertyId?: string;
+  unitNo?: string;
+  block?: string;
+  floor?: string;
+  unitType?: string;
+  taxAuthority?: string;
+  unitPurpose?: string;
+  unitDescription?: string;
+  unitSize?: number;
+  unitDewaPremiseNo?: string;
+  unitDefaultAmount?: number;
+  unitAcCharge?: number;
+  unitElectricalCharge?: number;
+  otherServiceCharge?: number;
+  others?: string;
+  deposit?: number;
+  targetRent?: number;
+  actualRent?: number;
+  proposedAmount?: number;
+  unitView?: string;
+  parkingNumber?: string;
+  maintenanceDeposit?: number;
+  annualRentMin?: number;
+  annualRentMax?: number;
+  status?: string;
+  remarks?: string;
+  property?: string;
+  createdBy?: string;
+  createdDate?: string;
+  updatedBy?: string;
+  updatedDate?: string;
+  isDeleted?: boolean;
+  deletedBy?: string;
+  deletedDate?: string;
 }
 
-// ── POST /api/ty/units
-// ── PUT  /api/ty/units/{id} — Request body
-
-export interface UnitRequest {
-  unitNo: string;
-  propertyId: string;
-  description: string;
-  floor: string;
-  status: string;
-  annualRent: number;
-}
+export interface UnitRequest extends Partial<Unit> {}

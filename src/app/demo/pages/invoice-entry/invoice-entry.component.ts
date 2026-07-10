@@ -24,6 +24,10 @@ import { FinalSettlementService } from '../../../services/final-settlement.servi
 import { FinalSettlement, FinalSettlementRequest, FinalSettlementCreditNoteRequest } from '../../../models/final-settlement.model';
 import { ContractService } from '../../../services/contract.service';
 import { CreateContractRequest } from '../../../models/contract.model';
+import { PropertyService } from '../../../services/property.service';
+import { Property } from '../../../models/property.model';
+import { UnitService } from '../../../services/unit.service';
+import { Unit } from '../../../models/unit.model';
 
 export type ReceiptTab    = 'rental' | 'receipt' | 'settlement';
 export type InvoiceType   = 'New' | 'Renewal';
@@ -38,6 +42,7 @@ export interface AdditionalCharge {
   taxAmount: number;
   total: number;
   description: string;
+  referenceNo?: string;
 }
 export interface ReceiptAttachment {
   id:         string;
@@ -84,6 +89,7 @@ export interface InvoiceForm {
   periodTo:               string;
   status:                 ReceiptStatus;
 
+  contractId?:            number;
   contractNumber:         string;
   contractDate:           string;
   documentNumber:         string;
@@ -126,6 +132,10 @@ export interface InvoiceForm {
   numberOfChecks:         number;
   checks:                 CheckItem[];
   attachments:            TyAttachment[];
+  
+  adminFeeReference:      string;
+  depositReference:       string;
+  penaltyReference:       string;
 
   leaveDate:              string;
   earlyTermination:       boolean;
@@ -172,6 +182,7 @@ export class InvoiceEntryComponent implements OnInit {
   invoiceSetupComplete = false;
   modalInvoiceType: InvoiceType = 'New';
   modalPreviousInvoiceNumber    = '';
+  invoiceLookupMode: 'main' | 'previous' = 'main';
 
   invoiceTypes: InvoiceType[] = ['New', 'Renewal'];
 
@@ -182,6 +193,17 @@ export class InvoiceEntryComponent implements OnInit {
   showInvoiceLookup    = false;
   invoiceResults: Invoice[] = [];
   invoiceLookupLoading = false;
+
+  showPropertyLookup = false;
+  propertiesList: Property[] = [];
+  filteredProperties: Property[] = [];
+  propertyModalFilter = '';
+
+  // ── Unit Lookup ──────────────────────────────────────────────
+  showUnitLookup = false;
+  unitsList: Unit[] = [];
+  filteredUnits: Unit[] = [];
+  unitModalFilter = '';
 
   // ── Invoice search dropdown state ───────────────────────────
   invoiceSearchQuery          = '';
@@ -202,6 +224,8 @@ export class InvoiceEntryComponent implements OnInit {
     private chequeService: ChequeService,
     private finalSettlementService: FinalSettlementService,
     private contractService: ContractService,
+    private propertyService: PropertyService,
+    private unitService: UnitService,
     private route: ActivatedRoute,
     private cdr: ChangeDetectorRef,
     private elRef: ElementRef,
@@ -211,27 +235,20 @@ export class InvoiceEntryComponent implements OnInit {
 
     if (idParam) {
       this.loadInvoice(+idParam);
+      this.loadProperties();
+      this.loadUnits();
       return;
     }
+
+    this.loadProperties();
+    this.loadUnits();
 
     const today = new Date().toISOString().substring(0, 10);
     this.form.receiptDate = today; // receipt numbering not mapped yet — stays local
     this.form.receiptNumber = 'RCP-' + Date.now();
     this.form.invoiceDate = today;
 
-    this.documentNumberService.getNext('Invoice').subscribe({
-  next: (res) => {
-    if (res.success && res.data) {
-      this.form.invoiceNumber = res.data.number;
-    } else {
-      this.form.invoiceNumber = 'INV-' + Date.now();
-    }
-  },
-  error: (err) => {
-    console.error('Failed to fetch invoice number:', err);
-    this.form.invoiceNumber = 'INV-' + Date.now();
-  },
-    });
+    this.fetchDocumentNumbers();
 
     this.openTypeModal();
   }
@@ -329,72 +346,54 @@ export class InvoiceEntryComponent implements OnInit {
     this.invoiceSetupComplete = true;
 
     if (this.form.invoiceType === 'Renewal' && this.form.previousInvoiceNumber) {
-      this.loadPreviousInvoiceByNumber(this.form.previousInvoiceNumber);
+      this.loadRenewalDetailsByInvoiceNumber();
     }
   }
 
   // ── Invoice Lookup ───────────────────────────────────────────
-  /*openInvoiceLookup(): void {
-    this.showInvoiceLookup = true;
+  openInvoiceLookup(mode: 'main' | 'previous' = 'main'): void {
+    this.invoiceLookupMode    = mode;
+    this.showInvoiceLookup    = true;
     this.invoiceLookupLoading = true;
+    this.invoiceResults       = [];
+    this.filteredInvoiceResults = [];
+    this.invoiceModalFilter   = '';
+
     this.invoiceService.getAll().subscribe({
       next: (res) => {
         this.invoiceLookupLoading = false;
-        if (res.success) {
-          this.invoiceResults = res.data;
-        } else {
-          alert(res.message || 'Failed to load invoices.');
+
+        if (!res || res.success === false) {
+          alert(res?.message || 'Failed to load invoices.');
+          this.cdr.detectChanges();
+          return;
         }
+
+        // Handle both "data: Invoice[]" and "data: { items: Invoice[] }" shapes
+        const data: any = res.data;
+        this.invoiceResults = Array.isArray(data)
+          ? data
+          : Array.isArray(data?.items)
+            ? data.items
+            : [];
+
+        this.filteredInvoiceResults = this.invoiceResults;
+
+        if (this.invoiceResults.length === 0) {
+          console.warn('Invoice lookup returned no rows. Raw response:', res);
+        }
+
+        // Force the table to render immediately — no Ctrl+S needed.
+        this.cdr.detectChanges();
       },
       error: (err) => {
         this.invoiceLookupLoading = false;
         console.error('Invoice lookup failed:', err);
-        alert('Failed to load invoices.');
+        alert(err?.error?.message || 'Failed to load invoices. Check console for details.');
+        this.cdr.detectChanges();
       },
     });
-  }*/
-openInvoiceLookup(): void {
-  this.showInvoiceLookup    = true;
-  this.invoiceLookupLoading = true;
-  this.invoiceResults       = [];
-  this.filteredInvoiceResults = [];
-  this.invoiceModalFilter   = '';
-
-  this.invoiceService.getAll().subscribe({
-    next: (res) => {
-      this.invoiceLookupLoading = false;
-
-      if (!res || res.success === false) {
-        alert(res?.message || 'Failed to load invoices.');
-        this.cdr.detectChanges();
-        return;
-      }
-
-      // Handle both "data: Invoice[]" and "data: { items: Invoice[] }" shapes
-      const data: any = res.data;
-      this.invoiceResults = Array.isArray(data)
-        ? data
-        : Array.isArray(data?.items)
-          ? data.items
-          : [];
-
-      this.filteredInvoiceResults = this.invoiceResults;
-
-      if (this.invoiceResults.length === 0) {
-        console.warn('Invoice lookup returned no rows. Raw response:', res);
-      }
-
-      // Force the table to render immediately — no Ctrl+S needed.
-      this.cdr.detectChanges();
-    },
-    error: (err) => {
-      this.invoiceLookupLoading = false;
-      console.error('Invoice lookup failed:', err);
-      alert(err?.error?.message || 'Failed to load invoices. Check console for details.');
-      this.cdr.detectChanges();
-    },
-  });
-}
+  }
   closeInvoiceLookup(): void {
     this.showInvoiceLookup  = false;
     this.invoiceModalFilter = '';
@@ -413,18 +412,87 @@ openInvoiceLookup(): void {
   }
 
   selectInvoiceFromLookup(invoice: Invoice): void {
-    this.showInvoiceLookup = false;
-    this.loadInvoice(invoice.id);
+    if (this.invoiceLookupMode === 'previous') {
+        this.form.previousInvoiceNumber = invoice.invoiceNumber;
+        this.modalPreviousInvoiceNumber = invoice.invoiceNumber;
+        this.showInvoiceLookup = false;
+        
+        // Only auto-load if we are NOT in the type modal. 
+        // If in the type modal, the 'Proceed' button will handle loading.
+        if (!this.showTypeModal) {
+          this.loadRenewalDetailsByInvoiceNumber();
+        }
+    } else {
+        this.showInvoiceLookup = false;
+        this.loadInvoice(invoice.id);
+    }
   }
 
-  private loadPreviousInvoiceByNumber(invoiceNumber: string): void {
+
+
+  loadRenewalDetailsByInvoiceNumber(): void {
+    if (!this.form.previousInvoiceNumber) {
+      alert('Please enter a Previous Invoice Number to fetch details.');
+      return;
+    }
+
     this.invoiceService.getAll().subscribe({
       next: (res) => {
-        const match = res.data.find((inv: any) => inv.invoiceNumber === invoiceNumber);
+        const data = Array.isArray(res.data) ? res.data : (res.data as any).items || [];
+        const match = data.find((inv: any) => inv.invoiceNumber === this.form.previousInvoiceNumber);
         if (match) {
-          this.loadInvoice(match.id);
+          // Fetch full invoice details
+          this.invoiceService.getById(match.id).subscribe({
+            next: (fullRes) => {
+              if (fullRes.success && fullRes.data) {
+                const oldInvoice = fullRes.data;
+                
+                const findAmount = (type: string) => {
+                  const t = type.toLowerCase();
+                  return oldInvoice.details?.find((d: any) => (d.serviceType || '').toLowerCase() === t)?.amount ?? 0;
+                };
+
+                // Copy over static details but keep it as a NEW renewal draft
+                this.form.customer = oldInvoice.customer || '';
+                this.form.customerName = oldInvoice.customerName || '';
+                this.form.landlordCode = oldInvoice.landlordCode || '';
+                this.form.landlordName = oldInvoice.landlordName || '';
+                this.form.propertyId = oldInvoice.propertyId || '';
+                this.form.propertyName = oldInvoice.propertyName || '';
+                this.form.unitNo = oldInvoice.unitNo || '';
+                this.form.purposeOfLease = oldInvoice.purposeOfLease || 'Residential';
+                this.form.multipleInvoices = oldInvoice.multipleUnits || false;
+                this.form.contractNumber = oldInvoice.contractNo || '';
+                this.form.ejariNumber = oldInvoice.ejariNumber || '';
+
+                // Copy over financial amounts from old invoice
+                this.form.rentAmount = findAmount('rent');
+                this.form.depositAmount = findAmount('security deposit');
+                this.form.adminFeeAmount = findAmount('admin fee');
+
+                // Ensure it stays as a Renewal draft!
+                this.form.invoiceType = 'Renewal';
+                this.form.status = 'Draft';
+                
+                // Clear dates so they have to pick new ones
+                this.form.periodFrom = '';
+                this.form.periodTo = '';
+                this.form.gracePeriodStart = '';
+                this.form.gracePeriodEnd = '';
+                
+                // Copy over contract date if it exists
+                this.form.contractDate = oldInvoice.contractDate ? this.toDateInput(oldInvoice.contractDate) : '';
+                
+                // Recalculate everything with the new amounts
+                this.recalculateFormTotals();
+                
+                alert('Successfully loaded customer and property details from previous invoice! Please select the new dates and rent for this renewal.');
+                this.cdr.detectChanges();
+              }
+            }
+          });
         } else {
-          alert(`Invoice ${invoiceNumber} not found.`);
+          alert(`Invoice ${this.form.previousInvoiceNumber} not found.`);
         }
       },
       error: (err) => {
@@ -434,6 +502,7 @@ openInvoiceLookup(): void {
     });
   }
 
+
   openCustomerLookup(): void {
     console.warn('No customer lookup API; select an invoice instead.');
   }
@@ -442,8 +511,114 @@ openInvoiceLookup(): void {
     console.warn('No landlord lookup API; select an invoice instead.');
   }
 
+  loadProperties(): void {
+    this.propertyService.getAll().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.propertiesList = res.data;
+        }
+      },
+      error: (err) => console.error('Failed to load properties', err)
+    });
+  }
+
+  onPropertyChange(): void {
+    const selected = this.propertiesList.find(p => p.propertyId === this.form.propertyId);
+    if (selected) {
+      this.form.propertyName = selected.propertyName;
+    }
+  }
+
   openPropertyLookup(): void {
-    console.log('Property lookup — will be mapped in a later step.');
+    this.showPropertyLookup = true;
+    this.propertyModalFilter = '';
+    this.filteredProperties = [...this.propertiesList];
+  }
+
+  closePropertyLookup(): void {
+    this.showPropertyLookup = false;
+  }
+
+  filterModalProperties(): void {
+    const q = (this.propertyModalFilter || '').toLowerCase().trim();
+    this.filteredProperties = q
+      ? this.propertiesList.filter(p => 
+          (p.propertyId || '').toLowerCase().includes(q) ||
+          (p.propertyName || '').toLowerCase().includes(q)
+        )
+      : [...this.propertiesList];
+  }
+
+  selectPropertyFromLookup(prop: Property): void {
+    this.form.propertyId = prop.propertyId;
+    this.form.propertyName = prop.propertyName;
+    this.closePropertyLookup();
+  }
+
+  // ── Unit Lookup Logic ──────────────────────────────────────────
+  loadUnits(): void {
+    this.unitService.getAll().subscribe({
+      next: (res) => {
+        if (res.success && res.data) {
+          this.unitsList = res.data;
+        }
+      },
+      error: (err) => console.error('Failed to load units:', err)
+    });
+  }
+
+  openUnitLookup(): void {
+    this.showUnitLookup = true;
+    this.unitModalFilter = '';
+    // If a property is selected, maybe filter by it immediately?
+    if (this.form.propertyId) {
+      this.filteredUnits = this.unitsList.filter(u => u.propertyId === this.form.propertyId);
+    } else {
+      this.filteredUnits = [...this.unitsList];
+    }
+  }
+
+  closeUnitLookup(): void {
+    this.showUnitLookup = false;
+  }
+
+  filterModalUnits(): void {
+    const q = this.unitModalFilter.toLowerCase();
+    let baseList = this.unitsList;
+    if (this.form.propertyId) {
+      baseList = baseList.filter(u => u.propertyId === this.form.propertyId);
+    }
+    
+    if (!q) {
+      this.filteredUnits = [...baseList];
+      return;
+    }
+    this.filteredUnits = baseList.filter(u =>
+      (u.unitId || '').toLowerCase().includes(q) ||
+      (u.unitNo || '').toLowerCase().includes(q) ||
+      (u.unitPurpose || '').toLowerCase().includes(q)
+    );
+  }
+
+  selectUnitFromLookup(unit: Unit): void {
+    this.form.unitNo = unit.unitNo || unit.unitId || '';
+    // Map unitPurpose to Purpose of Lease
+    // Make sure it matches one of the dropdown options if possible, or just set it
+    const purposeMap: any = {
+      'commercial': 'Commercial',
+      'residential': 'Residential',
+      'office': 'Office',
+      'warehouse': 'Warehouse'
+    };
+    if (unit.unitPurpose) {
+      const mapped = purposeMap[unit.unitPurpose.toLowerCase()];
+      if (mapped) {
+        this.form.purposeOfLease = mapped;
+      } else {
+        this.form.purposeOfLease = unit.unitPurpose;
+      }
+    }
+    this.closeUnitLookup();
   }
   onPeriodFromChange(newDate: string): void {
     if (!newDate) return;
@@ -469,20 +644,26 @@ openInvoiceLookup(): void {
     this.form.receiptDate   = today;
     this.form.invoiceDate   = today;
 
-    this.documentNumberService.getNext('Invoice').subscribe({
-  next: (res) => {
-    if (res.success && res.data) {
-      this.form.invoiceNumber = res.data.number;
-    } else {
-      this.form.invoiceNumber = 'INV-' + Date.now();
-    }
-  },
-  error: () => this.form.invoiceNumber = 'INV-' + Date.now(),
-});
+    this.fetchDocumentNumbers();
 
     this.activeTab            = 'rental';
     this.invoiceSetupComplete = false;
     this.openTypeModal();
+  }
+
+  private fetchDocumentNumbers(): void {
+    // Receipt
+    this.documentNumberService.getNext('Receipt').subscribe({
+      next: (res) => { if (res.success && res.data) this.form.receiptNumber = res.data.number; }
+    });
+    // Settlement
+    this.documentNumberService.getNext('Settlement').subscribe({
+      next: (res) => { if (res.success && res.data) this.form.settlementNumber = res.data.number; }
+    });
+    // Contract
+    this.documentNumberService.getNext('Contract').subscribe({
+      next: (res) => { if (res.success && res.data) this.form.contractNumber = res.data.number; }
+    });
   }
 
   // ── Legacy guards (kept for any remaining usages) ───────────
@@ -546,6 +727,24 @@ openInvoiceLookup(): void {
     if (!this.canPostRental()) { alert('Rental details have already been posted.'); return; }
     if (!this.validateBeforePost()) return;
     this.isSaving = true;
+
+    if (!this.form.invoiceNumber) {
+      this.documentNumberService.getNext('Invoice').subscribe({
+        next: (res) => {
+          this.form.invoiceNumber = (res.success && res.data) ? res.data.number : 'INV-' + Date.now();
+          this._doPostRental();
+        },
+        error: () => {
+          this.form.invoiceNumber = 'INV-' + Date.now();
+          this._doPostRental();
+        }
+      });
+    } else {
+      this._doPostRental();
+    }
+  }
+
+  private _doPostRental(): void {
     const payload = this.mapFormToInvoiceRequest();
     if (!payload) { this.isSaving = false; return; }
     console.log('[postRental] Sending payload:', JSON.stringify(payload, null, 2));
@@ -626,17 +825,72 @@ openInvoiceLookup(): void {
   // ── Receipt Details actions ──────────────────────────────────
 private mapFormToReceiptRequest(): ReceiptRequest {
     const bank = this.form.detailsBank || '';
-    const details = this.form.checks.map((c: CheckItem, i: number) => ({
-      lineNo:       i + 1,
-      bank:         c.bank || bank,
-      receiptDate:  this.toIsoRequired(this.form.receiptDate),
-      checkNo:      c.checkNo  || '',
-      checkDate:    this.toIsoRequired(c.checkDate),
-      paymentCode:  'CHQ',
-      customerBank: c.bank || bank,
-      amount:       c.amount  || 0,
-      comments:     c.remarks || '',
-    }));
+    const details: any[] = [];
+    let lineNo = 1;
+
+    // 1. Admin Fee
+    if (this.form.adminFeeTotal > 0) {
+      details.push({
+        lineNo:       lineNo++,
+        bank:         bank,
+        receiptDate:  this.toIsoRequired(this.form.receiptDate),
+        checkNo:      this.form.adminFeeReference || 'REF-ADM',
+        checkDate:    this.toIsoRequired(this.form.periodFrom),
+        paymentCode:  'CHQ', // Default or allow custom later
+        customerBank: bank,
+        amount:       this.form.adminFeeTotal,
+        comments:     'Administration Fee',
+      });
+    }
+
+    // 2. Security Deposit
+    if (this.form.depositTotal > 0) {
+      details.push({
+        lineNo:       lineNo++,
+        bank:         bank,
+        receiptDate:  this.toIsoRequired(this.form.receiptDate),
+        checkNo:      this.form.depositReference || 'REF-DEP',
+        checkDate:    this.toIsoRequired(this.form.periodFrom),
+        paymentCode:  'CHQ',
+        customerBank: bank,
+        amount:       this.form.depositTotal,
+        comments:     'Security Deposit',
+      });
+    }
+
+    // 3. Additional Charges
+    if (this.form.additionalCharges?.length) {
+      this.form.additionalCharges.forEach(ac => {
+        if (ac.total > 0) {
+          details.push({
+            lineNo:       lineNo++,
+            bank:         bank,
+            receiptDate:  this.toIsoRequired(this.form.receiptDate),
+            checkNo:      ac.referenceNo || `REF-ADD-${lineNo}`,
+            checkDate:    this.toIsoRequired(this.form.periodTo),
+            paymentCode:  'CHQ',
+            customerBank: bank,
+            amount:       ac.total,
+            comments:     `Additional Charge – ${ac.cause}`,
+          });
+        }
+      });
+    }
+
+    // 4. Rent Cheques
+    this.form.checks.forEach((c: CheckItem) => {
+      details.push({
+        lineNo:       lineNo++,
+        bank:         c.bank || bank,
+        receiptDate:  this.toIsoRequired(this.form.receiptDate),
+        checkNo:      c.checkNo  || '',
+        checkDate:    this.toIsoRequired(c.checkDate),
+        paymentCode:  'CHQ',
+        customerBank: c.bank || bank,
+        amount:       c.amount  || 0,
+        comments:     c.remarks || '',
+      });
+    });
 
     // Compute the total from the same details array being sent,
     // so it can never drift from what the backend calculates.
@@ -645,7 +899,6 @@ private mapFormToReceiptRequest(): ReceiptRequest {
     ) / 100;
 
     return {
-      receiptNumber:    this.form.receiptNumber    || '',
       customer:         this.form.customer         || '',
       customerName:     this.form.customerName     || '',
       landlordCode:     this.form.landlordCode     || '',
@@ -677,6 +930,7 @@ private mapFormToReceiptRequest(): ReceiptRequest {
         this.isSaving = false;
         if (res.success && res.data) {
           this.form = { ...this.form, receiptId: res.data.id, receiptStatus: 'Draft' };
+          this.syncCheques();
           alert('Receipt saved as draft.');
         } else {
           alert(res.message || 'Failed to save receipt.');
@@ -703,6 +957,7 @@ private mapFormToReceiptRequest(): ReceiptRequest {
       next: (res) => {
         if (res.success && res.data) {
           this.form = { ...this.form, receiptId: res.data.id };
+          this.syncCheques();
           this.receiptService.post(res.data.id).subscribe({
             next: (postRes) => {
               this.isSaving = false;
@@ -911,6 +1166,12 @@ private mapFormToReceiptRequest(): ReceiptRequest {
   //   setTimeout(() => this.cdr.detectChanges(), 0);
   // }
 private applyInvoiceToForm(invoice: Invoice): void {
+  if (this.invoiceLookupMode === 'previous') {
+    this.modalPreviousInvoiceNumber = invoice.invoiceNumber;
+    this.closeInvoiceLookup();
+    return;
+  }
+
   const round = (v: number) => Math.round((v || 0) * 100) / 100;
   const findAmount = (type: string) => {
     const t = type.toLowerCase();
@@ -1267,37 +1528,36 @@ if (this.form.additionalCharges?.length) {
   });
 }
 // syncCheques(): void {
-private syncCheques(): void {
+private async syncCheques(): Promise<void> {
   if (!this.form.checks?.length) return;
 
-  this.form.checks.forEach((check: any) => {
+  for (const check of this.form.checks as any[]) {
     const payload: ChequeRequest = {
       customerCode: this.form.customer,
       contractNo: this.form.contractNumber,
       invoiceNumber: this.form.invoiceNumber,
       bankName: check.bankName || this.form.detailsBank,
       chequeNo: check.checkNo,
-      chequeDate: this.toIsoRequired(check.chequeDate),
+      chequeDate: this.toIsoRequired(check.checkDate),
       chequeAmount: check.amount,
       remarks: '',
     };
 
-    if (check.chequeHeaderId) {
-      this.chequeService.update(check.chequeHeaderId, payload).subscribe({
-        error: (err) => console.error('Cheque update failed:', err),
-      });
-    } else {
-      this.chequeService.create(payload).subscribe({
-        next: (res) => {
-          if (res.success && res.data) {
-            check.chequeHeaderId = res.data.id;
-            check.id = res.data.details?.[0]?.id;
-          }
-        },
-        error: (err) => console.error('Cheque create failed:', err),
-      });
+    try {
+      if (check.chequeHeaderId) {
+        await this.chequeService.update(check.chequeHeaderId, payload).toPromise();
+      } else {
+        const res = await this.chequeService.create(payload).toPromise();
+        if (res?.success && res?.data) {
+          check.chequeHeaderId = res.data.id;
+          check.id = res.data.details?.[0]?.id;
+        }
+      }
+    } catch (err) {
+      console.error('Cheque sync failed for cheque:', check.checkNo, err);
+      alert(`Failed to save cheque ${check.checkNo}. Please try saving again.`);
     }
-  });
+  }
 }
 
   // ── Save Draft ───────────────────────────────────────────────
@@ -1461,6 +1721,23 @@ postReceipt(): void {
   if (!this.canPost()) { alert('This receipt has already been finalized.'); return; }
   if (!this.validateBeforePost()) return;
 
+  if (!this.form.invoiceNumber) {
+    this.documentNumberService.getNext('Invoice').subscribe({
+      next: (res) => {
+        this.form.invoiceNumber = (res.success && res.data) ? res.data.number : 'INV-' + Date.now();
+        this._doPostReceipt();
+      },
+      error: () => {
+        this.form.invoiceNumber = 'INV-' + Date.now();
+        this._doPostReceipt();
+      }
+    });
+  } else {
+    this._doPostReceipt();
+  }
+}
+
+private _doPostReceipt(): void {
   if (!this.form.invoiceId) {
     const payload = this.mapFormToInvoiceRequest();
     if (!payload) return;
@@ -1789,8 +2066,10 @@ cancelReceipt(): void {
       next: (res) => {
         this.isSaving = false;
         if (res.success && res.data) {
+          this.form.contractId = res.data.id;
           this.form.contractNumber = res.data.contractNo || '';
-          alert('Contract created successfully!');
+          alert('Contract created successfully! Generating PDF...');
+          this.executePrint(res.data.id);
           this.cdr.detectChanges();
         } else {
           alert(res.message || 'Failed to create contract.');
@@ -1800,6 +2079,58 @@ cancelReceipt(): void {
         this.isSaving = false;
         console.error('[createContract] Failed:', err);
         alert('Failed to create contract. Please try again.');
+      }
+    });
+  }
+
+  handleContractAction(): void {
+    if (this.isSaving) return;
+    
+    if (this.form.contractId) {
+      this.executePrint(this.form.contractId);
+      return;
+    }
+
+    if (this.form.contractNumber) {
+      this.isSaving = true;
+      this.contractService.getAll().subscribe({
+        next: (res) => {
+          this.isSaving = false;
+          const contracts = Array.isArray(res.data) ? res.data : (res.data as any).items || [];
+          const match = contracts.find((c: any) => c.contractNo === this.form.contractNumber);
+          if (match && match.id) {
+            this.form.contractId = match.id;
+            this.executePrint(match.id);
+          } else {
+            // It has a number but isn't on the server yet. Create it!
+            this.createContract();
+          }
+        },
+        error: () => {
+          this.isSaving = false;
+          alert('Failed to check contract status on server.');
+        }
+      });
+    } else {
+      this.createContract();
+    }
+  }
+
+  private executePrint(contractId: number): void {
+    this.contractService.print(contractId).subscribe({
+      next: (blob) => {
+        const url = window.URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `Contract_${this.form.contractNumber || contractId}.pdf`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        window.URL.revokeObjectURL(url);
+      },
+      error: (err) => {
+        console.error('[executePrint] Failed:', err);
+        alert('Failed to generate contract PDF.');
       }
     });
   }
@@ -1866,9 +2197,11 @@ cancelReceipt(): void {
     this.form.rentCollected = this.form.rentAmount ? this.form.rentAmount : (this.form.rentCollected || 0);
     this.form.securityDepositCollected = this.form.depositAmount ? this.form.depositAmount : (this.form.securityDepositCollected || 0);
     
-    this.form.dailyRent = totalContractDays > 0 ? (this.form.rentCollected / totalContractDays) : 0;
-    this.form.rentForDaysConsumed = daysConsumed * this.form.dailyRent;
-    this.form.rentForUnutilizedDays = remainingDays * this.form.dailyRent;
+    const round2 = (val: number) => Math.round((val || 0) * 100) / 100;
+
+    this.form.dailyRent = round2(totalContractDays > 0 ? (this.form.rentCollected / totalContractDays) : 0);
+    this.form.rentForDaysConsumed = round2(daysConsumed * this.form.dailyRent);
+    this.form.rentForUnutilizedDays = round2(remainingDays * this.form.dailyRent);
     
     this.form.rentRefund = this.form.rentForUnutilizedDays;
     this.form.securityDepositRefund = this.form.securityDepositCollected;
@@ -1907,7 +2240,7 @@ cancelReceipt(): void {
 
   recalculateSettlementTotals(): void {
     const totalCreditNotes = (this.form.creditNotes || []).reduce((sum, cn) => sum + (cn.amount || 0), 0);
-    this.form.grandRefund = this.form.rentRefund + this.form.securityDepositRefund - totalCreditNotes;
+    this.form.grandRefund = Math.round((this.form.rentRefund + this.form.securityDepositRefund - totalCreditNotes) * 100) / 100;
   }
 
   cancelSettlement(): void {
@@ -2190,6 +2523,10 @@ postSettlement(): void {
       numberOfChecks:         0,
       checks:                 [],
       attachments:            [],
+      
+      adminFeeReference:      '',
+      depositReference:       '',
+      penaltyReference:       '',
 
       leaveDate:              '',
       earlyTermination:       false,

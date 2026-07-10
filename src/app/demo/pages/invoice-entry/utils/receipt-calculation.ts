@@ -30,9 +30,7 @@ export interface ScheduleInput {
   adminFeeReference: string;
   depositTotal: number;
   depositReference: string;
-  penaltyTotal: number;
-  penaltyCause: string;
-  penaltyReference: string;
+  additionalCharges: { cause: string; total: number; referenceNo?: string }[];
   bank: string;
   periodFrom: string;
   periodTo: string;
@@ -167,18 +165,18 @@ export function buildScheduleRows(input: ScheduleInput): ScheduleRow[] {
     editable: false,
   });
 
-  if (input.penaltyCause) {
+  (input.additionalCharges || []).forEach((ac, idx) => {
     rows.push({
       lineNo: sr++,
       rowType: 'additional',
-      description: `Additional Charge – ${input.penaltyCause}`,
+      description: `Additional Charge – ${ac.cause}`,
       bank: input.bank,
-      referenceNo: input.penaltyReference || generateReference('REF-ADD'),
+      referenceNo: ac.referenceNo || generateReference('REF-ADD'),
       date: input.periodTo,
-      amount: input.penaltyTotal,
+      amount: ac.total,
       editable: false,
     });
-  }
+  });
 
   input.checks.forEach((c) => {
     rows.push({

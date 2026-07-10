@@ -422,6 +422,14 @@
       Cancel
     </button>
     <div class="d-flex gap-2">
+      <button class="btn btn-outline-success px-4" type="button"
+              *ngIf="form.status === 'Posted'"
+              [disabled]="isSaving"
+              (click)="generateContract.emit()">
+        <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
+        <i *ngIf="!isSaving" class="bi bi-printer me-1"></i> 
+        Print Contract
+      </button>
       <button class="btn btn-outline-secondary px-4" type="button"
               [disabled]="!canPrint"
               (click)="printRental.emit()">

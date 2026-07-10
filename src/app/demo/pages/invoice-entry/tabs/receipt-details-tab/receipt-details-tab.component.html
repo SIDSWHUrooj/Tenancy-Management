@@ -58,6 +58,7 @@
                   [class.bg-white]="!isLocked"
                   [class.bg-light]="isLocked"
                   [(ngModel)]="form.numberOfChecks"
+                  (ngModelChange)="onNumberOfChecksChange()"
                   [disabled]="isLocked">
             <option [ngValue]="0">-- Select --</option>
             <option *ngFor="let n of chequeCountOptions" [ngValue]="n">{{ n }}</option>
@@ -77,13 +78,14 @@
             [adminFeeReference]="form.adminFeeReference"
             [depositTotal]="form.depositTotal"
             [depositReference]="form.depositReference"
-            [penaltyTotal]="form.penaltyTotal"
-            [penaltyCause]="form.penaltyCause"
-            [penaltyReference]="form.penaltyReference"
+            [additionalCharges]="form.additionalCharges"
             [periodFrom]="form.periodFrom"
             [periodTo]="form.periodTo"
             [invoiceTotal]="form.invoiceTotal"
             (checksChange)="onChecksUpdated($event)"
+            (adminFeeReferenceChange)="form.adminFeeReference = $event"
+            (depositReferenceChange)="form.depositReference = $event"
+            (additionalChargesChange)="form.additionalCharges = $event"
             (totalAmountChange)="onChequeTotalChanged($event)"
             (grandTotalChange)="onGrandTotalChanged($event)">
           </app-check-grid>

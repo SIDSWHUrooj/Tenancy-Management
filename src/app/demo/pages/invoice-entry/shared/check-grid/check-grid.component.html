@@ -28,13 +28,10 @@
           <td>
             <input
               type="text"
-              class="form-control form-control-sm"
-              [class.bg-white]="row.rowType === 'check'"
-              [class.bg-light]="row.rowType !== 'check'"
+              class="form-control form-control-sm bg-white"
               [ngModel]="row.referenceNo"
               (ngModelChange)="onReferenceInput(row, $event)"
-              [readonly]="row.rowType !== 'check'"
-              placeholder="Cheque No.">
+              placeholder="Ref / Cheque No.">
           </td>
 
           <td>

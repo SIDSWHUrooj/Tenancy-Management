@@ -23,29 +23,12 @@
               </span>
             </div>
 
-            <div class="d-flex align-items-center">
-              <button *ngIf="form.status === 'Posted' && !form.contractNumber" 
-                      type="button" 
-                      class="btn btn-primary" 
-                      (click)="createContract()"
-                      [disabled]="isSaving">
-                <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2" role="status" aria-hidden="true"></span>
-                Create Contract
-              </button>
-              <button *ngIf="form.contractNumber" 
-                      type="button" 
-                      class="btn btn-outline-success" 
-                      title="Contract Generated"
-                      disabled>
-                <i class="bi bi-check-circle me-1"></i> Contract: {{ form.contractNumber }}
-              </button>
-            </div>
           </div>
         </div>
 
         <div class="card-body">
           <div class="row g-3 mb-4">
-            <div class="col-md-3 ">
+            <div class="col-md-3">
               <label class="form-label fw-semibold">Invoice Number</label>
               <div class="input-group">
                 <input type="text" class="form-control bg-light" [(ngModel)]="form.invoiceNumber" [disabled]="isRentalLocked()" >
@@ -55,9 +38,8 @@
                   </svg>
                 </button>
                 <button type="button" class="btn btn-outline-danger" title="Clear" (click)="resetReceipt()">
-                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-arrow-clockwise" viewBox="0 0 16 16">
-                    <path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2v1z"/>
-                    <path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466z"/>
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
+                    <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                   </svg>
                 </button>
               </div>
@@ -73,16 +55,6 @@
               <select class="form-select bg-white" [(ngModel)]="form.invoiceType" (change)="openTypeModal()" [disabled]="isRentalLocked()">
                 <option value="New">New</option>
                 <option value="Renewal">Renewal</option>
-              </select>
-            </div>
-
-            <div class="col-md-3">
-              <label class="form-label fw-semibold">Purpose Of Lease</label>
-              <select class="form-select bg-white" [(ngModel)]="form.purposeOfLease" [disabled]="isRentalLocked()">
-                <option value="Commercial">Commercial</option>
-                <option value="Residential">Residential</option>
-                <option value="Office">Office</option>
-                <option value="Warehouse">Warehouse</option>
               </select>
             </div>
           </div>
@@ -102,40 +74,59 @@
               <div class="input-group">
                 <input type="text" class="form-control bg-white" [(ngModel)]="form.customer" placeholder="ID" [disabled]="isRentalLocked()">
                 <button type="button" class="btn btn-outline-primary" title="Search Customer" (click)="openCustomerLookup()" [disabled]="isRentalLocked()">
-                  Search
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                  </svg>
                 </button>
               </div>
             </div>
 
-            <div class="col-md-9">
+            <div class="col-md-3">
               <label class="form-label fw-semibold">Customer Name</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.customerName" placeholder="Select Customer ID or enter name" [disabled]="isRentalLocked()">
+              <input type="text" class="form-control bg-white" [(ngModel)]="form.customerName" placeholder="Name" [disabled]="isRentalLocked()">
             </div>
-          </div>
 
-          <div class="row g-3 mb-4">
             <div class="col-md-3">
               <label class="form-label fw-semibold">Property ID</label>
               <div class="input-group">
                 <input type="text" class="form-control bg-white" [(ngModel)]="form.propertyId" placeholder="ID" [disabled]="isRentalLocked()">
                 <button type="button" class="btn btn-outline-primary" title="Search Property" (click)="openPropertyLookup()" [disabled]="isRentalLocked()">
-                  Search
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                  </svg>
                 </button>
               </div>
             </div>
 
-            <div class="col-md-6">
-              <label class="form-label fw-semibold">Property Name</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.propertyName" placeholder="Select Property ID or enter property name" [disabled]="isRentalLocked()">
-            </div>
-
             <div class="col-md-3">
-              <label class="form-label fw-semibold">Unit Number</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.unitNo" placeholder="Unit Number" [disabled]="isRentalLocked()">
+              <label class="form-label fw-semibold">Property Name</label>
+              <input type="text" class="form-control bg-white" [(ngModel)]="form.propertyName" placeholder="Name" [disabled]="isRentalLocked()">
             </div>
           </div>
 
-          <div class="row g-3">
+          <div class="row g-3 mb-4">
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Unit Number</label>
+              <div class="input-group">
+                <input type="text" class="form-control bg-white" [(ngModel)]="form.unitNo" placeholder="Unit Number" [disabled]="isRentalLocked()">
+                <button type="button" class="btn btn-outline-primary" title="Search Unit" (click)="openUnitLookup()" [disabled]="isRentalLocked()">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                    <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div class="col-md-3">
+              <label class="form-label fw-semibold">Purpose Of Lease</label>
+              <select class="form-select bg-white" [(ngModel)]="form.purposeOfLease" [disabled]="isRentalLocked()">
+                <option value="Commercial">Commercial</option>
+                <option value="Residential">Residential</option>
+                <option value="Office">Office</option>
+                <option value="Warehouse">Warehouse</option>
+              </select>
+            </div>
+
             <div class="col-md-3">
               <label class="form-label fw-semibold">Period From <span class="text-danger">*</span></label>
               <input type="date" class="form-control bg-white" [(ngModel)]="form.periodFrom"
@@ -148,21 +139,9 @@
               <input type="date" class="form-control bg-white" [(ngModel)]="form.periodTo"
                     [ngClass]="{'required-field': isRequired('periodTo')}" [disabled]="isRentalLocked()">
             </div>
-
-            <div class="col-md-3">
-              <label class="form-label fw-semibold">Grace Period Start <span class="text-danger">*</span></label>
-              <input type="date" class="form-control bg-white" [(ngModel)]="form.gracePeriodStart"
-                    [ngClass]="{'required-field': isRequired('gracePeriodStart')}" [disabled]="isRentalLocked()">
-            </div>
-
-            <div class="col-md-3">
-              <label class="form-label fw-semibold">Grace Period End <span class="text-danger">*</span></label>
-              <input type="date" class="form-control bg-white" [(ngModel)]="form.gracePeriodEnd"
-                    [ngClass]="{'required-field': isRequired('gracePeriodEnd')}" [disabled]="isRentalLocked()">
-            </div>
           </div>
 
-          <div class="row g-3 mb-4 mt-1">
+          <div class="row g-3 mb-4">
             <div class="col-md-3">
               <label class="form-label fw-semibold">Contract Number</label>
               <input type="text" class="form-control bg-white" [(ngModel)]="form.contractNumber" placeholder="Enter Contract Number" [disabled]="isRentalLocked()">
@@ -171,10 +150,6 @@
             <div class="col-md-3">
               <label class="form-label fw-semibold">Contract Date</label>
               <input type="date" class="form-control bg-white" [(ngModel)]="form.contractDate" [disabled]="isRentalLocked()">
-            </div>
-            <div class="col-md-3">
-              <label class="form-label fw-semibold">Ejari Number</label>
-              <input type="text" class="form-control bg-white" [(ngModel)]="form.ejariNumber" placeholder="Enter Ejari Number" [disabled]="isRentalLocked()">
             </div>
           </div>
 
@@ -205,6 +180,7 @@
                 (postRental)="postRental()"
                 (cancelRental)="cancelRental()"
                 (printRental)="printRental()"
+                (generateContract)="createContract()"
                 [isSaving]="isSaving"
                 [canSaveDraft]="canSaveRentalDraft()"
                 [canPost]="canPostRental()"
@@ -254,6 +230,7 @@
     <div class="modal-container shadow-lg border rounded-3 bg-white">
       <div class="modal-header border-bottom py-3 px-4 d-flex justify-content-between align-items-center bg-light">
         <h5 class="mb-0 fw-bold text-dark">Invoice Type Selection</h5>
+        <button type="button" class="btn-close" (click)="showTypeModal = false"></button>
       </div>
 
       <div class="modal-body p-4">
@@ -275,8 +252,15 @@
 
         <div class="dynamic-modal-inputs p-3 border rounded bg-light" *ngIf="modalInvoiceType === 'Renewal'">
           <label class="form-label fw-semibold">Previous Invoice Number</label>
-          <input type="text" class="form-control bg-white" placeholder="e.g., INV-000001"
-                [(ngModel)]="modalPreviousInvoiceNumber">
+          <div class="input-group">
+            <input type="text" class="form-control bg-white" placeholder="e.g., INV-000001"
+                  [(ngModel)]="modalPreviousInvoiceNumber">
+            <button type="button" class="btn btn-outline-primary" title="Search Invoice" (click)="openInvoiceLookup('previous')">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+              </svg>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -354,6 +338,96 @@
         <button type="button" class="btn btn-outline-secondary py-2" (click)="closeInvoiceLookup()">
           Close
         </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Property Lookup Modal -->
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" *ngIf="showPropertyLookup">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-bottom py-3 px-4 bg-light">
+          <h5 class="mb-0 fw-bold text-dark">Select Property</h5>
+          <button type="button" class="btn-close" (click)="closePropertyLookup()"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="input-group mb-3">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" placeholder="Search by Property ID or Name..." [(ngModel)]="propertyModalFilter" (keyup)="filterModalProperties()">
+          </div>
+          
+          <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-hover table-bordered mb-0 align-middle">
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th>Property ID</th>
+                  <th>Property Name</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let prop of filteredProperties" class="cursor-pointer" (click)="selectPropertyFromLookup(prop)">
+                  <td class="fw-semibold text-primary">{{ prop.propertyId }}</td>
+                  <td>{{ prop.propertyName }}</td>
+                </tr>
+                <tr *ngIf="filteredProperties.length === 0">
+                  <td colspan="2" class="text-center text-muted py-4">No properties found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer border-top p-3 px-4 bg-light d-flex justify-content-end rounded-bottom-3">
+          <button type="button" class="btn btn-outline-secondary py-2" (click)="closePropertyLookup()">
+            Close
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Unit Lookup Modal -->
+  <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" *ngIf="showUnitLookup">
+    <div class="modal-dialog modal-lg modal-dialog-centered">
+      <div class="modal-content">
+        <div class="modal-header border-bottom py-3 px-4 bg-light">
+          <h5 class="mb-0 fw-bold text-dark">Select Unit</h5>
+          <button type="button" class="btn-close" (click)="closeUnitLookup()"></button>
+        </div>
+        <div class="modal-body p-4">
+          <div class="input-group mb-3">
+            <span class="input-group-text"><i class="bi bi-search"></i></span>
+            <input type="text" class="form-control" placeholder="Search by Unit ID, Number or Purpose..." [(ngModel)]="unitModalFilter" (keyup)="filterModalUnits()">
+          </div>
+          
+          <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
+            <table class="table table-hover table-bordered mb-0 align-middle">
+              <thead class="table-light sticky-top">
+                <tr>
+                  <th>Unit ID</th>
+                  <th>Unit Number</th>
+                  <th>Purpose</th>
+                  <th>Property ID</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let unit of filteredUnits" class="cursor-pointer" (click)="selectUnitFromLookup(unit)">
+                  <td class="fw-semibold text-primary">{{ unit.unitId }}</td>
+                  <td>{{ unit.unitNo }}</td>
+                  <td>{{ unit.unitPurpose }}</td>
+                  <td>{{ unit.propertyId }}</td>
+                </tr>
+                <tr *ngIf="filteredUnits.length === 0">
+                  <td colspan="4" class="text-center text-muted py-4">No units found.</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+        <div class="modal-footer border-top p-3 px-4 bg-light d-flex justify-content-end rounded-bottom-3">
+          <button type="button" class="btn btn-outline-secondary py-2" (click)="closeUnitLookup()">
+            Close
+          </button>
+        </div>
       </div>
     </div>
   </div>

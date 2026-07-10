@@ -22,9 +22,7 @@ export class CheckGridComponent implements OnChanges {
   @Input() adminFeeReference: string = '';
   @Input() depositTotal: number = 0;
   @Input() depositReference: string = '';
-  @Input() penaltyTotal: number = 0;
-  @Input() penaltyCause: string = '';
-  @Input() penaltyReference: string = '';
+  @Input() additionalCharges: { cause: string; total: number; referenceNo?: string }[] = [];
   @Input() periodFrom: string = '';
   @Input() periodTo: string = '';
 
@@ -35,24 +33,37 @@ export class CheckGridComponent implements OnChanges {
   @Output() checksChange = new EventEmitter<CheckItem[]>();
   @Output() totalAmountChange = new EventEmitter<number>();
   @Output() grandTotalChange = new EventEmitter<number>();
+  
+  @Output() adminFeeReferenceChange = new EventEmitter<string>();
+  @Output() depositReferenceChange = new EventEmitter<string>();
+  @Output() additionalChargesChange = new EventEmitter<{ cause: string; total: number; referenceNo?: string }[]>();
 
   rows: ScheduleRow[] = [];
 
   // ── Derived ──────────────────────────────────────────────────
   get hasAdditionalCharge(): boolean {
-    return !!this.penaltyCause;
+    return this.additionalCharges && this.additionalCharges.length > 0;
   }
 onReferenceInput(row: ScheduleRow, value: string): void {
-  if (row.rowType !== 'check') return; // only cheque rows are editable
-
   row.referenceNo = value;
 
-  const updatedChecks = this.checks.map(c =>
-    c.lineNo === row.lineNo ? { ...c, checkNo: value } : c
-  );
+  if (row.rowType === 'admin') this.adminFeeReferenceChange.emit(value);
+  if (row.rowType === 'deposit') this.depositReferenceChange.emit(value);
+  if (row.rowType === 'additional') {
+    const acIndex = this.additionalCharges.findIndex(ac => `Additional Charge – ${ac.cause}` === row.description);
+    if (acIndex >= 0) {
+      this.additionalCharges[acIndex].referenceNo = value;
+      this.additionalChargesChange.emit(this.additionalCharges);
+    }
+  }
 
-  this.checks = updatedChecks;
-  this.checksChange.emit(updatedChecks);
+  if (row.rowType === 'check') {
+    const updatedChecks = this.checks.map(c =>
+      c.lineNo === row.lineNo ? { ...c, checkNo: value } : c
+    );
+    this.checks = updatedChecks;
+    this.checksChange.emit(updatedChecks);
+  }
 }
   get chequeSum(): number {
     return Math.round(this.checks.reduce((acc, c) => acc + (c.amount || 0), 0) * 100) / 100;
@@ -60,10 +71,11 @@ onReferenceInput(row: ScheduleRow, value: string): void {
 
   /** Sum of every row currently on the schedule (Admin Fee + Deposit + Additional + Cheques). */
   get scheduleTotal(): number {
+    const additionalSum = this.additionalCharges ? this.additionalCharges.reduce((sum, ac) => sum + (ac.total || 0), 0) : 0;
     return Math.round((
       this.adminFeeTotal +
       this.depositTotal +
-      (this.hasAdditionalCharge ? this.penaltyTotal : 0) +
+      additionalSum +
       this.chequeSum
     ) * 100) / 100;
   }
@@ -87,9 +99,7 @@ onReferenceInput(row: ScheduleRow, value: string): void {
       adminFeeReference: this.adminFeeReference,
       depositTotal: this.depositTotal,
       depositReference: this.depositReference,
-      penaltyTotal: this.penaltyTotal,
-      penaltyCause: this.penaltyCause,
-      penaltyReference: this.penaltyReference,
+      additionalCharges: this.additionalCharges,
       bank: this.bank,
       periodFrom: this.periodFrom,
       periodTo: this.periodTo,

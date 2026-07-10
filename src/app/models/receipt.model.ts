@@ -53,7 +53,7 @@ export interface Receipt {
 // ── PUT  /api/ty/receipts/{id} — Request body
 
 export interface ReceiptRequest {
-  receiptNumber: string;
+  receiptNumber?: string;
   customer: string;
   customerName: string;
   landlordCode: string;
