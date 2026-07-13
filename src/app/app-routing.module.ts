@@ -44,6 +44,13 @@ const routes: Routes = [
     import('./demo/pages/recurring-entries/recurring-entries.component').then(
       (m) => m.RecurringEntriesComponent
     )
+},
+{
+  path: 'console-management',
+  loadComponent: () =>
+    import('./demo/pages/console-management/console-management.component').then(
+      (m) => m.default
+    )
 }
     ]
   },

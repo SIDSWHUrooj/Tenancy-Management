@@ -188,6 +188,7 @@ private computeScheduleKey(): string {
         }
 
         this.form.attachments.push(response.data);
+        this.cdr.detectChanges();
 
       },
 
@@ -212,7 +213,7 @@ private computeScheduleKey(): string {
         this.form.attachments.filter(
           (x: TyAttachment) => x.id !== id
         );
-
+      this.cdr.detectChanges();
     },
 
     error: () => {

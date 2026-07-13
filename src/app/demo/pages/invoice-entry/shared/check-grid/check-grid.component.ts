@@ -38,7 +38,21 @@ export class CheckGridComponent implements OnChanges {
   @Output() depositReferenceChange = new EventEmitter<string>();
   @Output() additionalChargesChange = new EventEmitter<{ cause: string; total: number; referenceNo?: string }[]>();
 
+  banksList = [
+    'Emirates NBD',
+    'Abu Dhabi Commercial Bank (ADCB)',
+    'Dubai Islamic Bank (DIB)',
+    'First Abu Dhabi Bank (FAB)',
+    'Mashreq Bank',
+    'HSBC Middle East',
+    'Standard Chartered'
+  ];
+
   rows: ScheduleRow[] = [];
+
+  trackByLineNo(index: number, row: ScheduleRow): number {
+    return row.lineNo;
+  }
 
   // ── Derived ──────────────────────────────────────────────────
   get hasAdditionalCharge(): boolean {
@@ -59,12 +73,35 @@ onReferenceInput(row: ScheduleRow, value: string): void {
 
   if (row.rowType === 'check') {
     const updatedChecks = this.checks.map(c =>
-      c.lineNo === row.lineNo ? { ...c, checkNo: value } : c
+      c.lineNo === row.checkLineNo ? { ...c, checkNo: value } : c
     );
     this.checks = updatedChecks;
     this.checksChange.emit(updatedChecks);
   }
 }
+
+onBankInput(row: ScheduleRow, value: string): void {
+  if (row.rowType === 'check') {
+    row.bank = value;
+    const updatedChecks = this.checks.map(c =>
+      c.lineNo === row.checkLineNo ? { ...c, bank: value } : c
+    );
+    this.checks = updatedChecks;
+    this.checksChange.emit(updatedChecks);
+  }
+}
+
+onDateInput(row: ScheduleRow, value: string): void {
+  if (row.rowType === 'check') {
+    row.date = value;
+    const updatedChecks = this.checks.map(c =>
+      c.lineNo === row.checkLineNo ? { ...c, checkDate: value } : c
+    );
+    this.checks = updatedChecks;
+    this.checksChange.emit(updatedChecks);
+  }
+}
+
   get chequeSum(): number {
     return Math.round(this.checks.reduce((acc, c) => acc + (c.amount || 0), 0) * 100) / 100;
   }
@@ -114,7 +151,7 @@ onReferenceInput(row: ScheduleRow, value: string): void {
     const amount = Math.round((value || 0) * 100) / 100;
     row.amount = amount;
 
-    const target = this.checks.find(c => c.checkNo === row.referenceNo);
+    const target = this.checks.find(c => c.lineNo === row.checkLineNo);
     if (target) target.amount = amount;
 
     this.checksChange.emit(this.checks);

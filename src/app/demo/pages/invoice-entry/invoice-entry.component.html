@@ -131,12 +131,14 @@
               <label class="form-label fw-semibold">Period From <span class="text-danger">*</span></label>
               <input type="date" class="form-control bg-white" [(ngModel)]="form.periodFrom"
                     (ngModelChange)="onPeriodFromChange($event)"
+                    [min]="minPeriodDate"
                     [ngClass]="{'required-field': isRequired('periodFrom')}" [disabled]="isRentalLocked()">
             </div>
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Period To <span class="text-danger">*</span></label>
               <input type="date" class="form-control bg-white" [(ngModel)]="form.periodTo"
+                    [min]="form.periodFrom || minPeriodDate"
                     [ngClass]="{'required-field': isRequired('periodTo')}" [disabled]="isRentalLocked()">
             </div>
           </div>
@@ -406,6 +408,7 @@
                   <th>Unit ID</th>
                   <th>Unit Number</th>
                   <th>Purpose</th>
+                  <th>Status</th>
                   <th>Property ID</th>
                 </tr>
               </thead>
@@ -414,6 +417,11 @@
                   <td class="fw-semibold text-primary">{{ unit.unitId }}</td>
                   <td>{{ unit.unitNo }}</td>
                   <td>{{ unit.unitPurpose }}</td>
+                  <td>
+                    <span class="badge" [ngClass]="unit.status?.toLowerCase() === 'occupied' ? 'bg-danger' : 'bg-success'">
+                      {{ unit.status || 'Vacant' }}
+                    </span>
+                  </td>
                   <td>{{ unit.propertyId }}</td>
                 </tr>
                 <tr *ngIf="filteredUnits.length === 0">

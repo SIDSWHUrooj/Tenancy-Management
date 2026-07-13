@@ -21,40 +21,31 @@ export interface NavigationItem {
 export const NavigationItems: NavigationItem[] = [
   
   {
-  id: 'transactions',
-  title: 'Transactions',
-  type: 'group',
-  icon: 'file-text',
-  children: [
-    {
-      id: 'invoice-entry',
-      title: 'Invoice Management',
-      type: 'item',
-      url: '/invoice-entry'
-    }
-  ]
-},
- {
-  id: 'Contract',
-  title: 'Contract',
-  type: 'group',
-  icon: 'file-text',
-  children: [
-    {
-      id: 'invoice-entry',
-      title: 'Invoice Entry',
-      type: 'item',
-      url: '/invoice-entry'
-    },
-    {
-      id: 'recurring-entries',
-      title: 'Recurring Entries',
-      type: 'item',
-      url: '/recurring-entries'
-    }
-  ]
-},
-
+    id: 'transactions',
+    title: 'Transactions',
+    type: 'group',
+    icon: 'file-text',
+    children: [
+      {
+        id: 'invoice-entry',
+        title: 'Invoice Entry',
+        type: 'item',
+        url: '/invoice-entry'
+      },
+      {
+        id: 'recurring-entries',
+        title: 'Recurring Entries',
+        type: 'item',
+        url: '/recurring-entries'
+      },
+      {
+        id: 'console-management',
+        title: 'Console Management',
+        type: 'item',
+        url: '/console-management'
+      }
+    ]
+  },
   {
     id: 'authentication',
     title: 'Authentication',

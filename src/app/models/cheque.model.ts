@@ -22,13 +22,21 @@ export interface ChequeHeader {
 }
 
 export interface ChequeRequest {
+  id?: number;
   chequeId?: string;
   customerCode: string;
   contractNo: string;
   invoiceNumber: string;
+  details: ChequeDetailRequest[];
+}
+
+export interface ChequeDetailRequest {
+  id?: number;
+  chequeHeaderId?: number;
   bankName: string;
   chequeNo: string;
   chequeDate: string;
   chequeAmount: number;
+  chequeStatus?: string;
   remarks?: string;
 }

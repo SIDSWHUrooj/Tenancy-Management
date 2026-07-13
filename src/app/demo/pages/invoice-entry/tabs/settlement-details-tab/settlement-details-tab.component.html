@@ -288,7 +288,8 @@
 
           <!-- Save Actions -->
           <button class="btn btn-outline-secondary px-4" (click)="printSettlement()" *ngIf="form.settlementStatus === 'Posted' || form.settlementStatus === 'Draft'">Print</button>
-          <button class="btn btn-success px-4" (click)="postSettlement()" *ngIf="form.settlementStatus !== 'Posted'">Save (Post)</button>
+          <button class="btn btn-outline-primary px-4" (click)="saveSettlementDraft()" *ngIf="form.settlementStatus !== 'Posted'">Save Draft</button>
+          <button class="btn btn-success px-4" (click)="postSettlement()" *ngIf="form.settlementStatus !== 'Posted'">Post to ERP</button>
         </div>
       </div>
 

@@ -1,8 +1,7 @@
 <!-- ── Tab Header ─────────────────────────────────────── -->
-<div class="d-flex justify-content-between align-items-center mb-4 p-3 rounded-3 bg-light">
+<div *ngIf="isLocked" class="d-flex justify-content-between align-items-center mb-3">
   <div class="d-flex align-items-center gap-2">
-    <span class="fw-semibold text-dark" style="font-size:0.9rem;">Receipt Details</span>
-    <span *ngIf="isLocked" class="tab-locked-badge">
+    <span class="tab-locked-badge">
       <svg xmlns="http://www.w3.org/2000/svg" width="11" height="11" fill="currentColor" class="bi bi-lock-fill me-1" viewBox="0 0 16 16">
         <path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2zm3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2z"/>
       </svg>
@@ -41,7 +40,7 @@
         </div>
 
         <div class="col-md-4">
-          <label class="form-label fw-semibold">Clearing Bank</label>
+          <label class="form-label fw-semibold">Bank</label>
           <select class="form-select"
                   [class.bg-white]="!isLocked"
                   [class.bg-light]="isLocked"

@@ -3,6 +3,8 @@
 export type RowType = 'admin' | 'deposit' | 'additional' | 'check';
 
 export interface CheckItem {
+  id?: number;
+  chequeHeaderId?: number;
   lineNo: number;
   checkNo: string;
   checkDate: string;
@@ -23,6 +25,7 @@ export interface ScheduleRow {
   amount: number;
   /** Only cheque amounts are editable; fixed-charge rows come from the backend. */
   editable: boolean;
+  checkLineNo?: number;
 }
 
 export interface ScheduleInput {
@@ -114,7 +117,7 @@ export function distributeChecks(
 
     checks.push({
       lineNo: i + 1,
-      checkNo: generateReference('CHK'),
+      checkNo: '',
       checkDate: dateString,
       amount: checkAmount,
       remarks: `Cheque ${i + 1} of ${numberOfChecks}`,
@@ -183,11 +186,12 @@ export function buildScheduleRows(input: ScheduleInput): ScheduleRow[] {
       lineNo: sr++,
       rowType: 'check',
       description: `Cheque ${c.lineNo}`,
-      bank: input.bank,
+      bank: c.bank || input.bank,
       referenceNo: c.checkNo,
       date: c.checkDate,
       amount: c.amount,
       editable: true,
+      checkLineNo: c.lineNo,
     });
   });
 

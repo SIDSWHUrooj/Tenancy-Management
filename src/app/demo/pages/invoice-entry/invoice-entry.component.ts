@@ -183,6 +183,7 @@ export class InvoiceEntryComponent implements OnInit {
   modalInvoiceType: InvoiceType = 'New';
   modalPreviousInvoiceNumber    = '';
   invoiceLookupMode: 'main' | 'previous' = 'main';
+  minPeriodDate: string = '';
 
   invoiceTypes: InvoiceType[] = ['New', 'Renewal'];
 
@@ -618,6 +619,51 @@ export class InvoiceEntryComponent implements OnInit {
         this.form.purposeOfLease = unit.unitPurpose;
       }
     }
+
+    if (unit.propertyId) {
+      this.form.propertyId = unit.propertyId;
+      const prop = this.propertiesList.find(p => p.propertyId === unit.propertyId);
+      if (prop) {
+        this.form.propertyName = prop.propertyName;
+      } else if (unit.property && (unit.property as any).propertyName) {
+        this.form.propertyName = (unit.property as any).propertyName;
+      }
+    }
+    
+    // If unit is occupied, restrict periodFrom to be after its latest active contract
+    if (unit.status?.toLowerCase() === 'occupied') {
+      this.invoiceService.getAll().subscribe(res => {
+        if (res.success && res.data) {
+          const invoices = Array.isArray(res.data) ? res.data : (res.data as any).items || [];
+          const unitInvoices = invoices.filter((i: any) => 
+            i.unitNo === unit.unitNo && 
+            i.status === 'Posted'
+          );
+          
+          let latestDate = '';
+          unitInvoices.forEach((i: any) => {
+            if (!latestDate || new Date(i.periodTo) > new Date(latestDate)) {
+              latestDate = i.periodTo;
+            }
+          });
+          
+          if (latestDate) {
+            const vacantDate = new Date(latestDate);
+            vacantDate.setDate(vacantDate.getDate() + 1);
+            this.minPeriodDate = vacantDate.toISOString().substring(0, 10);
+            
+            // if current periodFrom is before minPeriodDate, reset it
+            if (this.form.periodFrom && new Date(this.form.periodFrom) < vacantDate) {
+              this.form.periodFrom = this.minPeriodDate;
+              this.onPeriodFromChange(this.form.periodFrom);
+            }
+          }
+        }
+      });
+    } else {
+      this.minPeriodDate = '';
+    }
+
     this.closeUnitLookup();
   }
   onPeriodFromChange(newDate: string): void {
@@ -761,6 +807,20 @@ export class InvoiceEntryComponent implements OnInit {
               this.isSaving = false;
               if (postRes.success) {
                 this.form = { ...this.form, status: 'Posted', rentalPosted: true };
+                
+                // Update unit status to occupied
+                const u = this.unitsList.find(un => un.unitNo === this.form.unitNo);
+                if (u && u.id) {
+                  this.unitService.update(u.id, { ...u, status: 'Occupied' }).subscribe({
+                    next: () => {
+                      console.log('Unit status updated to Occupied');
+                      // Update local cache so it reflects immediately
+                      u.status = 'Occupied';
+                    },
+                    error: (e) => console.error('Failed to update unit status', e)
+                  });
+                }
+
                 alert('Rental details posted successfully. You can now fill in Receipt Details.');
               } else {
                 alert(postRes.message || 'Failed to post rental details.');
@@ -949,6 +1009,11 @@ private mapFormToReceiptRequest(): ReceiptRequest {
   postReceiptAction(): void {
     if (!this.canPostReceipt()) { alert('Post Rental Details first, or receipt has already been posted.'); return; }
     const payload = this.mapFormToReceiptRequest();
+    
+    if (Math.abs(payload.receiptTotal - this.form.invoiceTotal) > 0.005) {
+      alert(`Cannot post: Receipt total (AED ${payload.receiptTotal.toFixed(2)}) must exactly match the Invoice total (AED ${this.form.invoiceTotal.toFixed(2)}).`);
+      return;
+    }
     this.isSaving = true;
     const save$ = this.form.receiptId
       ? this.receiptService.update(this.form.receiptId, payload)
@@ -1334,17 +1399,6 @@ private loadReceiptForInvoice(invoiceNumber: string): void {
           lastReceiptTotal: linked.lastReceiptTotal || 0,
           receiptTotal:     linked.receiptTotal || 0,
           balanceAmount:    linked.balanceAmount || 0,
-          numberOfChecks:   linked.details?.length || 0,
-          checks: (linked.details || []).map((d: any, i: number) => ({
-            lineNo:    i + 1,
-            checkNo:   d.checkNo,
-            checkDate: this.toDateInput(d.checkDate),
-            amount:    d.amount,
-            remarks:   d.comments || '',
-            bank:      d.bank,
-            rowType:   'check' as const,
-          })),
-          checksSource: 'backend',
         };
         this.cdr.detectChanges();
         
@@ -1491,6 +1545,8 @@ if (this.form.additionalCharges?.length) {
       if (res.success && res.data && res.data.length > 0) {
         const mapped: CheckItem[] = res.data.flatMap((header: any) =>
           header.details.map((d: any, idx: number) => ({
+            id:        d.id,
+            chequeHeaderId: header.id,
             lineNo:    idx + 1,
             checkNo:   d.chequeNo,
             checkDate: this.toDateInput(d.chequeDate),
@@ -1527,36 +1583,50 @@ if (this.form.additionalCharges?.length) {
     },
   });
 }
-// syncCheques(): void {
 private async syncCheques(): Promise<void> {
   if (!this.form.checks?.length) return;
 
-  for (const check of this.form.checks as any[]) {
-    const payload: ChequeRequest = {
-      customerCode: this.form.customer,
-      contractNo: this.form.contractNumber,
-      invoiceNumber: this.form.invoiceNumber,
-      bankName: check.bankName || this.form.detailsBank,
-      chequeNo: check.checkNo,
-      chequeDate: this.toIsoRequired(check.checkDate),
-      chequeAmount: check.amount,
-      remarks: '',
-    };
+  const details = this.form.checks.map((check: any) => ({
+    id: check.id || 0,
+    chequeHeaderId: check.chequeHeaderId || 0,
+    bankName: check.bank || this.form.detailsBank,
+    chequeNo: check.checkNo,
+    chequeDate: this.toIsoRequired(check.checkDate),
+    chequeAmount: check.amount,
+    remarks: check.remarks || '',
+    chequeStatus: check.status || 'Posted'
+  }));
 
-    try {
-      if (check.chequeHeaderId) {
-        await this.chequeService.update(check.chequeHeaderId, payload).toPromise();
-      } else {
-        const res = await this.chequeService.create(payload).toPromise();
-        if (res?.success && res?.data) {
+  const payload: ChequeRequest = {
+    customerCode: this.form.customer,
+    contractNo: this.form.contractNumber || '',
+    invoiceNumber: this.form.invoiceNumber,
+    details: details,
+  };
+
+  try {
+    // Assuming all cheques belong to the same header for this invoice
+    const headerId = this.form.checks[0]?.chequeHeaderId;
+    
+    if (headerId) {
+      payload.id = headerId;
+      await this.chequeService.update(headerId, payload).toPromise();
+    } else {
+      const res = await this.chequeService.create(payload).toPromise();
+      if (res?.success && res?.data) {
+        // Update local checks with returned IDs
+        const returnedDetails = res.data.details || [];
+        this.form.checks.forEach((check: any, index: number) => {
           check.chequeHeaderId = res.data.id;
-          check.id = res.data.details?.[0]?.id;
-        }
+          if (returnedDetails[index]) {
+            check.id = returnedDetails[index].id;
+          }
+        });
       }
-    } catch (err) {
-      console.error('Cheque sync failed for cheque:', check.checkNo, err);
-      alert(`Failed to save cheque ${check.checkNo}. Please try saving again.`);
     }
+  } catch (err) {
+    console.error('Cheque sync failed for invoice:', this.form.invoiceNumber, err);
+    alert('Failed to save cheques. Please try saving again.');
   }
 }
 
@@ -2492,8 +2562,8 @@ postSettlement(): void {
 
       annualRent:             0,
       rentAmount:             0,
-      rentTaxGroup:           'Standard VAT',
-      rentTaxRate:            5,
+      rentTaxGroup:           'Zero Rated',
+      rentTaxRate:            0,
       rentTaxAmount:          0,
       rentTotal:              0,
 
@@ -2503,21 +2573,21 @@ postSettlement(): void {
       depositTaxAmount:       0,
       depositTotal:           0,
 
-      adminFeeAmount:         0,
+      adminFeeAmount:         500,
       adminFeeTaxGroup:       'Standard VAT',
       adminFeeTaxRate:        5,
-      adminFeeTaxAmount:      0,
-      adminFeeTotal:          0,
+      adminFeeTaxAmount:      25,
+      adminFeeTotal:          525,
 
       additionalCharges: [],
 
-      subTotal:               0,
-      taxTotal:               0,
-      invoiceTotal:           0,
+      subTotal:               500,
+      taxTotal:               25,
+      invoiceTotal:           525,
       lastReceiptTotal:       0,
       receiptTotal:           0,
-      balanceAmount:          0,
-      grandTotal:             0,
+      balanceAmount:          525,
+      grandTotal:             525,
 
       detailsBank:            '',
       numberOfChecks:         0,
