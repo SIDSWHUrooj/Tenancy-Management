@@ -3,50 +3,227 @@
 }
 
 .table > tbody > tr.table-primary > td {
-  background-color: var(--bs-primary-bg-subtle);
-  color: var(--bs-primary-text-emphasis);
+  background-color: var(--erp-primary-soft);
+  color: var(--erp-primary);
 }
 
 .table-responsive {
   scrollbar-width: thin;
 }
 
+/* Lookup search button - uses theme primary */
 .btn-lookup {
-  color: #003a8c;
-  border-color: #003a8c;
-  background-color: transparent;
+  color: var(--erp-primary);
+  border-color: var(--erp-border);
+  background-color: #ffffff;
   transition: all 0.2s ease-in-out;
-  
+
   &:hover {
-    background-color: #003a8c;
+    background-color: var(--erp-primary);
+    border-color: var(--erp-primary);
     color: white;
+    transform: none;
   }
 }
 
-/* Override default bootstrap table header backgrounds */
-.table > thead > tr > th, 
+/* Sticky table header - uses theme primary */
+.table > thead > tr > th,
 .table > thead > tr > td {
-  background-color: #003a8c !important;
+  background-color: var(--erp-primary) !important;
   color: white !important;
   position: sticky;
   top: 0;
   z-index: 10;
 }
 
+/* Professional select dropdown - uses theme variables */
 .select-pro {
   cursor: pointer;
-  border: 1px solid #dcdfe4;
+  border: 1px solid var(--erp-border) !important;
   font-weight: 500;
-  color: #495057;
+  color: var(--erp-text);
   transition: all 0.2s ease-in-out;
+  border-radius: var(--erp-control-radius) !important;
 
   &:hover {
-    border-color: #003a8c;
+    border-color: var(--erp-primary) !important;
+    box-shadow: 0 4px 10px rgba(142, 36, 170, 0.08);
+    transform: translateY(-1px);
   }
 
   &:focus {
-    border-color: #003a8c;
+    border-color: var(--erp-primary) !important;
     outline: none;
-    box-shadow: 0 0 0 0.2rem rgba(0, 58, 140, 0.25);
+    box-shadow: 0 0 0 4px rgba(142, 36, 170, 0.18) !important;
+    transform: translateY(0);
+  }
+}
+
+/* Custom Dropdown Menu (Modern ERP Style) */
+.custom-select-btn {
+  width: 100%;
+  text-align: left;
+  background-color: #ffffff;
+  border: 1px solid var(--erp-border) !important;
+  border-radius: var(--erp-control-radius) !important;
+  padding: 0.375rem 0.75rem;
+  font-size: 0.9rem;
+  font-weight: 500;
+  color: var(--erp-text);
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  transition: all 0.2s ease;
+  position: relative;
+  z-index: 2;
+
+  &::after {
+    content: "";
+    display: inline-block;
+    width: 0.4em;
+    height: 0.4em;
+    border-right: 0.15em solid currentColor;
+    border-bottom: 0.15em solid currentColor;
+    transform: rotate(45deg);
+    margin-left: auto;
+    transition: transform 0.2s ease;
+  }
+
+  &:hover {
+    border-color: var(--erp-primary) !important;
+    box-shadow: 0 4px 10px rgba(142, 36, 170, 0.08);
+  }
+
+  &.active {
+    border-color: var(--erp-primary) !important;
+    color: var(--erp-primary);
+    box-shadow: 0 0 0 4px rgba(142, 36, 170, 0.18) !important;
+
+    &::after {
+      transform: rotate(-135deg);
+    }
+  }
+
+  &.has-value {
+    color: var(--erp-primary);
+    border-color: var(--erp-primary) !important;
+  }
+}
+
+.custom-dropdown-menu {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  width: 100%;
+  background: #ffffff;
+  border: 1px solid var(--erp-border);
+  border-radius: var(--erp-radius);
+  box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+  z-index: 1050;
+  max-height: 250px;
+  overflow-y: auto;
+  padding: 0.5rem 0;
+  animation: fadeInDropdown 0.2s ease-out;
+
+  /* Custom scrollbar for modern feel */
+  &::-webkit-scrollbar {
+    width: 6px;
+  }
+  &::-webkit-scrollbar-thumb {
+    background: rgba(142, 36, 170, 0.3);
+    border-radius: 10px;
+  }
+  &::-webkit-scrollbar-track {
+    background: transparent;
+  }
+}
+
+.custom-dropdown-item {
+  padding: 0.5rem 1rem;
+  font-size: 0.875rem;
+  color: var(--erp-text);
+  cursor: pointer;
+  transition: all 0.15s ease;
+
+  &:hover {
+    background-color: var(--erp-primary-soft) !important;
+    color: var(--erp-primary) !important;
+    padding-left: 1.25rem;
+  }
+
+  &.selected {
+    background-color: var(--erp-primary) !important;
+    color: #ffffff !important;
+  }
+}
+
+@keyframes fadeInDropdown {
+  from { opacity: 0; transform: translateY(-5px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.dropdown-backdrop {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: 1040;
+}
+
+
+/* Modern ERP Table Styles */
+.modern-erp-table {
+  border-collapse: separate;
+  border-spacing: 0;
+  width: 100%;
+
+  thead th {
+    padding: 0.9rem 1rem !important;
+    font-size: 0.75rem;
+    font-weight: 700;
+    letter-spacing: 0.5px;
+    text-transform: uppercase;
+    border-bottom: none !important;
+  }
+
+  tbody tr {
+    transition: background-color 0.2s ease;
+
+    &:hover {
+      background-color: rgba(142, 36, 170, 0.03) !important;
+    }
+
+    &.table-active-row {
+      background-color: rgba(142, 36, 170, 0.08) !important;
+    }
+
+    td {
+      padding: 0.85rem 1rem !important;
+      font-size: 0.875rem;
+      color: #495057;
+      border-bottom: 1px solid rgba(0, 0, 0, 0.04) !important;
+      vertical-align: middle;
+      border-top: none !important;
+    }
+
+    /* Left active indicator bar */
+    td:first-child {
+      position: relative;
+      &::before {
+        content: '';
+        position: absolute;
+        left: 0;
+        top: 0;
+        bottom: 0;
+        width: 3px;
+        background-color: transparent;
+        transition: background-color 0.2s ease;
+      }
+    }
+
+    &.table-active-row td:first-child::before {
+      background-color: var(--erp-primary);
+    }
   }
 }

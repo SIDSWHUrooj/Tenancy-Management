@@ -1,5 +1,5 @@
-$primary-color: #0050b3;
-$primary-hover: #003a8c;
+$primary-color: #8E24AA;
+$primary-hover: #7B1FA2;
 $danger-color: #dc3545;
 $danger-hover: #bd2130;
 $border-color: #ced4da;
@@ -35,7 +35,7 @@ $border-color: #ced4da;
 
   &:focus {
     border-color: lighten($primary-color, 15%);
-    box-shadow: 0 0 0 0.2rem rgba(0, 80, 179, 0.25);
+    box-shadow: 0 0 0 0.2rem rgba(142, 36, 170, 0.25);
     outline: 0;
   }
 
@@ -271,7 +271,7 @@ $border-color: #ced4da;
 
   &.active {
     border-color: $primary-color !important;
-    background-color: rgba(0, 80, 179, 0.04) !important;
+    background-color: rgba(142, 36, 170, 0.04) !important;
 
     label {
       color: $primary-color !important;
@@ -285,8 +285,8 @@ $border-color: #ced4da;
 }
 
 .dynamic-modal-inputs {
-  border: 1px solid rgba(0, 80, 179, 0.12) !important;
-  background-color: rgba(0, 80, 179, 0.02) !important;
+  border: 1px solid rgba(142, 36, 170, 0.12) !important;
+  background-color: rgba(142, 36, 170, 0.02) !important;
 }
 
 @keyframes fadeInOverlay {
@@ -333,7 +333,7 @@ $border-color: #ced4da;
 
       &:focus {
         border-color: lighten($primary-color, 15%);
-        box-shadow: 0 0 0 0.2rem rgba(0, 80, 179, 0.2);
+        box-shadow: 0 0 0 0.2rem rgba(142, 36, 170, 0.2);
       }
     }
 
@@ -396,7 +396,7 @@ $border-color: #ced4da;
       &:last-child { border-bottom: none; }
 
       &:hover {
-        background-color: rgba(0, 80, 179, 0.05);
+        background-color: rgba(142, 36, 170, 0.05);
       }
 
       .invoice-dropdown-number {
@@ -439,7 +439,7 @@ $border-color: #ced4da;
 // ── Per-Tab Action Bar ───────────────────────────────────────────────
 .tab-action-bar {
   background: linear-gradient(135deg, #f8f9fa 0%, #ffffff 100%);
-  border: 1px solid rgba(0, 80, 179, 0.12);
+  border: 1px solid rgba(142, 36, 170, 0.12);
   box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
 
   .tab-btn-group {
@@ -474,7 +474,7 @@ $border-color: #ced4da;
       color: $primary-color !important;
 
       &:hover:not(:disabled) {
-        background-color: rgba(0, 80, 179, 0.06) !important;
+        background-color: rgba(142, 36, 170, 0.06) !important;
         border-color: $primary-hover !important;
         color: $primary-hover !important;
       }

@@ -29,7 +29,7 @@
         <div class="card-body">
           <div class="row g-3 mb-4">
             <div class="col-md-3">
-              <label class="form-label fw-semibold">Invoice Number</label>
+              <label class="form-label f  w-semibold">Invoice Number</label>
               <div class="input-group">
                 <input type="text" class="form-control bg-light" [(ngModel)]="form.invoiceNumber" [disabled]="isRentalLocked()" >
                 <button type="button" class="btn btn-outline-primary" title="Search Invoice" (click)="openInvoiceLookup()">
@@ -230,9 +230,15 @@
   <!-- ── Invoice Type Modal ────────────────────────────────────── -->
   <div class="modal-overlay" *ngIf="showTypeModal">
     <div class="modal-container shadow-lg border rounded-3 bg-white">
-      <div class="modal-header border-bottom py-3 px-4 d-flex justify-content-between align-items-center bg-light">
-        <h5 class="mb-0 fw-bold text-dark">Invoice Type Selection</h5>
-        <button type="button" class="btn-close" (click)="showTypeModal = false"></button>
+      <div class="modal-header border-bottom py-3 px-4 d-flex justify-content-between align-items-center" style="background:var(--erp-primary-soft);">
+        <h5 class="mb-0 fw-bold" style="color:var(--erp-primary);">Invoice Type Selection</h5>
+        <button type="button" class="btn btn-sm border-0 d-flex align-items-center justify-content-center"
+                style="width:28px;height:28px;border-radius:50%;background:rgba(198,40,40,0.08);color:var(--erp-danger);"
+                (click)="showTypeModal = false">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+          </svg>
+        </button>
       </div>
 
       <div class="modal-body p-4">
@@ -277,9 +283,15 @@
   <!-- ── Invoice Lookup Modal ──────────────────────────────────── -->
   <div class="modal-overlay" *ngIf="showInvoiceLookup">
     <div class="modal-container shadow-lg border rounded-3 bg-white" style="max-width: 800px; width: 90%;">
-      <div class="modal-header border-bottom py-3 px-4 d-flex justify-content-between align-items-center bg-light">
-        <h5 class="mb-0 fw-bold text-dark">Select an Invoice</h5>
-        <button type="button" class="btn-close" (click)="closeInvoiceLookup()"></button>
+      <div class="modal-header border-bottom py-3 px-4 d-flex justify-content-between align-items-center" style="background:var(--erp-primary-soft);">
+        <h5 class="mb-0 fw-bold" style="color:var(--erp-primary);">Select an Invoice</h5>
+        <button type="button" class="btn btn-sm border-0 d-flex align-items-center justify-content-center"
+                style="width:28px;height:28px;border-radius:50%;background:rgba(198,40,40,0.08);color:var(--erp-danger);"
+                (click)="closeInvoiceLookup()">
+          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+          </svg>
+        </button>
       </div>
 
       <div class="modal-body p-4" style="max-height: 60vh; overflow-y: auto;">
@@ -348,9 +360,15 @@
   <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" *ngIf="showPropertyLookup">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header border-bottom py-3 px-4 bg-light">
-          <h5 class="mb-0 fw-bold text-dark">Select Property</h5>
-          <button type="button" class="btn-close" (click)="closePropertyLookup()"></button>
+        <div class="modal-header border-bottom py-3 px-4" style="background:var(--erp-primary-soft);">
+          <h5 class="mb-0 fw-bold" style="color:var(--erp-primary);">Select Property</h5>
+          <button type="button" class="btn btn-sm border-0 d-flex align-items-center justify-content-center"
+                  style="width:28px;height:28px;border-radius:50%;background:rgba(198,40,40,0.08);color:var(--erp-danger);"
+                  (click)="closePropertyLookup()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+            </svg>
+          </button>
         </div>
         <div class="modal-body p-4">
           <div class="input-group mb-3">
@@ -391,9 +409,15 @@
   <div class="modal fade show d-block" tabindex="-1" style="background: rgba(0,0,0,0.5);" *ngIf="showUnitLookup">
     <div class="modal-dialog modal-lg modal-dialog-centered">
       <div class="modal-content">
-        <div class="modal-header border-bottom py-3 px-4 bg-light">
-          <h5 class="mb-0 fw-bold text-dark">Select Unit</h5>
-          <button type="button" class="btn-close" (click)="closeUnitLookup()"></button>
+        <div class="modal-header border-bottom py-3 px-4" style="background:var(--erp-primary-soft);">
+          <h5 class="mb-0 fw-bold" style="color:var(--erp-primary);">Select Unit</h5>
+          <button type="button" class="btn btn-sm border-0 d-flex align-items-center justify-content-center"
+                  style="width:28px;height:28px;border-radius:50%;background:rgba(198,40,40,0.08);color:var(--erp-danger);"
+                  (click)="closeUnitLookup()">
+            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
+              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
+            </svg>
+          </button>
         </div>
         <div class="modal-body p-4">
           <div class="input-group mb-3">

@@ -36,3 +36,287 @@ File: style.css
 @import 'scss/themes/layouts/footer/footer.scss';
 
 @import 'scss/themes/preset-style.scss';
+
+// ============================================================
+// GLOBAL ERP THEME OVERRIDES
+// All colors use CSS variables so theme switcher works everywhere
+// ============================================================
+
+:root {
+  /* Default theme = Sunset Purple — matches ThemeService.themes[0] */
+  --erp-sidebar-bg:        #1B1647;
+  --erp-bg:                #F5F4FA;
+  --erp-card-bg:           #FCFBFE;
+  --erp-header-bg:         #E5E2F8;
+  --erp-primary:           #30277C;
+  --erp-primary-hover:     #241D60;
+  --erp-primary-soft:      #EAE8FC;
+  --erp-primary-soft-hover:#DFDCFA;
+  --erp-border:            #C6C3F2;
+  --erp-shadow:            0 8px 24px rgba(48, 39, 124, 0.06);
+  --erp-shadow-sm:         0 4px 12px rgba(48, 39, 124, 0.04);
+  /* Semantic colors (static) */
+  --erp-white:   #ffffff;
+  --erp-text:    #2f3542;
+  --erp-muted:   #6b7280;
+  --erp-success: #2E7D32;
+  --erp-warning: #EF6C00;
+  --erp-danger:  #C62828;
+  --erp-info:    #0277BD;
+  /* Controls */
+  --erp-radius:         12px;
+  --erp-control-radius: 8px;
+  /* Bootstrap override */
+  --bs-primary:             #30277C;
+  --pc-sidebar-background:  #1B1647;
+}
+
+// ── Sidebar Text Visibility ──────────────────────────────────────────
+.pc-sidebar,
+.coded-navbar {
+  background: var(--erp-sidebar-bg) !important;
+
+  // All nav links — bright readable white
+  .coded-inner-navbar li > a,
+  .coded-inner-navbar li > a span,
+  .coded-inner-navbar li > a .coded-mtext,
+  .coded-inner-navbar li > a .coded-micon,
+  .coded-inner-navbar li > a i {
+    color: rgba(255, 255, 255, 0.85) !important;
+  }
+
+  // Group caption labels
+  .coded-menu-caption label {
+    color: rgba(255, 255, 255, 0.45) !important;
+    font-size: 11px !important;
+    text-transform: uppercase !important;
+    letter-spacing: 0.08em !important;
+    font-weight: 700 !important;
+  }
+
+  // Hover state — full white
+  .coded-inner-navbar li > a:hover,
+  .coded-inner-navbar li > a:hover span,
+  .coded-inner-navbar li > a:hover .coded-mtext,
+  .coded-inner-navbar li > a:hover .coded-micon,
+  .coded-inner-navbar li > a:hover i {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+
+  // Active/selected item
+  .coded-inner-navbar li.active > a,
+  .coded-inner-navbar li.active > a span,
+  .coded-inner-navbar li.active > a .coded-mtext,
+  .coded-inner-navbar li.active > a .coded-micon,
+  .coded-inner-navbar li.active > a i,
+  .coded-inner-navbar li.coded-trigger > a,
+  .coded-inner-navbar li.coded-trigger > a span,
+  .coded-inner-navbar li.coded-trigger > a .coded-mtext,
+  .coded-inner-navbar li.coded-trigger > a .coded-micon,
+  .coded-inner-navbar li.coded-trigger > a i {
+    color: #ffffff !important;
+    background: var(--erp-primary) !important;
+  }
+
+  // Submenu items
+  .coded-submenu li > a {
+    color: rgba(255, 255, 255, 0.7) !important;
+  }
+  .coded-submenu li > a:hover,
+  .coded-submenu li.active > a {
+    color: #ffffff !important;
+    background: rgba(255, 255, 255, 0.08) !important;
+  }
+}
+
+// ── Primary Buttons — follow theme variable ──────────────────────────
+.btn-primary,
+.btn.btn-primary {
+  background-color: var(--erp-primary) !important;
+  border-color: var(--erp-primary) !important;
+  color: #ffffff !important;
+
+  &:hover:not(:disabled) {
+    background-color: var(--erp-primary-hover) !important;
+    border-color: var(--erp-primary-hover) !important;
+  }
+
+  &:focus, &:active {
+    background-color: var(--erp-primary-hover) !important;
+    border-color: var(--erp-primary-hover) !important;
+    box-shadow: 0 0 0 0.25rem rgba(var(--bs-primary-rgb, 48, 39, 124), 0.35) !important;
+  }
+}
+
+.btn-outline-primary,
+.btn.btn-outline-primary {
+  color: var(--erp-primary) !important;
+  border-color: var(--erp-primary) !important;
+  background-color: transparent !important;
+
+  &:hover:not(:disabled) {
+    background-color: var(--erp-primary) !important;
+    color: #ffffff !important;
+  }
+}
+
+// ── Danger Buttons ───────────────────────────────────────────────────
+.btn-danger,
+.btn.btn-danger {
+  background-color: var(--erp-danger) !important;
+  border-color: var(--erp-danger) !important;
+  color: #ffffff !important;
+
+  &:hover:not(:disabled) {
+    background-color: #b71c1c !important;
+    border-color: #b71c1c !important;
+  }
+}
+
+// ── Success Buttons ──────────────────────────────────────────────────
+.btn-success,
+.btn.btn-success {
+  background-color: var(--erp-success) !important;
+  border-color: var(--erp-success) !important;
+  color: #ffffff !important;
+
+  &:hover:not(:disabled) {
+    background-color: #1b5e20 !important;
+    border-color: #1b5e20 !important;
+  }
+}
+
+// ── Warning Buttons ──────────────────────────────────────────────────
+.btn-warning,
+.btn.btn-warning {
+  background-color: var(--erp-warning) !important;
+  border-color: var(--erp-warning) !important;
+  color: #ffffff !important;
+
+  &:hover:not(:disabled) {
+    background-color: #e65100 !important;
+    border-color: #e65100 !important;
+  }
+}
+
+// ── Secondary / outline-secondary Buttons ───────────────────────────
+.btn-secondary,
+.btn.btn-secondary,
+.btn-outline-secondary,
+.btn.btn-outline-secondary {
+  background-color: #f3f4f6 !important;
+  border-color: #d1d5db !important;
+  color: #4b5563 !important;
+
+  &:hover:not(:disabled) {
+    background-color: #e5e7eb !important;
+    border-color: #c4c4c4 !important;
+  }
+}
+
+// ── Form controls & selects: use theme borders + focus ring ─────────
+.form-control,
+.form-select {
+  border: 1px solid var(--erp-border) !important;
+  border-radius: var(--erp-control-radius) !important;
+  color: var(--erp-text) !important;
+
+  &:focus {
+    border-color: var(--erp-primary) !important;
+    box-shadow: 0 0 0 4px rgba(48, 39, 124, 0.15) !important;
+    outline: none !important;
+  }
+
+  &:hover {
+    border-color: var(--erp-primary) !important;
+  }
+}
+
+// ── Badges: bg-primary follows theme ────────────────────────────────
+.badge.bg-primary,
+.pc-h-badge.bg-primary {
+  background-color: var(--erp-primary) !important;
+}
+
+// ── Links ────────────────────────────────────────────────────────────
+a.link-primary {
+  color: var(--erp-primary) !important;
+}
+
+// ── Cards & card headers ─────────────────────────────────────────────
+.card {
+  border: 1px solid var(--erp-border) !important;
+  border-radius: var(--erp-radius) !important;
+  box-shadow: var(--erp-shadow-sm) !important;
+}
+
+.card-header {
+  background: var(--erp-header-bg) !important;
+  border-bottom: 1px solid var(--erp-border) !important;
+  border-top-left-radius: calc(var(--erp-radius) - 1px) !important;
+  border-top-right-radius: calc(var(--erp-radius) - 1px) !important;
+}
+
+// ── Table headers follow theme primary color ─────────────────────────
+// ── Table headers follow theme primary color ─────────────────────────
+.table > thead > tr {
+  background-color: var(--erp-primary) !important;
+}
+.table > thead > tr > th {
+  background-color: var(--erp-primary) !important;
+  color: #ffffff !important;
+  border-top: none !important;
+  border-left: none !important;
+  border-right: none !important;
+  box-shadow: none !important;
+}
+.table > thead > tr > th:first-child {
+  border-top-left-radius: calc(var(--erp-radius) - 1px) !important;
+}
+.table > thead > tr > th:last-child {
+  border-top-right-radius: calc(var(--erp-radius) - 1px) !important;
+}
+.table {
+  margin-top: 0 !important;
+}
+
+// ── Native Select Option Highlight Fix ───────────────────────────────
+option:checked, option:hover, option:focus, option:active {
+  background-color: var(--erp-primary) !important;
+  box-shadow: 0 0 10px 100px var(--erp-primary) inset !important;
+  color: #ffffff !important;
+}
+
+// ── Input Group Corners Fix ──────────────────────────────────────────
+.input-group {
+  display: flex !important;
+  align-items: stretch;
+
+  > .form-control,
+  > .form-select,
+  > .btn,
+  > .input-group-text {
+    margin-bottom: 0 !important;
+    position: relative !important;
+
+    &:focus, &:active, &:focus-within {
+      z-index: 5 !important;
+    }
+
+    &:hover {
+      z-index: 4;
+    }
+
+    &:not(:last-child) {
+      border-top-right-radius: 0 !important;
+      border-bottom-right-radius: 0 !important;
+    }
+
+    &:not(:first-child) {
+      border-top-left-radius: 0 !important;
+      border-bottom-left-radius: 0 !important;
+      margin-left: -1px !important;
+    }
+  }
+}

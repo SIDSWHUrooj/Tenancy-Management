@@ -91,41 +91,62 @@
         </div>
       </div>
 
-      <!-- Attachments -->
-      <div class="row mt-4">
-        <div class="col-12">
-          <label class="form-label fw-semibold">Attachments</label>
+      <!-- Attachments Card ────────────────────────── -->
+      <div class="card border-0 shadow-sm mb-4">
+        <div class="card-header bg-white border-bottom py-3">
+          <h6 class="mb-0 fw-bold text-dark">Attachments</h6>
+        </div>
+        <div class="card-body">
+          <div class="row g-3 align-items-end mb-4" *ngIf="!isLocked">
+            <div class="col-md-5">
+              <label class="form-label fw-semibold">Upload File</label>
+              <input type="file" class="form-control bg-white" multiple accept=".pdf,.png,.jpg,.jpeg" (change)="onFilesSelected($event)">
+            </div>
+            <div class="col-md-5">
+              <label class="form-label fw-semibold">Remarks</label>
+              <input type="text" class="form-control bg-white" placeholder="Optional remarks (Not saved for receipt yet)">
+            </div>
+            <div class="col-md-2">
+              <button class="btn btn-primary w-100">Upload</button>
+            </div>
+          </div>
 
-          <div class="border rounded p-3 bg-light">
-            <input
-              *ngIf="!isLocked"
-              type="file"
-              class="form-control bg-white mb-3"
-              multiple
-              accept=".pdf,.png,.jpg,.jpeg"
-              (change)="onFilesSelected($event)">
-
-            @if (this.form.attachments?.length) {
-              <ul class="list-group">
-                @for (att of this.form.attachments; track att.id) {
-                  <li class="list-group-item d-flex justify-content-between align-items-center bg-white">
-                    <div>
-                      <span class="fw-semibold">{{ att.name }}</span>
-                      <span class="text-muted ms-2">({{ formatFileSize(att.size) }})</span>
-                    </div>
-                    <button
-                      *ngIf="!isLocked"
-                      type="button"
-                      class="btn btn-sm btn-outline-danger"
-                      (click)="removeAttachment(att.id)">
-                      Remove
+          <div class="table-responsive" *ngIf="form.attachments && form.attachments.length > 0">
+            <table class="table table-hover align-middle mb-0">
+              <thead class="table-light">
+                <tr>
+                  <th>File Name</th>
+                  <th>Remarks</th>
+                  <th class="text-end">Size</th>
+                  <th class="text-center" style="width: 80px;">Action</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let att of form.attachments; let i = index">
+                  <td>
+                    <a href="javascript:void(0)" class="text-decoration-none">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-file-earmark-text me-2 text-primary" viewBox="0 0 16 16">
+                        <path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1h-5zM5 9.5a.5.5 0 0 1 .5-.5h5a.5.5 0 0 1 0 1h-5a.5.5 0 0 1-.5-.5zm0 2a.5.5 0 0 1 .5-.5h2a.5.5 0 0 1 0 1h-2a.5.5 0 0 1-.5-.5z"/>
+                        <path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5L9.5 0zm0 1v2.5a1 1 0 0 0 1 1H13v9a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1h5.5z"/>
+                      </svg>
+                      {{ att.name }}
+                    </a>
+                  </td>
+                  <td>-</td>
+                  <td class="text-end">{{ (att.size / 1024) | number:'1.0-1' }} KB</td>
+                  <td class="text-center">
+                    <button *ngIf="!isLocked" class="btn btn-sm btn-outline-danger border-0" (click)="removeAttachment(att.id)" title="Delete">
+                      <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
+                        <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.813 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.187 3.5h9.626Zm-8.113 2.5a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Zm3 0a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Zm3 0a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Z"/>
+                      </svg>
                     </button>
-                  </li>
-                }
-              </ul>
-            } @else {
-              <p class="text-muted small mb-0">No files attached yet. PDF, PNG, JPG — max 5MB each.</p>
-            }
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <div *ngIf="!form.attachments || form.attachments.length === 0" class="text-center text-muted py-3">
+            No files attached yet.
           </div>
         </div>
       </div>

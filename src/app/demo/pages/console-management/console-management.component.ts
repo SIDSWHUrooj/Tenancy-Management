@@ -56,6 +56,31 @@ export default class ConsoleManagementComponent implements OnInit {
 
   statusOptions = ['Posted', 'Realized', 'Bounce', 'On Hold', 'Exchange'];
 
+  // Custom Dropdown State
+  showBankDropdown = false;
+  showStatusDropdown = false;
+
+  toggleBankDropdown() {
+    this.showBankDropdown = !this.showBankDropdown;
+    this.showStatusDropdown = false;
+  }
+
+  selectBank(bank: string) {
+    this.filterBankName = bank;
+    this.showBankDropdown = false;
+    this.applyFilters();
+  }
+
+  toggleStatusDropdown() {
+    this.showStatusDropdown = !this.showStatusDropdown;
+    this.showBankDropdown = false;
+  }
+
+  selectStatus(status: string) {
+    this.processingStatus = status;
+    this.showStatusDropdown = false;
+  }
+
   // Lookups
   showReceiptLookup = false;
   showCustomerLookup = false;

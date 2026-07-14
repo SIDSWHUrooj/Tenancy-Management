@@ -4,6 +4,7 @@ import { RouterModule } from '@angular/router';
 
 // project import
 import { SharedModule } from 'src/app/theme/shared/shared.module';
+import { ThemeService } from 'src/app/services/theme.service';
 
 // third party
 
@@ -37,6 +38,7 @@ import {
 })
 export class NavRightComponent {
   private iconService = inject(IconService);
+  themeService = inject(ThemeService);
 
   // public props
   styleSelectorToggle = input<boolean>();
@@ -44,10 +46,13 @@ export class NavRightComponent {
   windowWidth: number;
   screenFull: boolean = true;
   direction: string = 'ltr';
+  showThemePicker = false;
+  activeThemeId: string;
 
   // constructor
   constructor() {
     this.windowWidth = window.innerWidth;
+    this.activeThemeId = this.themeService.getCurrentThemeId();
     this.iconService.addIcon(
       ...[
         CheckCircleOutline,
@@ -70,6 +75,12 @@ export class NavRightComponent {
         WalletOutline
       ]
     );
+  }
+
+  selectTheme(themeId: string): void {
+    this.activeThemeId = themeId;
+    this.themeService.setTheme(themeId);
+    this.showThemePicker = false;
   }
 
   profile = [
