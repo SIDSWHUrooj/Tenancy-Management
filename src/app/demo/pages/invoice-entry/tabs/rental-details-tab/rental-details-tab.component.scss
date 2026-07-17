@@ -10,13 +10,15 @@ $border-color: var(--erp-border);
 // ─────────────────────────────────────────────
 .charge-card {
   border-radius: 10px;
-  overflow: hidden;
+  overflow: visible;
   box-shadow: 0 2px 8px rgba(0,0,0,0.06);
 
   .card-header {
     border-bottom: 1px solid var(--erp-border) !important;
     padding-top: 0.6rem !important;
     padding-bottom: 0.6rem !important;
+    border-top-left-radius: 10px;
+    border-top-right-radius: 10px;
 
     h6 {
       font-size: 0.9rem;

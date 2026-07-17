@@ -21,6 +21,11 @@ export class ReceiptDetailsTabComponent implements DoCheck {
   // ── Workflow state inputs ──────────────────────────────────────
   @Input() rentalPosted = false;  // receipt can only be edited when true
   @Input() isLocked     = false;  // true after receipt is posted
+  
+  get isFormLocked(): boolean {
+    return this.isLocked || !this.rentalPosted;
+  }
+
   @Input() isSaving     = false;
   @Input() canSaveDraft = false;
   @Input() canPost      = false;
@@ -45,6 +50,17 @@ export class ReceiptDetailsTabComponent implements DoCheck {
 
   // Fixed dropdown per spec — no free-typed cheque counts allowed
   chequeCountOptions = [1, 2, 3, 4, 6, 12];
+
+  openDropdown: string | null = null;
+
+  toggleDropdown(id: string): void {
+    if (this.isFormLocked) return;
+    this.openDropdown = this.openDropdown === id ? null : id;
+  }
+
+  closeDropdowns(): void {
+    this.openDropdown = null;
+  }
 
   private readonly MAX_FILE_SIZE = 5 * 1024 * 1024;
   private readonly ALLOWED_TYPES = ['application/pdf', 'image/png', 'image/jpeg'];

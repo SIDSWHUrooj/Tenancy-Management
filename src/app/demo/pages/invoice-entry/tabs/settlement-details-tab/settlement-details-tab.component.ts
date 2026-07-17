@@ -16,6 +16,10 @@ export class SettlementDetailsTabComponent implements OnChanges {
   /** True once Receipt Details have been posted; enables editing this tab */
   @Input() receiptPosted = false;
 
+  get isFormLocked(): boolean {
+    return !this.receiptPosted || this.form?.settlementStatus === 'Posted';
+  }
+
   @Output() cancel          = new EventEmitter<void>();
   @Output() saveDraft       = new EventEmitter<void>();
   @Output() post            = new EventEmitter<void>();

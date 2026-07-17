@@ -326,6 +326,37 @@ export class InvoiceEntryComponent implements OnInit {
     this.loadInvoice(invoice.id);
   }
 
+  showInvoiceTypeDropdown = false;
+  showLeaseTypeDropdown = false;
+
+  closeAllDropdowns(): void {
+    this.showInvoiceTypeDropdown = false;
+    this.showLeaseTypeDropdown = false;
+  }
+
+  toggleInvoiceTypeDropdown(): void {
+    if (this.isRentalLocked()) return;
+    this.showInvoiceTypeDropdown = !this.showInvoiceTypeDropdown;
+  }
+
+  selectInvoiceType(type: InvoiceType): void {
+    if (this.isRentalLocked()) return;
+    this.form.invoiceType = type;
+    this.showInvoiceTypeDropdown = false;
+    this.openTypeModal();
+  }
+
+  toggleLeaseTypeDropdown(): void {
+    if (this.isRentalLocked()) return;
+    this.showLeaseTypeDropdown = !this.showLeaseTypeDropdown;
+  }
+
+  selectLeaseType(type: string): void {
+    if (this.isRentalLocked()) return;
+    this.form.purposeOfLease = type;
+    this.showLeaseTypeDropdown = false;
+  }
+
   openTypeModal(): void {
     this.showTypeModal              = true;
     this.modalInvoiceType           = this.form.invoiceType;

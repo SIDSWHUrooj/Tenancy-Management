@@ -1,11 +1,11 @@
-<div class="dropdown-backdrop" *ngIf="showBankDropdown || showStatusDropdown" (click)="showBankDropdown=false; showStatusDropdown=false"></div>
+<div class="dropdown-backdrop" *ngIf="showBankDropdown || isAnyRowDropdownOpen()" (click)="closeAllDropdowns()"></div>
 
 <div class="row">
   <div class="col-sm-12">
     <!-- Combined Filter and Data Grid -->
     <div class="card border-0 shadow-sm mb-4">
       <div class="card-header bg-white py-3 border-bottom">
-        <h5 class="mb-0 text-dark fw-bold">Cheques Pending Processing</h5>
+        <h5 class="mb-0 text-dark fw-bold">Console Management</h5>
       </div>
       <div class="card-body">
         <div class="row g-3">
@@ -31,18 +31,7 @@
               </button>
             </div>
           </div>
-        
-          <div class="col-md-3">
-            <label class="form-label fw-semibold">Property ID</label>
-            <div class="input-group">
-              <input type="text" class="form-control bg-white" [(ngModel)]="filterPropertyId" placeholder=" Property ID" (input)="applyFilters()">
-              <button type="button" class="btn btn-lookup" title="Search Property" (click)="openPropertyLookup()">
-                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
-                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
-                </svg>
-              </button>
-            </div>
-          </div>
+
           <div class="col-md-3">
             <label class="form-label fw-semibold">Unit ID</label>
             <div class="input-group">
@@ -64,65 +53,79 @@
               <div *ngIf="showBankDropdown" class="custom-dropdown-menu">
                 <div class="custom-dropdown-item" [class.selected]="filterBankName === ''" (click)="selectBank('')">All Banks</div>
                 <div class="custom-dropdown-item" *ngFor="let bank of uniqueBanks" [class.selected]="filterBankName === bank" (click)="selectBank(bank)">{{ bank }}</div>
+              </div>
             </div>
           </div>
-        </div>
-        <div class="mt-4 text-end">
-          <button class="btn btn-danger me-2" (click)="resetFilters()">Reset</button>
-          <button class="btn text-white" style="background-color: var(--erp-primary); border-color: var(--erp-primary);" (click)="applyFilters()">Search</button>
-        </div>
         </div>
       </div>
 
       <div class="card-body pt-0">
+        <div class="d-flex justify-content-start mb-3">
+          <div style="width: 300px;">
+            <div class="input-group">
+              <input type="text" class="form-control bg-white" placeholder="Search" [(ngModel)]="globalSearch" (input)="onGlobalSearchChange()">
+              <button class="btn btn-lookup d-flex align-items-center px-3" type="button">
+                <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                  <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+                </svg>
+              </button>
+            </div>
+          </div>
+        </div>
         <div class="card border mb-0" style="overflow: hidden; border-radius: var(--erp-radius);">
           <div class="card-body p-0">
-            <div class="table-responsive" style="max-height: 500px; overflow-y: auto;">
-              <table class="table mb-0 modern-erp-table">
+            <div class="table-responsive">
+              <table class="table table-sm table-hover mb-0 modern-erp-table" style="font-size: 0.8rem;">
                 <thead class="sticky-top">
                   <tr class="text-nowrap">
-                    <th class="py-2 px-3">Receipt No</th>
-                    <th class="py-2 px-3">Cheque No</th>
-                    <th class="py-2 px-3">Bank</th>
-                    <th class="py-2 px-3">Customer ID</th>
-                    <th class="py-2 px-3">Customer Name</th>
-                    <th class="py-2 px-3">Property ID</th>
-                    <th class="py-2 px-3">Property Name</th>
-                    <th class="py-2 px-3">Unit ID</th>
-                    <th class="py-2 px-3">Unit Name</th>
-                    <th class="py-2 px-3 text-end">Amount</th>
-                    <th class="py-2 px-3">Cheque Date</th>
-                    <th class="py-2 px-3 text-center">Status</th>
+                    <th class="py-0 px-3">Receipt No</th>
+                    <th class="py-0 px-3">Cheque No</th>
+                    <th class="py-0 px-3">Bank</th>
+                    <th class="py-0 px-3">Property ID</th>
+                    <th class="py-0 px-3">Unit ID</th>
+                    <th class="py-0 px-3 text-end">Amount</th>
+                    <th class="py-0 px-3">Cheque Date</th>
+                    <th class="py-0 px-3">Customer ID</th>
+                    <th class="py-0 px-3">Customer Name</th>
+                    <th class="py-0 px-3 text-center">Status</th>
                   </tr>
                 </thead>
                 <tbody>
                   <tr *ngIf="isLoading">
-                    <td colspan="12" class="text-center py-5 text-muted">
+                    <td colspan="10" class="text-center py-4 text-muted">
                       <div class="spinner-border spinner-border-sm me-2" role="status"></div>
                       Loading cheques...
                     </td>
                   </tr>
-                  <tr *ngIf="!isLoading && filteredCheques.length === 0">
-                    <td colspan="12" class="text-center py-5 text-muted">No cheques found.</td>
+                  <tr *ngIf="!isLoading && paginatedCheques.length === 0">
+                    <td colspan="10" class="text-center py-4 text-muted">No cheques found.</td>
                   </tr>
-                  <tr *ngFor="let c of filteredCheques" (click)="selectCheque(c)" class="text-nowrap" [class.table-active-row]="selectedCheque?.detailId === c.detailId">
-                    <td class="fw-medium px-3 text-dark">{{ c.receiptNo }}</td>
-                    <td class="fw-medium px-3 text-dark">{{ c.chequeNo }}</td>
-                    <td class="px-3">{{ c.bank }}</td>
-                    <td class="px-3 text-dark">{{ c.customerId }}</td>
-                    <td class="px-3">{{ c.customerName }}</td>
-                    <td class="px-3 text-dark">{{ c.propertyId }}</td>
-                    <td class="px-3">{{ c.propertyName }}</td>
-                    <td class="px-3 text-dark">{{ c.unitId }}</td>
-                    <td class="px-3">{{ c.unitName }}</td>
-                    <td class="px-3 fw-bold text-dark text-end">AED {{ c.amount | number:'1.2-2' }}</td>
-                    <td class="px-3 text-muted">{{ c.chequeDate | date:'dd MMM yyyy' }}</td>
-                    <td class="px-3 text-center">
-                      <span class="badge rounded-pill fw-medium" [ngClass]="{
-                        'bg-success bg-opacity-10 text-success border border-success': c.status === 'Realized' || c.status === 'Cleared' || c.status === 'Clear',
-                        'bg-danger bg-opacity-10 text-danger border border-danger': c.status === 'Bounce' || c.status === 'Exchange',
-                        'bg-warning bg-opacity-10 text-warning border border-warning': c.status === 'On Hold' || c.status === 'Pending' || c.status === 'Posted'
-                      }">{{ c.status }}</span>
+                  <tr *ngFor="let c of paginatedCheques" class="text-nowrap align-middle">
+                    <td class="fw-medium px-3 py-0 text-dark">{{ c.receiptNo }}</td>
+                    <td class="fw-medium px-3 py-0 text-dark">{{ c.chequeNo }}</td>
+                    <td class="px-3 py-0">{{ c.bank }}</td>
+                    <td class="px-3 py-0 text-dark">{{ c.propertyId }}</td>
+                    <td class="px-3 py-0 text-dark">{{ c.unitId }}</td>
+                    <td class="px-3 py-0 fw-bold text-dark text-end">AED {{ c.amount | number:'1.2-2' }}</td>
+                    <td class="px-3 py-0 text-muted">{{ c.chequeDate | date:'dd MMM yyyy' }}</td>
+                    <td class="px-3 py-0 text-dark">{{ c.customerId }}</td>
+                    <td class="px-3 py-0">{{ c.customerName }}</td>
+                    <td class="px-3 py-1 text-center" style="position: relative;">
+                      <div style="position: relative; width: 130px; margin: 0 auto;">
+                        <button type="button" class="custom-select-btn shadow-sm" style="padding: 0.2rem 0.5rem; font-size: 0.75rem; border-radius: var(--erp-radius);" 
+                                [class.active]="c.showStatusDropdown" 
+                                [ngClass]="getStatusClasses(c.newStatus || c.status)"
+                                (click)="toggleRowDropdown(c, $event)">
+                          {{ c.newStatus || c.status }}
+                        </button>
+                        <div *ngIf="c.showStatusDropdown" class="custom-dropdown-menu text-start shadow-lg" style="min-width: 140px; right: 0; left: auto; top: calc(100% + 2px);">
+                          <div class="custom-dropdown-item" *ngFor="let opt of statusOptions" 
+                               [class.selected]="(c.newStatus || c.status) === opt" 
+                               (click)="selectRowStatus(c, opt, $event)">
+                            {{ opt }}
+                          </div>
+                        </div>
+                      </div>
                     </td>
                   </tr>
                 </tbody>
@@ -130,115 +133,31 @@
             </div>
           </div>
         </div>
-      </div>
-    </div>
-
-    <!-- Details Section -->
-    <div class="row" *ngIf="selectedCheque">
-      <div class="col-12 mb-4">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white py-3 border-bottom">
-            <h5 class="mb-0 text-dark fw-bold">Receipt / Cheque Information</h5>
+        <div class="d-flex justify-content-between align-items-center mt-3" *ngIf="filteredCheques.length > 0">
+          <div class="d-flex align-items-center">
+            <div class="text-muted small me-4">
+              Showing {{ (currentPage - 1) * pageSize + (paginatedCheques.length > 0 ? 1 : 0) }} to {{ (currentPage - 1) * pageSize + paginatedCheques.length }} of {{ filteredCheques.length }} entries
+            </div>
+            <nav aria-label="Table navigation">
+              <ul class="pagination pagination-sm mb-0">
+                <li class="page-item" [class.disabled]="currentPage === 1">
+                  <button class="page-link" (click)="changePage(currentPage - 1)">Previous</button>
+                </li>
+                <li class="page-item" *ngFor="let p of getPagesArray()" [class.active]="p === currentPage">
+                  <button class="page-link" (click)="changePage(p)">{{ p }}</button>
+                </li>
+                <li class="page-item" [class.disabled]="currentPage === totalPages">
+                  <button class="page-link" (click)="changePage(currentPage + 1)">Next</button>
+                </li>
+              </ul>
+            </nav>
           </div>
-          <div class="card-body">
-            <div class="row g-3">
-              <div class="col-md-3">
-                <label class="form-label text-muted mb-1">Receipt No</label>
-                <div class="fw-semibold text-truncate">{{ selectedCheque.receiptNo || '-' }}</div>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label text-muted mb-1">Cheque Date</label>
-                <div class="fw-semibold text-truncate">{{ selectedCheque.chequeDate | date }}</div>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label text-muted mb-1">Customer</label>
-                <div class="fw-semibold text-truncate" [title]="selectedCheque.customerId + ' - ' + selectedCheque.customerName">{{ selectedCheque.customerId }} - {{ selectedCheque.customerName }}</div>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label text-muted mb-1">Property</label>
-                <div class="fw-semibold text-truncate" [title]="selectedCheque.propertyId + ' - ' + selectedCheque.propertyName">{{ selectedCheque.propertyId }} - {{ selectedCheque.propertyName }}</div>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label text-muted mb-1">Unit</label>
-                <div class="fw-semibold text-truncate" [title]="selectedCheque.unitId + ' - ' + selectedCheque.unitName">{{ selectedCheque.unitId }} - {{ selectedCheque.unitName }}</div>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label text-muted mb-1">Bank</label>
-                <div class="fw-semibold text-truncate" [title]="selectedCheque.bank">{{ selectedCheque.bank }}</div>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label text-muted mb-1">Cheque No</label>
-                <div class="fw-semibold text-truncate">{{ selectedCheque.chequeNo }}</div>
-              </div>
-              <div class="col-md-3">
-                <label class="form-label text-muted mb-1">Amount</label>
-                <div class="fw-semibold text-primary text-truncate">AED {{ selectedCheque.amount | number:'1.2-2' }}</div>
-              </div>
-            </div>
-          </div>
-        </div>
-      </div>
-
-      <div class="col-12 mb-4">
-        <div class="card border-0 shadow-sm">
-          <div class="card-header bg-white py-3 border-bottom">
-            <h5 class="mb-0 text-dark fw-bold">Cheque Processing</h5>
-          </div>
-          <div class="card-body">
-            <div class="row align-items-end mb-3">
-              <div class="col-md-6">
-                <label class="form-label fw-semibold">Update Status <span class="text-danger">*</span></label>
-                <div style="position: relative; width: 100%;">
-                  <button type="button" class="custom-select-btn" [class.active]="showStatusDropdown" [class.has-value]="processingStatus" (click)="toggleStatusDropdown()">
-                    {{ processingStatus || 'Select Status' }}
-                  </button>
-                  <div *ngIf="showStatusDropdown" class="custom-dropdown-menu">
-                    <div class="custom-dropdown-item" *ngFor="let s of statusOptions" [class.selected]="processingStatus === s" (click)="selectStatus(s)">{{ s }}</div>
-                  </div>
-                </div>
-              </div>
-              <div class="col-md-6 text-end mt-3 mt-md-0">
-                <button class="btn btn-danger me-2" (click)="cancelProcessing()" [disabled]="isSaving">Cancel</button>
-                <button class="btn text-white" style="background-color: var(--erp-primary); border-color: var(--erp-primary);" (click)="updateCheque()" [disabled]="isSaving">
-                  <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-1"></span>
-                  Update
-                </button>
-              </div>
-            </div>
-            
-            <div class="row" *ngIf="processingStatus === 'Bounce'">
-              <div class="col-12">
-                  <label class="form-label fw-semibold text-danger">Bounce Reason <span class="text-danger">*</span></label>
-                  <textarea class="form-control" rows="3" [(ngModel)]="bounceReason" placeholder="Enter reason for bounce..."></textarea>
-              </div>
-            </div>
-
-            <!-- Exchange Fields -->
-            <div class="row mt-2" *ngIf="processingStatus === 'Exchange'">
-              <div class="col-12">
-                <div class="p-3 bg-light rounded border border-primary border-opacity-25">
-                  <h6 class="fw-bold text-primary mb-3">Replacement Cheque Details</h6>
-                  <div class="row g-3">
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">New Cheque No <span class="text-danger">*</span></label>
-                      <input type="text" class="form-control" [(ngModel)]="newChequeNo" placeholder="Enter new cheque no">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">New Bank Name <span class="text-danger">*</span></label>
-                      <input type="text" class="form-control" [(ngModel)]="newBankName" placeholder="Enter new bank name">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">New Cheque Date <span class="text-danger">*</span></label>
-                      <input type="date" class="form-control" [(ngModel)]="newChequeDate">
-                    </div>
-                    <div class="col-md-6">
-                      <label class="form-label fw-semibold">New Amount <span class="text-danger">*</span></label>
-                      <input type="number" class="form-control" [(ngModel)]="newAmount" placeholder="0.00">
-                    </div>
-                  </div>
-                </div>
-              </div>
-            </div>
+          <div>
+            <button class="btn btn-success px-3 shadow-sm fw-semibold" style="border-radius: var(--erp-radius);" (click)="bulkUpdate()" [disabled]="isSaving">
+              <span *ngIf="isSaving" class="spinner-border spinner-border-sm me-2"></span>
+             
+              Update
+            </button>
           </div>
         </div>
       </div>
@@ -270,13 +189,13 @@
           <input type="text" class="form-control" placeholder="Search Receipt No..." [(ngModel)]="receiptModalFilter" (keyup)="filterModalReceipts()">
         </div>
         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-          <table class="table table-hover table-bordered mb-0 align-middle">
-            <thead class="table-light sticky-top">
-              <tr><th>Receipt No</th></tr>
+          <table class="table table-sm table-hover mb-0 modern-erp-table" style="font-size: 0.85rem;">
+            <thead class="sticky-top">
+              <tr class="text-nowrap"><th class="py-2 px-3">Receipt No</th></tr>
             </thead>
             <tbody>
               <tr *ngFor="let r of filteredModalReceipts" class="cursor-pointer" (click)="selectReceiptFromLookup(r)">
-                <td class="fw-semibold text-primary">{{ r.receiptNo }}</td>
+                <td class="px-3 py-2 fw-medium text-dark">{{ r.receiptNo }}</td>
               </tr>
               <tr *ngIf="filteredModalReceipts.length === 0">
                 <td class="text-center text-muted py-4">No receipts found.</td>
@@ -316,14 +235,14 @@
           <input type="text" class="form-control" placeholder="Search ID or Name..." [(ngModel)]="customerModalFilter" (keyup)="filterModalCustomers()">
         </div>
         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-          <table class="table table-hover table-bordered mb-0 align-middle">
-            <thead class="table-light sticky-top">
-              <tr><th>Customer ID</th><th>Customer Name</th></tr>
+          <table class="table table-sm table-hover mb-0 modern-erp-table" style="font-size: 0.85rem;">
+            <thead class="sticky-top">
+              <tr class="text-nowrap"><th class="py-2 px-3">Customer ID</th><th class="py-2 px-3">Customer Name</th></tr>
             </thead>
             <tbody>
               <tr *ngFor="let c of filteredModalCustomers" class="cursor-pointer" (click)="selectCustomerFromLookup(c)">
-                <td class="fw-semibold text-primary">{{ c.id }}</td>
-                <td>{{ c.name }}</td>
+                <td class="px-3 py-2 fw-medium text-dark">{{ c.id }}</td>
+                <td class="px-3 py-2">{{ c.name }}</td>
               </tr>
               <tr *ngIf="filteredModalCustomers.length === 0">
                 <td colspan="2" class="text-center text-muted py-4">No customers found.</td>
@@ -363,14 +282,14 @@
           <input type="text" class="form-control" placeholder="Search ID or Name..." [(ngModel)]="propertyModalFilter" (keyup)="filterModalProperties()">
         </div>
         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-          <table class="table table-hover table-bordered mb-0 align-middle">
-            <thead class="table-light sticky-top">
-              <tr><th>Property ID</th><th>Property Name</th></tr>
+          <table class="table table-sm table-hover mb-0 modern-erp-table" style="font-size: 0.85rem;">
+            <thead class="sticky-top">
+              <tr class="text-nowrap"><th class="py-2 px-3">Property ID</th><th class="py-2 px-3">Property Name</th></tr>
             </thead>
             <tbody>
               <tr *ngFor="let p of filteredModalProperties" class="cursor-pointer" (click)="selectPropertyFromLookup(p)">
-                <td class="fw-semibold text-primary">{{ p.id }}</td>
-                <td>{{ p.name }}</td>
+                <td class="px-3 py-2 fw-medium text-dark">{{ p.id }}</td>
+                <td class="px-3 py-2">{{ p.name }}</td>
               </tr>
               <tr *ngIf="filteredModalProperties.length === 0">
                 <td colspan="2" class="text-center text-muted py-4">No properties found.</td>
@@ -410,14 +329,14 @@
           <input type="text" class="form-control" placeholder="Search ID or Name..." [(ngModel)]="unitModalFilter" (keyup)="filterModalUnits()">
         </div>
         <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-          <table class="table table-hover table-bordered mb-0 align-middle">
-            <thead class="table-light sticky-top">
-              <tr><th>Unit ID</th><th>Unit Name</th></tr>
+          <table class="table table-sm table-hover mb-0 modern-erp-table" style="font-size: 0.85rem;">
+            <thead class="sticky-top">
+              <tr class="text-nowrap"><th class="py-2 px-3">Unit ID</th><th class="py-2 px-3">Unit Name</th></tr>
             </thead>
             <tbody>
               <tr *ngFor="let u of filteredModalUnits" class="cursor-pointer" (click)="selectUnitFromLookup(u)">
-                <td class="fw-semibold text-primary">{{ u.id }}</td>
-                <td>{{ u.name }}</td>
+                <td class="px-3 py-2 fw-medium text-dark">{{ u.id }}</td>
+                <td class="px-3 py-2">{{ u.name }}</td>
               </tr>
               <tr *ngIf="filteredModalUnits.length === 0">
                 <td colspan="2" class="text-center text-muted py-4">No units found.</td>

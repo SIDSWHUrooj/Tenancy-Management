@@ -11,13 +11,13 @@
       </div>
     </div>
 
-    <div *ngIf="receiptPosted">
+    <div class="settlement-content-wrapper">
 
       <!-- ── Settlement Information Card ────────────────────────── -->
       <div class="card border-0 shadow-sm mb-4">
         <div class="card-header bg-white border-bottom py-3 d-flex justify-content-between align-items-center">
           <h6 class="mb-0 fw-bold text-dark">Settlement Information</h6>
-          <button class="btn btn-sm btn-success shadow-sm px-4" style="min-width: 140px;" (click)="triggerUpdate()" [disabled]="!isDirty || (form.earlyTermination && !isLeaveDateValid)" *ngIf="form.settlementStatus !== 'Posted'">
+          <button class="btn btn-sm btn-success shadow-sm px-4" style="min-width: 140px;" (click)="triggerUpdate()" [disabled]="!isDirty || (form.earlyTermination && !isLeaveDateValid) || isFormLocked" *ngIf="form.settlementStatus !== 'Posted'">
             Update
           </button>
         </div>
@@ -35,10 +35,13 @@
               <label class="form-label fw-semibold">Leaving Date</label>
               <input
               type="date"
-              class="form-control bg-white"
+              class="form-control"
+              [class.bg-white]="!isFormLocked"
+              [class.bg-light]="isFormLocked"
               [(ngModel)]="form.leaveDate"
               (ngModelChange)="onToDateChange()"
-              [max]="form.periodTo">
+              [max]="form.periodTo"
+              [disabled]="isFormLocked">
             </div>
 
             <!-- Early Termination Checkbox -->
@@ -49,7 +52,8 @@
                   type="checkbox"
                   id="earlyTermination"
                   [(ngModel)]="form.earlyTermination"
-                  (ngModelChange)="onEarlyTerminationChange()">
+                  (ngModelChange)="onEarlyTerminationChange()"
+                  [disabled]="isFormLocked">
                 <label class="form-check-label cursor-pointer fw-semibold ms-2" for="earlyTermination">
                   Early Termination
                 </label>
@@ -140,19 +144,19 @@
               <tbody>
                 <tr *ngFor="let note of form.creditNotes; let i = index">
                   <td>
-                    <select class="form-select form-select-sm bg-white" [(ngModel)]="note.serviceType" (ngModelChange)="markDirty()">
+                    <select class="form-select form-select-sm" [class.bg-white]="!isFormLocked" [class.bg-light]="isFormLocked" [(ngModel)]="note.serviceType" (ngModelChange)="markDirty()" [disabled]="isFormLocked">
                       <option value="" disabled>Select Service Type...</option>
                       <option *ngFor="let type of serviceTypes" [value]="type">{{ type }}</option>
                     </select>
                   </td>
                   <td>
-                    <input type="number" class="form-control form-control-sm bg-white text-end" [(ngModel)]="note.amount" (ngModelChange)="markDirty()" placeholder="0.00">
+                    <input type="number" class="form-control form-control-sm" [class.bg-white]="!isFormLocked" [class.bg-light]="isFormLocked" [(ngModel)]="note.amount" (ngModelChange)="markDirty()" placeholder="0.00" [disabled]="isFormLocked">
                   </td>
                   <td>
-                    <input type="text" class="form-control form-control-sm bg-white" [(ngModel)]="note.remarks" (ngModelChange)="markDirty()" placeholder="Remarks">
+                    <input type="text" class="form-control form-control-sm" [class.bg-white]="!isFormLocked" [class.bg-light]="isFormLocked" [(ngModel)]="note.remarks" (ngModelChange)="markDirty()" placeholder="Remarks" [disabled]="isFormLocked">
                   </td>
                   <td class="text-center">
-                    <button class="btn btn-sm border-0 d-inline-flex align-items-center justify-content-center"
+                    <button *ngIf="!isFormLocked" class="btn btn-sm border-0 d-inline-flex align-items-center justify-content-center"
                             style="width:28px;height:28px;border-radius:50%;background:rgba(198,40,40,0.08);color:var(--erp-danger);"
                             (click)="removeCreditNote(i)" title="Delete">
                       <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
@@ -203,7 +207,7 @@
           <h6 class="mb-0 fw-bold text-dark">Attachments</h6>
         </div>
         <div class="card-body">
-          <div class="row g-3 align-items-end mb-4">
+          <div class="row g-3 align-items-end mb-4" *ngIf="!isFormLocked">
             <div class="col-md-5">
               <label class="form-label fw-semibold">Upload File</label>
               <input type="file" class="form-control bg-white" (change)="onFileSelected($event)">
@@ -241,7 +245,7 @@
                   <td>{{ att.remarks }}</td>
                   <td class="text-end">{{ (att.size / 1024) | number:'1.0-1' }} KB</td>
                   <td class="text-center">
-                    <button class="btn btn-sm btn-outline-danger border-0" (click)="removeAttachment(i)" title="Delete">
+                    <button *ngIf="!isFormLocked" class="btn btn-sm btn-outline-danger border-0" (click)="removeAttachment(i)" title="Delete">
                       <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-trash3" viewBox="0 0 16 16">
                         <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5ZM11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H2.506a.58.58 0 0 0-.01 0H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1h-.995a.59.59 0 0 0-.01 0H11Zm1.813 1-.846 10.58a1 1 0 0 1-.997.92h-6.23a1 1 0 0 1-.997-.92L3.187 3.5h9.626Zm-8.113 2.5a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Zm3 0a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Zm3 0a.5.5 0 0 1 .5-.5h.5a.5.5 0 0 1 .5.5v7a.5.5 0 0 1-.5.5h-.5a.5.5 0 0 1-.5-.5v-7Z"/>
                       </svg>
@@ -285,20 +289,19 @@
 
       <!-- ── Action Bar ────────────────────────────────────────── -->
       <div class="d-flex justify-content-between align-items-center mt-4">
-        <button class="btn btn-danger px-4" (click)="cancelSettlement()">Cancel</button>
+        <button class="btn btn-danger px-4" (click)="cancelSettlement()" [disabled]="isFormLocked">Cancel</button>
         <div class="d-flex gap-2">
           <!-- These actions show when settlement is posted based on the design request -->
           <ng-container *ngIf="form.settlementStatus === 'Posted'">
             <button class="btn btn-outline-primary" (click)="generateInvoiceAction()">Generate Invoice</button>
-            <!-- Post AR removed for now per user request -->
             <button class="btn btn-outline-primary" (click)="postCashWorksAction()">Post CashWorks</button>
             <button class="btn btn-outline-primary" (click)="markVacantAction()">Mark Vacant</button>
           </ng-container>
 
           <!-- Save Actions -->
-          <button class="btn btn-outline-secondary px-4" (click)="printSettlement()" *ngIf="form.settlementStatus === 'Posted' || form.settlementStatus === 'Draft'">Print</button>
-          <button class="btn btn-outline-primary px-4" (click)="saveSettlementDraft()" *ngIf="form.settlementStatus !== 'Posted'">Save Draft</button>
-          <button class="btn btn-success px-4" (click)="postSettlement()" *ngIf="form.settlementStatus !== 'Posted'">Post to ERP</button>
+          <button class="btn btn-outline-secondary px-4" (click)="printSettlement()" *ngIf="form.settlementStatus === 'Posted' || form.settlementStatus === 'Draft'" [disabled]="isFormLocked">Print</button>
+          <button class="btn btn-outline-primary px-4" (click)="saveSettlementDraft()" *ngIf="form.settlementStatus !== 'Posted'" [disabled]="isFormLocked">Save Draft</button>
+          <button class="btn btn-success px-4" (click)="postSettlement()" *ngIf="form.settlementStatus !== 'Posted'" [disabled]="isFormLocked">Post to ERP</button>
         </div>
       </div>
 

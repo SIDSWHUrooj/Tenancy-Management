@@ -2,6 +2,27 @@
   cursor: pointer;
 }
 
+.form-control,
+.form-select {
+  border: 1px solid var(--erp-border);
+  border-radius: 0.25rem;
+  font-size: 0.9rem;
+  padding: 0.375rem 0.75rem;
+  transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+
+  &:focus {
+    border-color: var(--erp-primary);
+    box-shadow: 0 0 0 0.2rem rgba(142, 36, 170, 0.25);
+    outline: 0;
+  }
+}
+
+.form-label {
+  font-size: 0.875rem;
+  color: #495057;
+  margin-bottom: 0.4rem;
+}
+
 .table > tbody > tr.table-primary > td {
   background-color: var(--erp-primary-soft);
   color: var(--erp-primary);
@@ -13,15 +34,15 @@
 
 /* Lookup search button - uses theme primary */
 .btn-lookup {
-  color: var(--erp-primary);
-  border-color: var(--erp-border);
-  background-color: #ffffff;
+  background-color: var(--erp-primary);
+  border-color: var(--erp-primary);
+  color: #ffffff;
   transition: all 0.2s ease-in-out;
 
   &:hover {
-    background-color: var(--erp-primary);
-    border-color: var(--erp-primary);
-    color: white;
+    background-color: var(--erp-primary-hover, rgba(142, 36, 170, 0.9));
+    border-color: var(--erp-primary-hover, rgba(142, 36, 170, 0.9));
+    color: #ffffff;
     transform: none;
   }
 }

@@ -1,5 +1,5 @@
-$primary-color: #8E24AA;
-$primary-hover: #7B1FA2;
+$primary-color: var(--erp-primary);
+$primary-hover: var(--erp-primary-hover);
 $danger-color: #dc3545;
 $danger-hover: #bd2130;
 $border-color: #ced4da;
@@ -34,7 +34,7 @@ $border-color: #ced4da;
   transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
 
   &:focus {
-    border-color: lighten($primary-color, 15%);
+    border-color: var(--erp-primary);
     box-shadow: 0 0 0 0.2rem rgba(142, 36, 170, 0.25);
     outline: 0;
   }
@@ -54,12 +54,13 @@ $border-color: #ced4da;
 
 .input-group {
   .btn-outline-primary {
-    color: $primary-color;
-    border-color: $border-color;
+    background-color: $primary-color;
+    border-color: $primary-color;
+    color: #ffffff;
 
     &:hover {
-      background-color: $primary-color;
-      border-color: $primary-color;
+      background-color: $primary-hover;
+      border-color: $primary-hover;
       color: #ffffff;
     }
   }
@@ -97,7 +98,7 @@ $border-color: #ced4da;
 
     &:hover {
       color: $primary-color;
-      border-bottom-color: lighten($primary-color, 25%);
+      border-bottom-color: var(--erp-primary-soft);
     }
 
     &.active {
@@ -265,7 +266,7 @@ $border-color: #ced4da;
   cursor: pointer;
 
   &:hover {
-    border-color: lighten($primary-color, 15%);
+    border-color: var(--erp-primary);
     background-color: #fcfdfe;
   }
 
@@ -332,7 +333,7 @@ $border-color: #ced4da;
       background-color: #ffffff !important;
 
       &:focus {
-        border-color: lighten($primary-color, 15%);
+        border-color: var(--erp-primary);
         box-shadow: 0 0 0 0.2rem rgba(142, 36, 170, 0.2);
       }
     }

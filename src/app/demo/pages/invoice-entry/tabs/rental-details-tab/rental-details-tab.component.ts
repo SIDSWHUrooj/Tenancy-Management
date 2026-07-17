@@ -43,6 +43,17 @@ export class RentalDetailsTabComponent {
     'Penalty', 'Utility', 'Miscellaneous','Other Charges'
   ];
 
+  openDropdown: string | null = null;
+
+  toggleDropdown(id: string): void {
+    if (this.isLocked) return;
+    this.openDropdown = this.openDropdown === id ? null : id;
+  }
+
+  closeDropdowns(): void {
+    this.openDropdown = null;
+  }
+
   isTaxRateLocked(taxGroup: TaxGroup): boolean {
     return taxGroup === 'Out of Scope' || taxGroup === 'Zero Rated';
   }

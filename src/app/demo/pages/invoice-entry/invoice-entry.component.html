@@ -1,7 +1,7 @@
-
-  <div class="row">
+<div class="row">
     <div class="col-12">
-      <div class="card border-0 shadow-sm main-receipt-card">
+      <div class="card border-0 shadow-sm main-receipt-card position-relative">
+        <div class="dropdown-backdrop" *ngIf="showInvoiceTypeDropdown || showLeaseTypeDropdown" (click)="closeAllDropdowns()"></div>
         <div class="card-header bg-white py-3">
           <div class="d-flex justify-content-between align-items-center">
             <div>
@@ -32,12 +32,12 @@
               <label class="form-label f  w-semibold">Invoice Number</label>
               <div class="input-group">
                 <input type="text" class="form-control bg-light" [(ngModel)]="form.invoiceNumber" [disabled]="isRentalLocked()" >
-                <button type="button" class="btn btn-outline-primary" title="Search Invoice" (click)="openInvoiceLookup()">
+                <button type="button" class="btn btn-primary" title="Search Invoice" (click)="openInvoiceLookup()">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                   </svg>
                 </button>
-                <button type="button" class="btn btn-outline-danger" title="Clear" (click)="resetReceipt()">
+                <button type="button" class="btn btn-danger" title="Clear" (click)="resetReceipt()">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-plus" viewBox="0 0 16 16">
                     <path d="M8 4a.5.5 0 0 1 .5.5v3h3a.5.5 0 0 1 0 1h-3v3a.5.5 0 0 1-1 0v-3h-3a.5.5 0 0 1 0-1h3v-3A.5.5 0 0 1 8 4z"/>
                   </svg>
@@ -52,10 +52,19 @@
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Invoice Type</label>
-              <select class="form-select bg-white" [(ngModel)]="form.invoiceType" (change)="openTypeModal()" [disabled]="isRentalLocked()">
-                <option value="New">New</option>
-                <option value="Renewal">Renewal</option>
-              </select>
+              <div style="position: relative; width: 100%;">
+                <button type="button" class="custom-select-btn" 
+                        [class.active]="showInvoiceTypeDropdown" 
+                        [class.has-value]="form.invoiceType" 
+                        [disabled]="isRentalLocked()"
+                        (click)="toggleInvoiceTypeDropdown()">
+                  {{ form.invoiceType || 'Select Type' }}
+                </button>
+                <div *ngIf="showInvoiceTypeDropdown" class="custom-dropdown-menu">
+                  <div class="custom-dropdown-item" [class.selected]="form.invoiceType === 'New'" (click)="selectInvoiceType('New')">New</div>
+                  <div class="custom-dropdown-item" [class.selected]="form.invoiceType === 'Renewal'" (click)="selectInvoiceType('Renewal')">Renewal</div>
+                </div>
+              </div>
             </div>
           </div>
 
@@ -73,7 +82,7 @@
               <label class="form-label fw-semibold">Customer ID</label>
               <div class="input-group">
                 <input type="text" class="form-control bg-white" [(ngModel)]="form.customer" placeholder="ID" [disabled]="isRentalLocked()">
-                <button type="button" class="btn btn-outline-primary" title="Search Customer" (click)="openCustomerLookup()" [disabled]="isRentalLocked()">
+                <button type="button" class="btn btn-primary" title="Search Customer" (click)="openCustomerLookup()" [disabled]="isRentalLocked()">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                   </svg>
@@ -90,7 +99,7 @@
               <label class="form-label fw-semibold">Property ID</label>
               <div class="input-group">
                 <input type="text" class="form-control bg-white" [(ngModel)]="form.propertyId" placeholder="ID" [disabled]="isRentalLocked()">
-                <button type="button" class="btn btn-outline-primary" title="Search Property" (click)="openPropertyLookup()" [disabled]="isRentalLocked()">
+                <button type="button" class="btn btn-primary" title="Search Property" (click)="openPropertyLookup()" [disabled]="isRentalLocked()">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                   </svg>
@@ -109,7 +118,7 @@
               <label class="form-label fw-semibold">Unit Number</label>
               <div class="input-group">
                 <input type="text" class="form-control bg-white" [(ngModel)]="form.unitNo" placeholder="Unit Number" [disabled]="isRentalLocked()">
-                <button type="button" class="btn btn-outline-primary" title="Search Unit" (click)="openUnitLookup()" [disabled]="isRentalLocked()">
+                <button type="button" class="btn btn-primary" title="Search Unit" (click)="openUnitLookup()" [disabled]="isRentalLocked()">
                   <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
                     <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
                   </svg>
@@ -119,12 +128,21 @@
 
             <div class="col-md-3">
               <label class="form-label fw-semibold">Purpose Of Lease</label>
-              <select class="form-select bg-white" [(ngModel)]="form.purposeOfLease" [disabled]="isRentalLocked()">
-                <option value="Commercial">Commercial</option>
-                <option value="Residential">Residential</option>
-                <option value="Office">Office</option>
-                <option value="Warehouse">Warehouse</option>
-              </select>
+              <div style="position: relative; width: 100%;">
+                <button type="button" class="custom-select-btn" 
+                        [class.active]="showLeaseTypeDropdown" 
+                        [class.has-value]="form.purposeOfLease" 
+                        [disabled]="isRentalLocked()"
+                        (click)="toggleLeaseTypeDropdown()">
+                  {{ form.purposeOfLease || 'Select Lease Type' }}
+                </button>
+                <div *ngIf="showLeaseTypeDropdown" class="custom-dropdown-menu">
+                  <div class="custom-dropdown-item" [class.selected]="form.purposeOfLease === 'Commercial'" (click)="selectLeaseType('Commercial')">Commercial</div>
+                  <div class="custom-dropdown-item" [class.selected]="form.purposeOfLease === 'Residential'" (click)="selectLeaseType('Residential')">Residential</div>
+                  <div class="custom-dropdown-item" [class.selected]="form.purposeOfLease === 'Office'" (click)="selectLeaseType('Office')">Office</div>
+                  <div class="custom-dropdown-item" [class.selected]="form.purposeOfLease === 'Warehouse'" (click)="selectLeaseType('Warehouse')">Warehouse</div>
+                </div>
+              </div>
             </div>
 
             <div class="col-md-3">
@@ -232,13 +250,7 @@
     <div class="modal-container shadow-lg border rounded-3 bg-white">
       <div class="modal-header border-bottom py-3 px-4 d-flex justify-content-between align-items-center" style="background:var(--erp-primary-soft);">
         <h5 class="mb-0 fw-bold" style="color:var(--erp-primary);">Invoice Type Selection</h5>
-        <button type="button" class="btn btn-sm border-0 d-flex align-items-center justify-content-center"
-                style="width:28px;height:28px;border-radius:50%;background:rgba(198,40,40,0.08);color:var(--erp-danger);"
-                (click)="showTypeModal = false">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-          </svg>
-        </button>
+        <button type="button" class="btn-close" aria-label="Close" (click)="showTypeModal = false"></button>
       </div>
 
       <div class="modal-body p-4">
@@ -285,13 +297,7 @@
     <div class="modal-container shadow-lg border rounded-3 bg-white" style="max-width: 800px; width: 90%;">
       <div class="modal-header border-bottom py-3 px-4 d-flex justify-content-between align-items-center" style="background:var(--erp-primary-soft);">
         <h5 class="mb-0 fw-bold" style="color:var(--erp-primary);">Select an Invoice</h5>
-        <button type="button" class="btn btn-sm border-0 d-flex align-items-center justify-content-center"
-                style="width:28px;height:28px;border-radius:50%;background:rgba(198,40,40,0.08);color:var(--erp-danger);"
-                (click)="closeInvoiceLookup()">
-          <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-            <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-          </svg>
-        </button>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeInvoiceLookup()"></button>
       </div>
 
       <div class="modal-body p-4" style="max-height: 60vh; overflow-y: auto;">
@@ -302,12 +308,17 @@
 
         <div *ngIf="!invoiceLookupLoading">
           <!-- Filter input inside the modal -->
-          <div class="mb-3">
-            <input type="text" class="form-control" placeholder="Filter by invoice no., customer or property..."
-                   [(ngModel)]="invoiceModalFilter" (ngModelChange)="filterModalInvoices()">
+          <div class="input-group mb-4">
+            <span class="input-group-text px-3 border-0" style="background-color: var(--erp-primary); color: #ffffff;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+              </svg>
+            </span>
+            <input type="text" class="form-control" placeholder="Search by invoice no., customer or property..."
+                   [(ngModel)]="invoiceModalFilter" (ngModelChange)="filterModalInvoices()" style="box-shadow: none;">
           </div>
 
-          <table class="table table-hover table-sm table-bordered align-middle mb-0">
+          <table class="modern-erp-table table-hover align-middle mb-0">
             <thead class="table-light">
               <tr>
                 <th>Invoice No.</th>
@@ -321,7 +332,7 @@
             </thead>
             <tbody>
               <tr *ngFor="let inv of filteredInvoiceResults">
-                <td class="fw-semibold">{{ inv.invoiceNumber }}</td>
+                <td class="fw-semibold" style="color:var(--erp-primary);">{{ inv.invoiceNumber }}</td>
                 <td>{{ inv.customerName }}</td>
                 <td>{{ inv.propertyName }}</td>
                 <td>{{ inv.unitNo }}</td>
@@ -362,22 +373,20 @@
       <div class="modal-content">
         <div class="modal-header border-bottom py-3 px-4" style="background:var(--erp-primary-soft);">
           <h5 class="mb-0 fw-bold" style="color:var(--erp-primary);">Select Property</h5>
-          <button type="button" class="btn btn-sm border-0 d-flex align-items-center justify-content-center"
-                  style="width:28px;height:28px;border-radius:50%;background:rgba(198,40,40,0.08);color:var(--erp-danger);"
-                  (click)="closePropertyLookup()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-            </svg>
-          </button>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closePropertyLookup()"></button>
         </div>
         <div class="modal-body p-4">
-          <div class="input-group mb-3">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input type="text" class="form-control" placeholder="Search by Property ID or Name..." [(ngModel)]="propertyModalFilter" (keyup)="filterModalProperties()">
+          <div class="input-group mb-4">
+            <span class="input-group-text px-3 border-0" style="background-color: var(--erp-primary); color: #ffffff;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+              </svg>
+            </span>
+            <input type="text" class="form-control" placeholder="Search by Property ID or Name..." [(ngModel)]="propertyModalFilter" (keyup)="filterModalProperties()" style="box-shadow: none;">
           </div>
           
           <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-            <table class="table table-hover table-bordered mb-0 align-middle">
+            <table class="modern-erp-table table-hover align-middle mb-0">
               <thead class="table-light sticky-top">
                 <tr>
                   <th>Property ID</th>
@@ -386,7 +395,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let prop of filteredProperties" class="cursor-pointer" (click)="selectPropertyFromLookup(prop)">
-                  <td class="fw-semibold text-primary">{{ prop.propertyId }}</td>
+                  <td class="fw-semibold" style="color:var(--erp-primary);">{{ prop.propertyId }}</td>
                   <td>{{ prop.propertyName }}</td>
                 </tr>
                 <tr *ngIf="filteredProperties.length === 0">
@@ -411,22 +420,20 @@
       <div class="modal-content">
         <div class="modal-header border-bottom py-3 px-4" style="background:var(--erp-primary-soft);">
           <h5 class="mb-0 fw-bold" style="color:var(--erp-primary);">Select Unit</h5>
-          <button type="button" class="btn btn-sm border-0 d-flex align-items-center justify-content-center"
-                  style="width:28px;height:28px;border-radius:50%;background:rgba(198,40,40,0.08);color:var(--erp-danger);"
-                  (click)="closeUnitLookup()">
-            <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" fill="currentColor" class="bi bi-x-lg" viewBox="0 0 16 16">
-              <path d="M2.146 2.854a.5.5 0 1 1 .708-.708L8 7.293l5.146-5.147a.5.5 0 0 1 .708.708L8.707 8l5.147 5.146a.5.5 0 0 1-.708.708L8 8.707l-5.146 5.147a.5.5 0 0 1-.708-.708L7.293 8z"/>
-            </svg>
-          </button>
+          <button type="button" class="btn-close" aria-label="Close" (click)="closeUnitLookup()"></button>
         </div>
         <div class="modal-body p-4">
-          <div class="input-group mb-3">
-            <span class="input-group-text"><i class="bi bi-search"></i></span>
-            <input type="text" class="form-control" placeholder="Search by Unit ID, Number or Purpose..." [(ngModel)]="unitModalFilter" (keyup)="filterModalUnits()">
+          <div class="input-group mb-4">
+            <span class="input-group-text px-3 border-0" style="background-color: var(--erp-primary); color: #ffffff;">
+              <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" fill="currentColor" class="bi bi-search" viewBox="0 0 16 16">
+                <path d="M11.742 10.344a6.5 6.5 0 1 0-1.397 1.398h-.001q.044.06.098.115l3.85 3.85a1 1 0 0 0 1.415-1.414l-3.85-3.85a1 1 0 0 0-.115-.1zM12 6.5a5.5 5.5 0 1 1-11 0 5.5 5.5 0 0 1 11 0"/>
+              </svg>
+            </span>
+            <input type="text" class="form-control" placeholder="Search by Unit ID, Number or Purpose..." [(ngModel)]="unitModalFilter" (keyup)="filterModalUnits()" style="box-shadow: none;">
           </div>
           
           <div class="table-responsive" style="max-height: 400px; overflow-y: auto;">
-            <table class="table table-hover table-bordered mb-0 align-middle">
+            <table class="modern-erp-table table-hover align-middle mb-0">
               <thead class="table-light sticky-top">
                 <tr>
                   <th>Unit ID</th>
@@ -438,7 +445,7 @@
               </thead>
               <tbody>
                 <tr *ngFor="let unit of filteredUnits" class="cursor-pointer" (click)="selectUnitFromLookup(unit)">
-                  <td class="fw-semibold text-primary">{{ unit.unitId }}</td>
+                  <td class="fw-semibold" style="color:var(--erp-primary);">{{ unit.unitId }}</td>
                   <td>{{ unit.unitNo }}</td>
                   <td>{{ unit.unitPurpose }}</td>
                   <td>
